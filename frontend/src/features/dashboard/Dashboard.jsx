@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import DashboardLayout from "./layout/DashboardLayout";
+
 
 export default function Dashboard() {
   const [userInfo, setUserInfo] = useState({
@@ -22,6 +24,7 @@ export default function Dashboard() {
   }, []);
 
   return (
+    <DashboardLayout>
     <div style={{ padding: "2rem" }}>
       <h1>Welcome to your Dashboard</h1>
       <p>
@@ -44,5 +47,6 @@ export default function Dashboard() {
         </ul>
       </div>
     </div>
+    </DashboardLayout>
   );
 }
