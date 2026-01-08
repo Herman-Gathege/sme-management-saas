@@ -23,7 +23,13 @@ uv init
 ```bash
 uv add flask flask-sqlalchemy flask-migrate flask-jwt-extended flask-cors python-dotenv
 ```
+# or !!!!!!!!!
 
+```bash
+uv init
+uv shell
+pip install -r requirements.txt
+```
 4. Backend folder structure:
 
 ```
