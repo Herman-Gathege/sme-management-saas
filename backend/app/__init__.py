@@ -1,7 +1,7 @@
 # backend/app/__init__.py
 from flask import Flask
 from .config import Config
-from .extensions import db, jwt
+from .extensions import db, jwt, migrate
 from .modules.sales.routes import sales_bp
 from .modules.stock.routes import stock_bp
 from .modules.customers.routes import customers_bp
@@ -16,6 +16,7 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     jwt.init_app(app)
+    migrate.init_app(app, db)
 
     # Register blueprints
     app.register_blueprint(sales_bp, url_prefix="/sales")
