@@ -42,3 +42,9 @@
 ├── .env                      # Environment variables
 └── run.py                    # Entry point to start server
 
+# uv run python manage.py db init
+# uv run python manage.py db migrate -m "Initial auth + organization schema"
+# uv run python manage.py db upgrade
+
+# cd frontend
+# npm install
