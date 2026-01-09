@@ -1,0 +1,29 @@
+/* Dashboard.module.css */
+
+/* Container */
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Welcome message */
+.welcome {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Info section */
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 1rem;
+  color: #4b5563;
+}
+
+.info span {
+  font-weight: 500;
+  color: #2563eb; /* subtle accent for values */
+}

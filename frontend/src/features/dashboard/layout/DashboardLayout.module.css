@@ -1,0 +1,120 @@
+/* Layout */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f6f8;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: #ffffff;
+  color: #1f2937;
+  padding: 1.5rem;
+  flex-shrink: 0;
+  border-right: 1px solid #e5e7eb;
+}
+
+/* Logo */
+.logo {
+  margin-bottom: 2rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+/* Links */
+.link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.3rem;
+  color: #374151;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+/* Hover */
+.link:hover {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+/* Active */
+.link.active {
+  background: #00b4d8ff;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+
+/* Main area */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Navbar */
+.navbar {
+  height: 60px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 1.5rem;
+}
+
+/* Avatar */
+.avatarWrapper {
+  position: relative;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: 48px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  overflow: hidden;  
+}
+
+.dropdown button {
+  padding: 0.7rem 1.2rem;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: #000;
+}
+
+.dropdown button:hover {
+  background: #f1f5f9;
+}
+
+/* Content */
+.content {
+  padding: 2rem;
+  text-align: left;
+}

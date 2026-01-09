@@ -19,6 +19,21 @@ def create_app():
     jwt.init_app(app)
     migrate.init_app(app, db)
 
+    # 🔐 JWT ERROR HANDLERS (GO HERE)
+    @jwt.unauthorized_loader
+    def missing_token(reason):
+        return {"error": "Missing token"}, 401
+
+    @jwt.invalid_token_loader
+    def invalid_token(reason):
+        return {"error": "Invalid token"}, 401
+
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        return {"error": "Token expired"}, 401
+    
+    print("APP INSTANCE ID:", id(app))
+
     CORS(app, resources={r"/*": {"origins": "*"}})
 
 
