@@ -1,32 +1,12 @@
-import { useState } from "react";
-import styles from "./DashboardLayout.module.css";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
-
-  const logout = () => {
-    localStorage.clear();
-    window.location.href = "/login";
-  };
+  const { user, logout } = useAuth();
 
   return (
-    <header className={styles.navbar}>
-      <div />
-
-      <div className={styles.avatarWrapper}>
-        <div
-          className={styles.avatar}
-          onClick={() => setOpen(!open)}
-        >
-          U
-        </div>
-
-        {open && (
-          <div className={styles.dropdown}>
-            <button onClick={logout}>Logout</button>
-          </div>
-        )}
-      </div>
+    <header className="navbar">
+      <span>{user.full_name}</span>
+      <button onClick={logout}>Logout</button>
     </header>
   );
 }
