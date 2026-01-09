@@ -7,11 +7,50 @@ export default function Sidebar() {
       <h2 className={styles.logo}>SME SaaS</h2>
 
       <nav>
-        <NavLink to="/dashboard" className={styles.link}>Dashboard</NavLink>
-        <NavLink to="/dashboard/sales" className={styles.link}>Sales</NavLink>
-        <NavLink to="/dashboard/stock" className={styles.link}>Stock</NavLink>
-        <NavLink to="/dashboard/staff" className={styles.link}>Staff</NavLink>
-        <NavLink to="/dashboard/reports" className={styles.link}>Reports</NavLink>
+        <NavLink
+          to="/dashboard"
+          className={({ isActive }) =>
+            isActive ? `${styles.link} ${styles.active}` : styles.link
+          }
+        >
+          Dashboard
+        </NavLink>
+
+        <NavLink
+          to="/dashboard/sales"
+          className={({ isActive }) =>
+            isActive ? `${styles.link} ${styles.active}` : styles.link
+          }
+        >
+          Sales
+        </NavLink>
+
+        <NavLink
+          to="/dashboard/stock"
+          className={({ isActive }) =>
+            isActive ? `${styles.link} ${styles.active}` : styles.link
+          }
+        >
+          Stock
+        </NavLink>
+
+        <NavLink
+          to="/dashboard/staff"
+          className={({ isActive }) =>
+            isActive ? `${styles.link} ${styles.active}` : styles.link
+          }
+        >
+          Staff
+        </NavLink>
+
+        <NavLink
+          to="/dashboard/reports"
+          className={({ isActive }) =>
+            isActive ? `${styles.link} ${styles.active}` : styles.link
+          }
+        >
+          Reports
+        </NavLink>
       </nav>
     </aside>
   );

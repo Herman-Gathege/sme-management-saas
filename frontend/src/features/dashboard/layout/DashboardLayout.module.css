@@ -8,27 +8,48 @@
 /* Sidebar */
 .sidebar {
   width: 220px;
-  background: #111827;
-  color: white;
+  background: #ffffff;
+  color: #1f2937;
   padding: 1.5rem;
   flex-shrink: 0;
+  border-right: 1px solid #e5e7eb;
 }
 
+/* Logo */
 .logo {
   margin-bottom: 2rem;
   font-size: 1.2rem;
+  font-weight: 700;
+  color: #2563eb;
 }
 
+/* Links */
 .link {
-  display: block;
-  color: #cbd5e1;
-  padding: 0.6rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.3rem;
+  color: #374151;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-decoration: none;
 }
 
-.link.active {
-  color: white;
-  font-weight: bold;
+/* Hover */
+.link:hover {
+  background: #eff6ff;
+  color: #2563eb;
 }
+
+/* Active */
+.link.active {
+  background: #00b4d8ff;
+  color: #ffffff;
+  font-weight: 600;
+}
+
 
 /* Main area */
 .main {
