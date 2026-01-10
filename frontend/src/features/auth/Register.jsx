@@ -1,3 +1,5 @@
+//frontend/src/features/auth/Register.jsx
+
 import { useState } from "react";
 import { registerOrg } from "../../api/auth";
 import styles from "./AuthForm.module.css"; // import CSS module

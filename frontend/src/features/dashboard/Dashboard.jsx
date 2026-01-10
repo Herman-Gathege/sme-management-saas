@@ -1,3 +1,5 @@
+//frontend/src/features/dashboard/Dashboard.jsx
+
 import { useAuth } from "../../context/AuthContext";
 import DashboardLayout from "./layout/DashboardLayout";
 import styles from "./Dashboard.module.css";

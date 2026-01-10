@@ -85,6 +85,7 @@ uv run python manage.py db upgrade
 
 ```bash
 uv run python run.py
+flask run
 ```
 
 > Your backend should now be running on [http://127.0.0.1:5000](http://127.0.0.1:5000) with CORS enabled for development.

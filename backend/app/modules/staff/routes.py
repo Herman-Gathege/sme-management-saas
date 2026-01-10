@@ -1,3 +1,5 @@
+# /home/annewaithaka/personalprojects/sme-management-saas/backend/app/modules/staff/routes.py
+
 from flask import Blueprint, jsonify
 
 staff_bp = Blueprint("staff", __name__)
