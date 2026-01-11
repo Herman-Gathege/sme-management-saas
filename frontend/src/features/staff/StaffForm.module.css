@@ -1,3 +1,6 @@
+/* --------------------------
+   General Container
+--------------------------- */
 .container {
   max-width: 700px;
   margin: 0 auto;
@@ -9,6 +12,7 @@
   padding: 1rem;
   margin-bottom: 1.5rem;
   border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 .inputField {
@@ -16,33 +20,158 @@
   width: 100%;
   padding: 0.5rem;
   margin-bottom: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .submitButton {
   padding: 0.5rem 1rem;
   cursor: pointer;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.cancelButton {
+  padding: 0.5rem 1rem;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  background-color: #9ca3af;
+  color: white;
+  border: none;
+  border-radius: 4px;
 }
 
 .message {
   font-weight: bold;
   margin-bottom: 1rem;
+  color: #dc2626;
 }
 
-.staffTable {
+/* --------------------------
+   Table Styles
+--------------------------- */
+.staffTable, .table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 1rem;
 }
 
-.staffTable th,
-.staffTable td {
+.staffTable th, .staffTable td,
+.table th, .table td {
   border: 1px solid #ddd;
   padding: 0.5rem;
+  text-align: left;
+}
+
+.staffTable th, .table th {
+  background-color: #f3f4f6;
 }
 
 .editButton {
   margin-right: 0.5rem;
+  padding: 4px 8px;
+  background-color: #fbbf24;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
 }
 
 .deactivateButton {
-  color: red;
+  margin-left: 4px;
+  padding: 4px 8px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.resetButton {
+  margin-left: 8px;
+  padding: 4px 8px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+/* --------------------------
+   Dashboard Layout
+--------------------------- */
+.dashboardWrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f9f9f9;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background-color: #1f2937;
+  color: #fff;
+  padding: 20px;
+  flex-shrink: 0;
+}
+
+.sidebarTitle {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.sidebarMenu {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebarMenu li {
+  padding: 10px 0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sidebarMenu li:hover {
+  background-color: #374151;
+  border-radius: 5px;
+}
+
+/* Main content */
+.mainContent {
+  flex: 1;
+  padding: 30px;
+}
+
+/* Header */
+.header h2 {
+  margin: 0 0 5px 0;
+}
+
+.header p {
+  margin: 2px 0;
+  color: #555;
+}
+
+/* Modal Overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
 }

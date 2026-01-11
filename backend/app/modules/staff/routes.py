@@ -24,6 +24,13 @@ def create_staff():
     claims = get_jwt()
     org_id = claims["organization_id"]
 
+    # Check if email exists
+    existing = User.query.filter_by(email=data["email"]).first()
+    if existing:
+        if not existing.is_active:
+            return jsonify({"error": "Staff with this email exists but is inactive. Reactivate instead."}), 400
+        return jsonify({"error": "Staff with this email already exists"}), 400
+
     # Generate temporary password
     temp_password = secrets.token_urlsafe(8)
     hashed_password = generate_password_hash(temp_password)
@@ -51,10 +58,12 @@ def create_staff():
             "full_name": staff.full_name,
             "email": staff.email,
             "phone": staff.phone,
-            "role": staff.role
+            "role": staff.role,
+            "is_active": staff.is_active
         },
         "temporary_password": temp_password
     }), 201
+
 
 # ----------------------
 # Owner: List Staff in Org
@@ -76,6 +85,7 @@ def list_staff():
         } for s in staff_members
     ]
     return jsonify({"staff": result})
+
 
 # ----------------------
 # Owner: Update Staff
@@ -113,6 +123,7 @@ def update_staff(id):
         }
     })
 
+
 # ----------------------
 # Owner: Deactivate Staff (Soft Delete)
 # ----------------------
@@ -135,6 +146,31 @@ def deactivate_staff(id):
         return jsonify({"error": str(e)}), 500
 
     return jsonify({"message": f"{staff.full_name} has been deactivated"})
+
+
+# ----------------------
+# Owner: Reactivate Staff
+# ----------------------
+@staff_bp.route("/<int:id>/reactivate", methods=["PATCH"])
+@owner_required
+def reactivate_staff(id):
+    claims = get_jwt()
+    org_id = claims["organization_id"]
+
+    staff = User.query.filter_by(id=id, organization_id=org_id, role="staff").first()
+    if not staff:
+        return jsonify({"error": "Staff not found"}), 404
+
+    staff.is_active = True
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"message": f"{staff.full_name} has been reactivated"})
+
 
 # ----------------------
 # Staff: Update Own Password

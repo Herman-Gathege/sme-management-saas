@@ -7,11 +7,13 @@ import {
   listStaff as apiListStaff,
   updateStaff as apiUpdateStaff,
   deactivateStaff as apiDeactivateStaff,
+  reactivateStaff as apiReactivateStaff,
+  resetStaffPassword as apiResetPassword,
 } from "../../api/staff";
 
-export default function CreateStaff() {
+export default function CreateStaff({ staff = null, onClose }) {
   const { organization } = useAuth();
-  const token = localStorage.getItem("token"); // grab token once
+  const token = localStorage.getItem("token");
 
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,8 +22,20 @@ export default function CreateStaff() {
     email: "",
     phone: "",
   });
-  const [editId, setEditId] = useState(null);
   const [message, setMessage] = useState("");
+
+  // Pre-fill form if editing
+  useEffect(() => {
+    if (staff) {
+      setFormData({
+        full_name: staff.full_name,
+        email: staff.email,
+        phone: staff.phone,
+      });
+    } else {
+      setFormData({ full_name: "", email: "", phone: "" });
+    }
+  }, [staff]);
 
   // Fetch staff list
   const fetchStaff = async () => {
@@ -46,16 +60,14 @@ export default function CreateStaff() {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // Handle create/update staff
+  // Create or update staff
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
-
     try {
-      if (editId) {
-        const res = await apiUpdateStaff(editId, formData, token);
+      if (staff) {
+        const res = await apiUpdateStaff(staff.id, formData, token);
         setMessage(`Staff ${res.staff.full_name} updated`);
-        setEditId(null);
       } else {
         const res = await apiCreateStaff(formData, token);
         setMessage(`Staff created! Temporary password: ${res.temporary_password}`);
@@ -63,23 +75,16 @@ export default function CreateStaff() {
 
       setFormData({ full_name: "", email: "", phone: "" });
       fetchStaff();
+      if (onClose) onClose();
     } catch (err) {
       console.error(err);
       setMessage(err.message || "Server error or invalid input");
     }
   };
 
-  // Handle edit
-  const handleEdit = (staff) => {
-    setEditId(staff.id);
-    setFormData({
-      full_name: staff.full_name,
-      email: staff.email,
-      phone: staff.phone,
-    });
-  };
+  // Table actions
+  const handleEdit = (s) => setFormData({ full_name: s.full_name, email: s.email, phone: s.phone });
 
-  // Handle deactivate
   const handleDeactivate = async (id) => {
     setMessage("");
     try {
@@ -92,90 +97,138 @@ export default function CreateStaff() {
     }
   };
 
+  const handleReactivate = async (id) => {
+    setMessage("");
+    try {
+      await apiReactivateStaff(id, token);
+      setMessage("Staff reactivated");
+      fetchStaff();
+    } catch (err) {
+      console.error(err);
+      setMessage(err.message || "Failed to reactivate staff");
+    }
+  };
+
+  const handleResetPassword = async (id) => {
+    if (!window.confirm("Generate a temporary password for this staff?")) return;
+    try {
+      const res = await apiResetPassword(id, token);
+      alert(`Temporary password: ${res.temporary_password}`);
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Failed to reset password");
+    }
+  };
+
   return (
-    <div className={styles.container}>
-      <h2>Welcome, {organization?.name} 👋</h2>
+    <div className={onClose ? styles.overlay : ""}>
+      <div className={onClose ? styles.modal : ""}>
+        <h2>Welcome, {organization?.name} 👋</h2>
 
-      {message && <p className={styles.message}>{message}</p>}
+        {message && <p className={styles.message}>{message}</p>}
 
-      <form className={styles.formContainer} onSubmit={handleSubmit}>
-        <h3>{editId ? "Edit Staff" : "Create Staff"}</h3>
+        <form className={styles.formContainer} onSubmit={handleSubmit}>
+          <h3>{staff ? "Edit Staff" : "Create Staff"}</h3>
 
-        <input
-          name="full_name"
-          placeholder="Full Name"
-          value={formData.full_name}
-          onChange={handleChange}
-          className={styles.inputField}
-          required
-        />
-        <input
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          className={styles.inputField}
-          required
-        />
-        <input
-          name="phone"
-          placeholder="Phone"
-          value={formData.phone}
-          onChange={handleChange}
-          className={styles.inputField}
-          required
-        />
+          <input
+            name="full_name"
+            placeholder="Full Name"
+            value={formData.full_name}
+            onChange={handleChange}
+            className={styles.inputField}
+            required
+          />
+          <input
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            className={styles.inputField}
+            required
+          />
+          <input
+            name="phone"
+            placeholder="Phone"
+            value={formData.phone}
+            onChange={handleChange}
+            className={styles.inputField}
+            required
+          />
 
-        <button className={styles.submitButton}>
-          {editId ? "Update Staff" : "Create Staff"}
-        </button>
-      </form>
+          <div className={styles.actions}>
+            <button className={styles.submitButton}>
+              {staff ? "Update Staff" : "Create Staff"}
+            </button>
+            {onClose && (
+              <button type="button" onClick={onClose} className={styles.cancelButton}>
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
 
-      <h3>Staff List</h3>
+        {!staff && (
+          <>
+            <h3>Staff List</h3>
+            {loading ? (
+              <p>Loading...</p>
+            ) : staffList.length === 0 ? (
+              <p>No staff yet.</p>
+            ) : (
+              <table className={styles.staffTable}>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {staffList.map((s) => (
+                    <tr key={s.id}>
+                      <td>{s.full_name}</td>
+                      <td>{s.email}</td>
+                      <td>{s.phone}</td>
+                      <td>{s.is_active ? "Active" : "Inactive"}</td>
+                      <td>
+                        <button className={styles.editButton} onClick={() => handleEdit(s)}>
+                          Edit
+                        </button>
 
-      {loading ? (
-        <p>Loading...</p>
-      ) : staffList.length === 0 ? (
-        <p>No staff yet.</p>
-      ) : (
-        <table className={styles.staffTable}>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {staffList.map((s) => (
-              <tr key={s.id}>
-                <td>{s.full_name}</td>
-                <td>{s.email}</td>
-                <td>{s.phone}</td>
-                <td>{s.is_active ? "Active" : "Inactive"}</td>
-                <td>
-                  <button
-                    className={styles.editButton}
-                    onClick={() => handleEdit(s)}
-                  >
-                    Edit
-                  </button>
-                  {s.is_active && (
-                    <button
-                      className={styles.deactivateButton}
-                      onClick={() => handleDeactivate(s.id)}
-                    >
-                      Deactivate
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+                        {s.is_active ? (
+                          <>
+                            <button
+                              className={styles.deactivateButton}
+                              onClick={() => handleDeactivate(s.id)}
+                            >
+                              Deactivate
+                            </button>
+                            <button
+                              className={styles.resetButton}
+                              onClick={() => handleResetPassword(s.id)}
+                            >
+                              Reset Password
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            className={styles.reactivateButton}
+                            onClick={() => handleReactivate(s.id)}
+                          >
+                            Reactivate
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
