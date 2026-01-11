@@ -1,0 +1,29 @@
+/* frontend/src/features/staff/StaffForm.module.css */
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+input {
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+button {
+  padding: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+p {
+  margin-top: 0.5rem;
+  font-weight: bold;
+}

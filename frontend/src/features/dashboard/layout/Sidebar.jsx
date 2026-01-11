@@ -1,57 +1,47 @@
-import { NavLink } from "react-router-dom";
+// frontend/src/features/dashboard/layout/Sidebar.jsx
+
+import { Link } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
 import styles from "./DashboardLayout.module.css";
 
 export default function Sidebar() {
+  const { user } = useAuth();
+
+  if (!user) return null;
+
   return (
     <aside className={styles.sidebar}>
-      <h2 className={styles.logo}>SME SaaS</h2>
+      <ul>
+        {/* Shared links */}
+        <li>
+          <Link to="/dashboard">Home</Link>
+        </li>
 
-      <nav>
-        <NavLink
-          to="/dashboard"
-          className={({ isActive }) =>
-            isActive ? `${styles.link} ${styles.active}` : styles.link
-          }
-        >
-          Dashboard
-        </NavLink>
+        <li>
+          <Link to="/sales">Sales</Link>
+        </li>
 
-        <NavLink
-          to="/dashboard/sales"
-          className={({ isActive }) =>
-            isActive ? `${styles.link} ${styles.active}` : styles.link
-          }
-        >
-          Sales
-        </NavLink>
-
-        <NavLink
-          to="/dashboard/stock"
-          className={({ isActive }) =>
-            isActive ? `${styles.link} ${styles.active}` : styles.link
-          }
-        >
-          Stock
-        </NavLink>
-
-        <NavLink
-          to="/dashboard/staff"
-          className={({ isActive }) =>
-            isActive ? `${styles.link} ${styles.active}` : styles.link
-          }
-        >
-          Staff
-        </NavLink>
-
-        <NavLink
-          to="/dashboard/reports"
-          className={({ isActive }) =>
-            isActive ? `${styles.link} ${styles.active}` : styles.link
-          }
-        >
-          Reports
-        </NavLink>
-      </nav>
+        {/* Owner-only links */}
+        {user.role === "owner" && (
+          <>
+            <li>
+              <Link to="/stock">Stock</Link>
+            </li>
+            <li>
+              <Link to="/customers">Customers</Link>
+            </li>
+            <li>
+              <Link to="/staff">Staff</Link>
+            </li>
+            <li>
+              <Link to="/staff/create">Add Staff</Link>
+            </li>
+            <li>
+              <Link to="/reports">Reports</Link>
+            </li>
+          </>
+        )}
+      </ul>
     </aside>
   );
 }

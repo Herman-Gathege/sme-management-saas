@@ -1,28 +1,27 @@
-//frontend/src/features/dashboard/Dashboard.jsx
+// frontend/src/features/dashboard/Dashboard.jsx
 
+import { Navigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import DashboardLayout from "./layout/DashboardLayout";
-import styles from "./Dashboard.module.css";
 
 export default function Dashboard() {
-  const { user, organization } = useAuth();
+  const { user, loading } = useAuth();
 
-  return (
-    <DashboardLayout>
-      <div className={styles.dashboardContainer}>
-        <div className={styles.welcome}>
-          Welcome, {user.full_name} 👋
-        </div>
+  // While auth state is resolving
+  if (loading) return null;
 
-        <div className={styles.info}>
-          <p>
-            Organization: <span>{organization.name}</span>
-          </p>
-          <p>
-            Role: <span>{user.role}</span>
-          </p>
-        </div>
-      </div>
-    </DashboardLayout>
-  );
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Role-based decision
+  if (user.role === "owner") {
+    return <Navigate to="/owner/dashboard" replace />;
+  }
+
+  if (user.role === "staff") {
+    return <Navigate to="/staff/dashboard" replace />;
+  }
+
+  // Fallback (should never happen)
+  return <Navigate to="/login" replace />;
 }

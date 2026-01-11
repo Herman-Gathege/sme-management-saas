@@ -1,8 +1,10 @@
+# backend/app/modules/staff/routes.py
 from flask import Blueprint, request, jsonify
 from ...extensions import db
 from ...models.user import User
 from ...utils.decorators import owner_required, staff_required
 from werkzeug.security import generate_password_hash
+from flask_jwt_extended import get_jwt
 import secrets
 
 staff_bp = Blueprint("staff", __name__)
@@ -25,7 +27,6 @@ def create_staff():
     temp_password = secrets.token_urlsafe(8)
     hashed_password = generate_password_hash(temp_password)
 
-    # Create staff user
     staff = User(
         full_name=data["full_name"],
         email=data["email"],
@@ -35,8 +36,13 @@ def create_staff():
         organization_id=org_id,
         password_hash=hashed_password
     )
-    db.session.add(staff)
-    db.session.commit()
+
+    try:
+        db.session.add(staff)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
     return jsonify({
         "staff": {
@@ -44,14 +50,14 @@ def create_staff():
             "full_name": staff.full_name,
             "email": staff.email,
             "phone": staff.phone,
-            "role": staff.role,
-            "is_active": staff.is_active
+            "role": staff.role
         },
         "temporary_password": temp_password
     }), 201
 
+
 # ----------------------
-# Owner: List Staff in Organization
+# Owner: List Staff in Org
 # ----------------------
 @staff_bp.route("/", methods=["GET"])
 @owner_required
@@ -69,7 +75,41 @@ def list_staff():
             "is_active": s.is_active
         } for s in staff_members
     ]
-    return jsonify({"staff": result}), 200
+    return jsonify({"staff": result})
+
+
+# ----------------------
+# Owner: Update Staff
+# ----------------------
+@staff_bp.route("/<int:id>", methods=["PATCH"])
+@owner_required
+def update_staff(id):
+    data = request.get_json()
+    staff = User.query.filter_by(id=id, role="staff").first()
+    if not staff:
+        return jsonify({"error": "Staff not found"}), 404
+
+    # Update allowed fields
+    staff.full_name = data.get("full_name", staff.full_name)
+    staff.email = data.get("email", staff.email)
+    staff.phone = data.get("phone", staff.phone)
+    if "is_active" in data:
+        staff.is_active = data["is_active"]
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"staff": {
+        "id": staff.id,
+        "full_name": staff.full_name,
+        "email": staff.email,
+        "phone": staff.phone,
+        "is_active": staff.is_active
+    }})
+
 
 # ----------------------
 # Staff: Update Own Password
@@ -78,7 +118,7 @@ def list_staff():
 @staff_required
 def update_password(id):
     claims = get_jwt()
-    if claims["sub"] != str(id):  # JWT identity is string
+    if claims["sub"] != str(id):
         return jsonify({"error": "Unauthorized: can only update your own password"}), 403
 
     data = request.get_json()
@@ -87,10 +127,7 @@ def update_password(id):
         return jsonify({"error": "Missing new_password"}), 400
 
     staff = User.query.get(id)
-    if not staff:
-        return jsonify({"error": "User not found"}), 404
-
     staff.password_hash = generate_password_hash(new_password)
     db.session.commit()
 
-    return jsonify({"message": "Password updated successfully"}), 200
+    return jsonify({"message": "Password updated successfully"})
