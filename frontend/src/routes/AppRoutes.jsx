@@ -13,15 +13,21 @@ import StaffDashboard, {
 import CreateStaff from "../features/staff/CreateStaff";
 import ProtectedRoute from "./ProtectedRoute";
 
+// Stock (OWNER – layout-based)
+import StockLayout from "../features/stock/StockLayout";
+import StockList from "../features/stock/StockList";
+import AddStock from "../features/stock/AddStock";
+import EditStock from "../features/stock/EditStock";
+
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Public routes */}
+      {/* ================= Public ================= */}
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Role-based dashboard redirect */}
+      {/* ============ Role Decision ============ */}
       <Route
         path="/dashboard"
         element={
@@ -31,7 +37,7 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Owner dashboard */}
+      {/* ============ Owner Dashboard ============ */}
       <Route
         path="/owner/dashboard"
         element={
@@ -41,22 +47,7 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Staff dashboard with nested routes */}
-      <Route
-        path="/staff/*"
-        element={
-          <ProtectedRoute allowedRoles={["staff"]}>
-            <StaffDashboard />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<StaffSales />} />          {/* /staff */}
-        <Route path="dashboard" element={<StaffSales />} />
-        <Route path="profile" element={<StaffProfile />} />
-        <Route path="password" element={<StaffPassword />} />
-      </Route>
-
-      {/* Create staff (only owner) */}
+      {/* ============ Owner: Staff ============ */}
       <Route
         path="/staff/create"
         element={
@@ -65,6 +56,36 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* ============ Owner: Stock (layout + nested) ============ */}
+      <Route
+        path="/stock/*"
+        element={
+          <ProtectedRoute allowedRoles={["owner"]}>
+            <StockLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<StockList />} />   {/* /stock */}
+        <Route path="add" element={<AddStock />} /> {/* /stock/add */}
+        <Route path=":id/edit" element={<EditStock />} />  {/* /stock/:id/edit */}
+
+      </Route>
+
+      {/* ============ Staff Dashboard ============ */}
+      <Route
+        path="/staff/*"
+        element={
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <StaffDashboard />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<StaffSales />} />     {/* /staff */}
+        <Route path="dashboard" element={<StaffSales />} />
+        <Route path="profile" element={<StaffProfile />} />
+        <Route path="password" element={<StaffPassword />} />
+      </Route>
     </Routes>
   );
 }
