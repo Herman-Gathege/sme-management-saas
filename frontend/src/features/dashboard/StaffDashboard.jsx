@@ -1,213 +1,114 @@
-// frontend/src/features/staff/StaffDashboard.jsx
-import React, { useEffect, useState } from "react";
+// frontend/src/features/dashboard/StaffDashboard.jsx
+import { Outlet } from "react-router-dom";
+import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import CreateStaff from "../staff/CreateStaff";
-import {
-  listStaff,
-  deactivateStaff,
-  reactivateStaff,
-  resetStaffPassword,
-} from "../../api/staff";
-import styles from "../staff/StaffForm.module.css";
+import Sidebar from "../dashboard/layout/Sidebar";
+import styles from "../dashboard/layout/DashboardLayout.module.css";
 
-const StaffDashboard = () => {
+// -----------------------------
+// Nested Components for Staff
+// -----------------------------
+
+export function StaffSales() {
   const { user, organization } = useAuth();
-  const [staffList, setStaffList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [editingStaff, setEditingStaff] = useState(null);
+  return (
+    <>
+      <header className={styles.header}>
+        <h2>Welcome, {user.full_name} 👋</h2>
+        <p>Organization: {organization?.name}</p>
+        <p>Role: Staff</p>
+      </header>
 
-  const isOwner = user.role === "owner";
-  const isStaff = user.role === "staff";
+      <section className={styles.card}>
+        <h3>Sales</h3>
+        <p>Sales functionality will appear here.</p>
+      </section>
+    </>
+  );
+}
 
-  // Fetch staff list
-  const fetchStaff = async () => {
+export function StaffProfile() {
+  const { user } = useAuth();
+  return (
+    <section className={styles.card}>
+      <h3>My Profile</h3>
+      <div className={styles.profileRow}>
+        <strong>Name:</strong> {user.full_name}
+      </div>
+      <div className={styles.profileRow}>
+        <strong>Email:</strong> {user.email}
+      </div>
+    </section>
+  );
+}
+
+export function StaffPassword() {
+  const { user } = useAuth();
+  const [newPassword, setNewPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    setMessage("");
     setLoading(true);
+
     try {
-      const data = await listStaff();
-      let staffData = data.staff || data;
+      const token = localStorage.getItem("token");
+      const res = await fetch(
+        `http://127.0.0.1:5000/api/staff/${user.id}/password`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ new_password: newPassword }),
+        }
+      );
 
-      // Staff sees only themselves
-      if (isStaff) {
-        staffData = staffData.filter((s) => s.id === user.id);
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Password update failed");
 
-      setStaffList(staffData);
-      setError("");
+      setMessage("Password updated successfully");
+      setNewPassword("");
     } catch (err) {
-      setError(err.message || "Failed to fetch staff");
+      setMessage(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchStaff();
-  }, []);
-
-  // Deactivate staff (owner only)
-  const handleDeactivate = async (id) => {
-    if (!window.confirm("Are you sure you want to deactivate this staff?")) return;
-    try {
-      await deactivateStaff(id);
-      fetchStaff();
-    } catch (err) {
-      alert(err.message || "Failed to deactivate staff");
-    }
-  };
-
-  // Reactivate staff (owner only)
-  const handleReactivate = async (id) => {
-    try {
-      await reactivateStaff(id);
-      fetchStaff();
-    } catch (err) {
-      alert(err.message || "Failed to reactivate staff");
-    }
-  };
-
-  // Reset staff password
-  const handleResetPassword = async (id) => {
-    if (!window.confirm("Generate a temporary password for this staff?")) return;
-    try {
-      const res = await resetStaffPassword(id);
-      alert(`Temporary password: ${res.temporary_password}`);
-    } catch (err) {
-      alert(err.message || "Failed to reset password");
-    }
-  };
-
-  // Open edit modal
-  const handleEdit = (staff) => {
-    setEditingStaff(staff);
-  };
-
-  const handleModalClose = () => {
-    setEditingStaff(null);
-    fetchStaff();
-  };
-
   return (
-    <div className={styles.dashboardWrapper}>
-      {/* Sidebar */}
-      <aside className={styles.sidebar}>
-        <h3 className={styles.sidebarTitle}>{organization?.name}</h3>
-        <ul className={styles.sidebarMenu}>
-          <li>Home</li>
-          <li>Sales</li>
-          {isOwner && <li>Stock</li>}
-          {isOwner && <li>Customers</li>}
-          {isOwner && <li>Staff</li>}
-          {isOwner && <li>Add Staff</li>}
-          {isOwner && <li>Reports</li>}
-          {isStaff && <li>My Profile</li>}
-        </ul>
-      </aside>
+    <section className={styles.card}>
+      <h3>Change Password</h3>
+      <form onSubmit={handlePasswordChange} className={styles.form}>
+        <input
+          type="password"
+          placeholder="New password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          required
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? "Updating..." : "Update Password"}
+        </button>
+        {message && <p className={styles.message}>{message}</p>}
+      </form>
+    </section>
+  );
+}
 
-      {/* Main Content */}
-      <main className={styles.mainContent}>
-        <header className={styles.header}>
-          <h2>Welcome, {user.full_name} 👋</h2>
-          <p>Organization: {organization?.name}</p>
-          <p>Role: {user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p>
-        </header>
-
-        {loading && <p>Loading staff...</p>}
-        {error && <p className={styles.error}>{error}</p>}
-
-        {/* Owner: Create Staff Modal */}
-        {isOwner && (
-          <button
-            className={styles.createButton}
-            onClick={() => setEditingStaff({})}
-          >
-            Create Staff
-          </button>
-        )}
-
-        {/* Staff Table */}
-        {!loading && staffList.length > 0 && (
-          <table className={styles.staffTable}>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {staffList.map((s) => (
-                <tr key={s.id}>
-                  <td>{s.full_name}</td>
-                  <td>{s.email}</td>
-                  <td>{s.phone}</td>
-                  <td>{s.is_active ? "Active" : "Inactive"}</td>
-                  <td>
-                    {isOwner && (
-                      <>
-                        <button
-                          className={styles.editButton}
-                          onClick={() => handleEdit(s)}
-                        >
-                          Edit
-                        </button>
-                        {s.is_active ? (
-                          <>
-                            <button
-                              className={styles.deactivateButton}
-                              onClick={() => handleDeactivate(s.id)}
-                            >
-                              Deactivate
-                            </button>
-                            <button
-                              className={styles.resetButton}
-                              onClick={() => handleResetPassword(s.id)}
-                            >
-                              Reset Password
-                            </button>
-                          </>
-                        ) : (
-                          <button
-                            className={styles.reactivateButton}
-                            onClick={() => handleReactivate(s.id)}
-                          >
-                            Reactivate
-                          </button>
-                        )}
-                      </>
-                    )}
-
-                    {isStaff && s.id === user.id && (
-                      <button
-                        className={styles.resetButton}
-                        onClick={() => handleResetPassword(s.id)}
-                      >
-                        Reset Password
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-
-        {!loading && staffList.length === 0 && (
-          <p>No staff found.</p>
-        )}
-
-        {/* Create/Edit Modal */}
-        {editingStaff && (
-          <CreateStaff
-            staff={editingStaff?.id ? editingStaff : null}
-            onClose={handleModalClose}
-          />
-        )}
-      </main>
+// -----------------------------
+// StaffDashboard Layout
+// -----------------------------
+export default function StaffDashboard() {
+  return (
+    <div className={styles.layout}>
+      <Sidebar />
+      <div className={styles.content}>
+        <Outlet />
+      </div>
     </div>
   );
-};
-
-export default StaffDashboard;
+}

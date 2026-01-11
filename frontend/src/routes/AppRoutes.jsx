@@ -5,7 +5,11 @@ import Login from "../features/auth/Login";
 import Register from "../features/auth/Register";
 import DashboardDecision from "../features/dashboard/DashboardDecision";
 import OwnerDashboard from "../features/dashboard/OwnerDashboard";
-import StaffDashboard from "../features/dashboard/StaffDashboard";
+import StaffDashboard, {
+  StaffSales,
+  StaffProfile,
+  StaffPassword,
+} from "../features/dashboard/StaffDashboard";
 import CreateStaff from "../features/staff/CreateStaff";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -27,7 +31,6 @@ export default function AppRoutes() {
         }
       />
 
-
       {/* Owner dashboard */}
       <Route
         path="/owner/dashboard"
@@ -38,15 +41,20 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Staff dashboard */}
+      {/* Staff dashboard with nested routes */}
       <Route
-        path="/staff/dashboard"
+        path="/staff/*"
         element={
           <ProtectedRoute allowedRoles={["staff"]}>
             <StaffDashboard />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<StaffSales />} />          {/* /staff */}
+        <Route path="dashboard" element={<StaffSales />} />
+        <Route path="profile" element={<StaffProfile />} />
+        <Route path="password" element={<StaffPassword />} />
+      </Route>
 
       {/* Create staff (only owner) */}
       <Route
