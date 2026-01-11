@@ -1,29 +1,48 @@
-/* frontend/src/features/staff/StaffForm.module.css */
-
 .container {
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto;
   padding: 1rem;
 }
 
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.formContainer {
+  background: #fff;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 6px;
 }
 
-input {
+.inputField {
+  display: block;
+  width: 100%;
   padding: 0.5rem;
-  font-size: 1rem;
+  margin-bottom: 0.75rem;
 }
 
-button {
-  padding: 0.5rem;
-  font-size: 1rem;
+.submitButton {
+  padding: 0.5rem 1rem;
   cursor: pointer;
 }
 
-p {
-  margin-top: 0.5rem;
+.message {
   font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.staffTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.staffTable th,
+.staffTable td {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+}
+
+.editButton {
+  margin-right: 0.5rem;
+}
+
+.deactivateButton {
+  color: red;
 }

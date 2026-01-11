@@ -7,12 +7,13 @@ from werkzeug.security import generate_password_hash
 from flask_jwt_extended import get_jwt
 import secrets
 
-staff_bp = Blueprint("staff", __name__)
+staff_bp = Blueprint("staff", __name__, url_prefix="/api/staff")
+
 
 # ----------------------
 # Owner: Create Staff
 # ----------------------
-@staff_bp.route("/", methods=["POST"])
+@staff_bp.route("", methods=["POST"])
 @owner_required
 def create_staff():
     data = request.get_json()
@@ -55,11 +56,10 @@ def create_staff():
         "temporary_password": temp_password
     }), 201
 
-
 # ----------------------
 # Owner: List Staff in Org
 # ----------------------
-@staff_bp.route("/", methods=["GET"])
+@staff_bp.route("", methods=["GET"])
 @owner_required
 def list_staff():
     claims = get_jwt()
@@ -77,19 +77,20 @@ def list_staff():
     ]
     return jsonify({"staff": result})
 
-
 # ----------------------
 # Owner: Update Staff
 # ----------------------
 @staff_bp.route("/<int:id>", methods=["PATCH"])
 @owner_required
 def update_staff(id):
-    data = request.get_json()
-    staff = User.query.filter_by(id=id, role="staff").first()
+    claims = get_jwt()
+    org_id = claims["organization_id"]
+
+    staff = User.query.filter_by(id=id, organization_id=org_id, role="staff").first()
     if not staff:
         return jsonify({"error": "Staff not found"}), 404
 
-    # Update allowed fields
+    data = request.get_json()
     staff.full_name = data.get("full_name", staff.full_name)
     staff.email = data.get("email", staff.email)
     staff.phone = data.get("phone", staff.phone)
@@ -102,14 +103,38 @@ def update_staff(id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-    return jsonify({"staff": {
-        "id": staff.id,
-        "full_name": staff.full_name,
-        "email": staff.email,
-        "phone": staff.phone,
-        "is_active": staff.is_active
-    }})
+    return jsonify({
+        "staff": {
+            "id": staff.id,
+            "full_name": staff.full_name,
+            "email": staff.email,
+            "phone": staff.phone,
+            "is_active": staff.is_active
+        }
+    })
 
+# ----------------------
+# Owner: Deactivate Staff (Soft Delete)
+# ----------------------
+@staff_bp.route("/<int:id>/deactivate", methods=["PATCH"])
+@owner_required
+def deactivate_staff(id):
+    claims = get_jwt()
+    org_id = claims["organization_id"]
+
+    staff = User.query.filter_by(id=id, organization_id=org_id, role="staff").first()
+    if not staff:
+        return jsonify({"error": "Staff not found"}), 404
+
+    staff.is_active = False
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"message": f"{staff.full_name} has been deactivated"})
 
 # ----------------------
 # Staff: Update Own Password

@@ -2,25 +2,38 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./StaffForm.module.css";
+import {
+  createStaff as apiCreateStaff,
+  listStaff as apiListStaff,
+  updateStaff as apiUpdateStaff,
+  deactivateStaff as apiDeactivateStaff,
+} from "../../api/staff";
 
 export default function CreateStaff() {
-  const { user } = useAuth();
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [staffList, setStaffList] = useState([]);
+  const { organization } = useAuth();
+  const token = localStorage.getItem("token"); // grab token once
 
+  const [staffList, setStaffList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    full_name: "",
+    email: "",
+    phone: "",
+  });
+  const [editId, setEditId] = useState(null);
+  const [message, setMessage] = useState("");
+
+  // Fetch staff list
   const fetchStaff = async () => {
+    setLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:5000/staff/", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      const data = await res.json();
-      setStaffList(data.staff || []);
+      const res = await apiListStaff(token);
+      setStaffList(res.staff || []);
     } catch (err) {
-      console.error("Failed to fetch staff:", err);
+      console.error("Error fetching staff:", err);
+      setMessage(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -28,80 +41,141 @@ export default function CreateStaff() {
     fetchStaff();
   }, []);
 
+  // Handle input changes
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  // Handle create/update staff
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setMessage("");
 
     try {
-      const res = await fetch("http://127.0.0.1:5000/staff/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ full_name: fullName, email, phone }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setMessage(data.error || "Error creating staff");
+      if (editId) {
+        const res = await apiUpdateStaff(editId, formData, token);
+        setMessage(`Staff ${res.staff.full_name} updated`);
+        setEditId(null);
       } else {
-        setMessage(`Staff created! Temporary password: ${data.temporary_password}`);
-        setFullName("");
-        setEmail("");
-        setPhone("");
-        fetchStaff();
+        const res = await apiCreateStaff(formData, token);
+        setMessage(`Staff created! Temporary password: ${res.temporary_password}`);
       }
+
+      setFormData({ full_name: "", email: "", phone: "" });
+      fetchStaff();
     } catch (err) {
       console.error(err);
-      setMessage("Network or server error");
-    } finally {
-      setLoading(false);
+      setMessage(err.message || "Server error or invalid input");
+    }
+  };
+
+  // Handle edit
+  const handleEdit = (staff) => {
+    setEditId(staff.id);
+    setFormData({
+      full_name: staff.full_name,
+      email: staff.email,
+      phone: staff.phone,
+    });
+  };
+
+  // Handle deactivate
+  const handleDeactivate = async (id) => {
+    setMessage("");
+    try {
+      await apiDeactivateStaff(id, token);
+      setMessage("Staff deactivated");
+      fetchStaff();
+    } catch (err) {
+      console.error(err);
+      setMessage(err.message || "Failed to deactivate staff");
     }
   };
 
   return (
     <div className={styles.container}>
-      <h2>Create Staff</h2>
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <h2>Welcome, {organization?.name} 👋</h2>
+
+      {message && <p className={styles.message}>{message}</p>}
+
+      <form className={styles.formContainer} onSubmit={handleSubmit}>
+        <h3>{editId ? "Edit Staff" : "Create Staff"}</h3>
+
         <input
-          type="text"
+          name="full_name"
           placeholder="Full Name"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
+          value={formData.full_name}
+          onChange={handleChange}
+          className={styles.inputField}
           required
         />
         <input
-          type="email"
+          name="email"
           placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={formData.email}
+          onChange={handleChange}
+          className={styles.inputField}
           required
         />
         <input
-          type="tel"
+          name="phone"
           placeholder="Phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          value={formData.phone}
+          onChange={handleChange}
+          className={styles.inputField}
           required
         />
-        <button type="submit" disabled={loading}>
-          {loading ? "Creating..." : "Create Staff"}
+
+        <button className={styles.submitButton}>
+          {editId ? "Update Staff" : "Create Staff"}
         </button>
       </form>
 
-      {message && <p>{message}</p>}
-
       <h3>Staff List</h3>
-      <ul>
-        {staffList.map((s) => (
-          <li key={s.id}>
-            {s.full_name} | {s.email} | {s.phone} | {s.is_active ? "Active" : "Inactive"}
-          </li>
-        ))}
-      </ul>
+
+      {loading ? (
+        <p>Loading...</p>
+      ) : staffList.length === 0 ? (
+        <p>No staff yet.</p>
+      ) : (
+        <table className={styles.staffTable}>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {staffList.map((s) => (
+              <tr key={s.id}>
+                <td>{s.full_name}</td>
+                <td>{s.email}</td>
+                <td>{s.phone}</td>
+                <td>{s.is_active ? "Active" : "Inactive"}</td>
+                <td>
+                  <button
+                    className={styles.editButton}
+                    onClick={() => handleEdit(s)}
+                  >
+                    Edit
+                  </button>
+                  {s.is_active && (
+                    <button
+                      className={styles.deactivateButton}
+                      onClick={() => handleDeactivate(s.id)}
+                    >
+                      Deactivate
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
