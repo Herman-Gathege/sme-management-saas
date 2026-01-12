@@ -1,10 +1,15 @@
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
 import styles from "./DashboardLayout.module.css";
 
 export default function Sidebar() {
+  const { organization } = useAuth(); // grab org from context
+
   return (
     <aside className={styles.sidebar}>
-      <h2 className={styles.logo}>SME SaaS</h2>
+      <h2 className={styles.logo}>
+        {organization?.name || "SmartShop"} {/* fallback just in case */}
+      </h2>
 
       <nav>
         <NavLink
