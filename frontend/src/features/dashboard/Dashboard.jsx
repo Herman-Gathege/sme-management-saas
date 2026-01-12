@@ -13,11 +13,11 @@ export default function Dashboard() {
         </div>
 
         <div className={styles.info}>
-          <p>
+          {/* <p>
             Organization: <span>{organization.name}</span>
-          </p>
+          </p> */}
           <p>
-            Role: <span>{user.role}</span>
+            You are logged in as: <span>{user.role}</span>
           </p>
         </div>
       </div>
