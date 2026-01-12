@@ -15,6 +15,12 @@
   border-right: 1px solid #e5e7eb;
 }
 
+.sidebar button.link {
+  text-align: left;
+  cursor: pointer;
+}
+
+
 /* Logo */
 .logo {
   margin-bottom: 2rem;

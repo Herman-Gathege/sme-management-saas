@@ -50,7 +50,7 @@ export default function AddStock() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to add stock");
 
-      navigate("/stock");
+      navigate("/owner/stock");
     } catch (err) {
       setError(err.message);
     } finally {

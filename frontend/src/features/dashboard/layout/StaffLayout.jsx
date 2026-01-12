@@ -1,17 +1,16 @@
-import { Outlet } from "react-router-dom";
+// frontend/src/features/dashboard/layout/StaffLayout.jsx
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import styles from "./DashboardLayout.module.css";
 
-export default function DashboardLayout() {
+export default function StaffLayout({ children }) {
   return (
     <div className={styles.layout}>
       <Sidebar />
-
       <div className={styles.main}>
         <Navbar />
         <div className={styles.content}>
-          <Outlet />
+          {children}
         </div>
       </div>
     </div>

@@ -2,10 +2,7 @@
 import DashboardLayout from "./layout/DashboardLayout";
 import DashboardContent from "./DashboardContent";
 
+
 export default function OwnerDashboard() {
-  return (
-    <DashboardLayout>
-      <DashboardContent roleLabel="Owner" />
-    </DashboardLayout>
-  );
+  return <DashboardContent roleLabel="Owner" />;
 }

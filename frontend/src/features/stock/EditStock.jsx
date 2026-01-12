@@ -77,7 +77,7 @@ export default function EditStock() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update stock");
 
-      navigate("/stock");
+      navigate("/owner/stock");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -93,36 +93,58 @@ export default function EditStock() {
       <h3>Edit Stock Item</h3>
 
       <form onSubmit={handleSubmit} className={styles.form}>
+        {/* Name */}
+        <label htmlFor="name">Item Name</label>
         <input
+          id="name"
           name="name"
-          placeholder="Item name"
           value={form.name}
           onChange={handleChange}
           required
         />
-        <input name="sku" placeholder="SKU" value={form.sku} onChange={handleChange} />
-        <input name="category" placeholder="Category" value={form.category} onChange={handleChange} />
+
+        {/* SKU */}
+        <label htmlFor="sku">SKU</label>
+        <input id="sku" name="sku" value={form.sku} onChange={handleChange} />
+
+        {/* Category */}
+        <label htmlFor="category">Category</label>
         <input
+          id="category"
+          name="category"
+          value={form.category}
+          onChange={handleChange}
+        />
+
+        {/* Quantity */}
+        <label htmlFor="quantity">Quantity</label>
+        <input
+          id="quantity"
           type="number"
           name="quantity"
-          placeholder="Quantity"
           value={form.quantity}
           onChange={handleChange}
           required
         />
+
+        {/* Unit Price */}
+        <label htmlFor="unit_price">Unit Price</label>
         <input
+          id="unit_price"
           type="number"
           step="0.01"
           name="unit_price"
-          placeholder="Unit price"
           value={form.unit_price}
           onChange={handleChange}
           required
         />
+
+        {/* Minimum Stock Level */}
+        <label htmlFor="min_stock_level">Minimum Stock Level</label>
         <input
+          id="min_stock_level"
           type="number"
           name="min_stock_level"
-          placeholder="Minimum stock level"
           value={form.min_stock_level}
           onChange={handleChange}
         />

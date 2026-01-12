@@ -2,8 +2,9 @@
 import { Outlet } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import Sidebar from "../dashboard/layout/Sidebar";
+import StaffLayout from "./layout/StaffLayout";
 import styles from "../dashboard/layout/DashboardLayout.module.css";
+
 
 // -----------------------------
 // Nested Components for Staff
@@ -102,13 +103,12 @@ export function StaffPassword() {
 // -----------------------------
 // StaffDashboard Layout
 // -----------------------------
+// StaffDashboard layout
+
 export default function StaffDashboard() {
   return (
-    <div className={styles.layout}>
-      <Sidebar />
-      <div className={styles.content}>
-        <Outlet />
-      </div>
-    </div>
+    <StaffLayout>
+      <Outlet />
+    </StaffLayout>
   );
 }

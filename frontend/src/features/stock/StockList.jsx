@@ -83,7 +83,7 @@ export default function StockList() {
     <section className={styles.card}>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <h3>Stock Inventory</h3>
-        <Link to="/stock/add">
+        <Link to="/owner/stock/add">
           <button>Add Stock</button>
         </Link>
       </div>
@@ -94,12 +94,12 @@ export default function StockList() {
         <table style={{ width: "100%", marginTop: "1rem" }}>
           <thead>
             <tr>
-              <th>Name</th>
+              <th>Item Name</th>
               <th>SKU</th>
               <th>Category</th>
-              <th>Qty</th>
-              <th>Min</th>
-              <th>Unit Price</th>
+              <th>Quantity</th>
+              <th>Minimum stock level</th>
+              <th>Price per item</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -125,7 +125,7 @@ export default function StockList() {
                     )}
                   </td>
                   <td>
-                    <Link to={`/stock/${item.id}/edit`}>
+                    <Link to={`/owner/stock/${item.id}/edit`}>
                       <button>Edit</button>
                     </Link>
                     <button

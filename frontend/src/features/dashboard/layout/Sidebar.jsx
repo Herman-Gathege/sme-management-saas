@@ -1,82 +1,136 @@
 // frontend/src/features/dashboard/layout/Sidebar.jsx
-import { Link, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
+import { useState, useEffect } from "react";
 import styles from "./DashboardLayout.module.css";
 
 export default function Sidebar() {
-  const { user } = useAuth();
+  const { user, organization } = useAuth();
   const location = useLocation();
 
+  // ---------------------------
+  // Hooks (must always run)
+  // ---------------------------
+  const [stockOpen, setStockOpen] = useState(false);
+
+  const isStaff = user?.role === "staff";
+  const isOwner = user?.role === "owner";
+
+  // Auto-open Stock dropdown if current path starts with /owner/stock
+  useEffect(() => {
+    if (location.pathname.startsWith("/owner/stock")) {
+      setStockOpen(true);
+    }
+  }, [location.pathname]);
+
+  // Dynamic class for NavLink
+  const linkClass = ({ isActive }) =>
+    isActive ? `${styles.link} ${styles.active}` : styles.link;
+
+  // ---------------------------
+  // Early return for unauthenticated
+  // ---------------------------
   if (!user) return null;
 
-  const isStaff = user.role === "staff";
-  const isOwner = user.role === "owner";
-
-  // Detect if we're inside Stock
-  const isStockSection = location.pathname.startsWith("/stock");
-
+  // ---------------------------
+  // Render Sidebar
+  // ---------------------------
   return (
     <aside className={styles.sidebar}>
-      <ul>
+      {/* LOGO */}
+      <h2 className={styles.logo}>
+        {organization?.name || "SmartShop"}
+      </h2>
+
+      <nav>
         {/* HOME */}
-        <li>
-          <Link to={isOwner ? "/dashboard" : "/staff/dashboard"}>Home</Link>
-        </li>
+        <NavLink
+          to={isOwner ? "/dashboard" : "/staff/dashboard"}
+          className={linkClass}
+        >
+          Home
+        </NavLink>
 
         {/* SALES */}
-        <li>
-          <Link to={isOwner ? "/sales" : "/staff/dashboard"}>Sales</Link>
-        </li>
+        <NavLink
+          to={isOwner ? "/sales" : "/staff/dashboard"}
+          className={linkClass}
+        >
+          Sales
+        </NavLink>
 
-        {/* STAFF-ONLY */}
+        {/* STAFF ONLY */}
         {isStaff && (
           <>
-            <li>
-              <Link to="/staff/profile">My Profile</Link>
-            </li>
-            <li>
-              <Link to="/staff/password">Change Password</Link>
-            </li>
+            <NavLink to="/staff/profile" className={linkClass}>
+              My Profile
+            </NavLink>
+            <NavLink to="/staff/password" className={linkClass}>
+              Change Password
+            </NavLink>
           </>
         )}
 
-        {/* OWNER-ONLY */}
+        {/* OWNER ONLY */}
         {isOwner && (
           <>
-            <li>
-              <Link to="/stock">Stock</Link>
-            </li>
+            {/* STOCK DROPDOWN TRIGGER */}
+            <button
+              type="button"
+              onClick={() => setStockOpen(!stockOpen)}
+              className={styles.link}
+              style={{ background: "none", border: "none", width: "100%", textAlign: "left" }}
+            >
+              Stock
+            </button>
 
-            {/* STOCK SUB-NAV (only when inside /stock) */}
-            {isStockSection && (
-              <ul style={{ marginLeft: "1rem" }}>
-                <li>
-                  <Link to="/stock">Stock List</Link>
-                </li>
-                <li>
-                  <Link to="/stock/add">Add Stock</Link>
-                </li>
-                <li>
-                  <Link to="/stock/history">Stock History</Link>
-                </li>
-              </ul>
+            {/* STOCK SUB-MENU */}
+            {stockOpen && (
+              <div style={{ marginLeft: "1rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                <NavLink
+                  to="/owner/stock"
+                  end
+                  className={({ isActive }) =>
+                    location.pathname === "/owner/stock" ||
+                    location.pathname.match(/^\/owner\/stock\/\d+\/edit$/)
+                      ? `${styles.link} ${styles.active}`
+                      : styles.link
+                  }
+                >
+                  Stock List
+                </NavLink>
+
+                <NavLink
+                  to="/owner/stock/add"
+                  className={({ isActive }) => (isActive ? `${styles.link} ${styles.active}` : styles.link)}
+                >
+                  Add Stock
+                </NavLink>
+
+                <NavLink
+                  to="/owner/stock/history"
+                  className={({ isActive }) => (isActive ? `${styles.link} ${styles.active}` : styles.link)}
+                >
+                  Stock History
+                </NavLink>
+              </div>
             )}
 
-            <li>
-              <Link to="/customers">Customers</Link>
-            </li>
-            <li>
-              <Link to="/staff">Staff</Link>
-            </li>
-            <li>
-              <Link to="/staff/create">Add Staff</Link>
-            </li>
-            <li>
-              <Link to="/reports">Reports</Link>
-            </li>
+            {/* Other Owner Links */}
+            <NavLink to="/customers" className={linkClass}>
+              Customers
+            </NavLink>
+
+            <NavLink to="/owner/staff/create" className={linkClass}>
+              Manage Staff
+            </NavLink>
+
+            <NavLink to="/reports" className={linkClass}>
+              Reports
+            </NavLink>
           </>
         )}
-      </ul>
+      </nav>
     </aside>
   );
 }
