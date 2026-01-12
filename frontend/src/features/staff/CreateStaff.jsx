@@ -22,11 +22,20 @@ export default function CreateStaff({ staff = null }) {
     phone: "",
   });
   const [message, setMessage] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Prefill form for editing
   useEffect(() => {
-    if (staff) setFormData({ full_name: staff.full_name, email: staff.email, phone: staff.phone });
-    else setFormData({ full_name: "", email: "", phone: "" });
+    if (staff) {
+      setFormData({
+        full_name: staff.full_name,
+        email: staff.email,
+        phone: staff.phone,
+      });
+      setModalOpen(true);
+    } else {
+      setFormData({ full_name: "", email: "", phone: "" });
+    }
   }, [staff]);
 
   const fetchStaff = async () => {
@@ -46,7 +55,8 @@ export default function CreateStaff({ staff = null }) {
     fetchStaff();
   }, []);
 
-  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) =>
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,64 +67,110 @@ export default function CreateStaff({ staff = null }) {
         setMessage(`Staff ${res.staff.full_name} updated`);
       } else {
         const res = await apiCreateStaff(formData, token);
-        setMessage(`Staff created! Temporary password: ${res.temporary_password}`);
+        setMessage(
+          `Staff created! Temporary password: ${res.temporary_password}`
+        );
       }
       setFormData({ full_name: "", email: "", phone: "" });
+      setModalOpen(false);
       fetchStaff();
     } catch (err) {
       setMessage(err.message || "Server error or invalid input");
     }
   };
 
-  const handleEdit = (s) => setFormData({ full_name: s.full_name, email: s.email, phone: s.phone });
-  const handleDeactivate = async (id) => { try { await apiDeactivateStaff(id, token); fetchStaff(); } catch {} };
-  const handleReactivate = async (id) => { try { await apiReactivateStaff(id, token); fetchStaff(); } catch {} };
-  const handleResetPassword = async (id) => { try { const res = await apiResetPassword(id, token); alert(res.temporary_password); } catch {} };
+  const handleEdit = (s) => {
+    setFormData({ full_name: s.full_name, email: s.email, phone: s.phone });
+    setModalOpen(true);
+  };
+
+  const handleDeactivate = async (id) => {
+    try {
+      await apiDeactivateStaff(id, token);
+      fetchStaff();
+    } catch {}
+  };
+  const handleReactivate = async (id) => {
+    try {
+      await apiReactivateStaff(id, token);
+      fetchStaff();
+    } catch {}
+  };
+  const handleResetPassword = async (id) => {
+    try {
+      const res = await apiResetPassword(id, token);
+      alert(res.temporary_password);
+    } catch {}
+  };
 
   return (
     <div className={styles.dashboardPage}>
       <header className={styles.pageHeader}>
         <h2>Staff Management</h2>
-        {/* <p>Organization: {organization?.name}</p> */}
+        <button
+          onClick={() => setModalOpen(true)}
+          className={styles.primaryBtn}
+        >
+          Create New Staff
+        </button>
+        {/* {modalOpen && (
+          <button
+            onClick={() => setModalOpen(false)}
+            className={styles.secondaryBtn}
+          >
+            Close Form
+          </button>
+        )} */}
       </header>
 
-      {/* Form Card */}
-      <section className={styles.card}>
-        {message && <p className={styles.message}>{message}</p>}
-        <form className={styles.staffForm} onSubmit={handleSubmit}>
-          <h3>{staff ? "Edit Staff" : "Create New Staff"}</h3>
+      {message && <p className={styles.message}>{message}</p>}
 
-          <input
-            name="full_name"
-            placeholder="Full Name"
-            value={formData.full_name}
-            onChange={handleChange}
-            required
-          />
-          <input
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-          <input
-            name="phone"
-            placeholder="Phone"
-            value={formData.phone}
-            onChange={handleChange}
-            required
-          />
-
-          <div className={styles.formActions}>
-            <button className={styles.primaryBtn}>
-              {staff ? "Update Staff" : "Create Staff"}
-            </button>
+      {/* Modal */}
+      {modalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h3>{staff ? "Edit Staff" : "Create New Staff"}</h3>
+            <form className={styles.staffForm} onSubmit={handleSubmit}>
+              <input
+                name="full_name"
+                placeholder="Full Name"
+                value={formData.full_name}
+                onChange={handleChange}
+                required
+              />
+              <input
+                name="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+              <input
+                name="phone"
+                placeholder="Phone"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+              />
+              <div className={styles.formActions}>
+                <button className={styles.primaryBtn}>
+                  {staff ? "Update Staff" : "Create Staff"}
+                </button>
+                {modalOpen && (
+                  <button
+                    onClick={() => setModalOpen(false)}
+                    className={styles.secondaryBtn}
+                  >
+                    Close Form
+                  </button>
+                )}
+              </div>
+            </form>
           </div>
-        </form>
-      </section>
+        </div>
+      )}
 
-      {/* Staff List Card */}
+      {/* Staff List */}
       <section className={styles.card}>
         <h3>Staff List</h3>
         {loading ? (
@@ -133,21 +189,41 @@ export default function CreateStaff({ staff = null }) {
               </tr>
             </thead>
             <tbody>
-              {staffList.map(s => (
+              {staffList.map((s) => (
                 <tr key={s.id}>
                   <td>{s.full_name}</td>
                   <td>{s.email}</td>
                   <td>{s.phone}</td>
                   <td>{s.is_active ? "Active" : "Inactive"}</td>
                   <td>
-                    <button onClick={() => handleEdit(s)} className={styles.editBtn}>Edit</button>
+                    <button
+                      onClick={() => handleEdit(s)}
+                      className={styles.editBtn}
+                    >
+                      Edit
+                    </button>
                     {s.is_active ? (
                       <>
-                        <button onClick={() => handleDeactivate(s.id)} className={styles.deactivateBtn}>Deactivate</button>
-                        <button onClick={() => handleResetPassword(s.id)} className={styles.resetBtn}>Reset Password</button>
+                        <button
+                          onClick={() => handleDeactivate(s.id)}
+                          className={styles.deactivateBtn}
+                        >
+                          Deactivate
+                        </button>
+                        <button
+                          onClick={() => handleResetPassword(s.id)}
+                          className={styles.resetBtn}
+                        >
+                          Reset Password
+                        </button>
                       </>
                     ) : (
-                      <button onClick={() => handleReactivate(s.id)} className={styles.reactivateBtn}>Reactivate</button>
+                      <button
+                        onClick={() => handleReactivate(s.id)}
+                        className={styles.reactivateBtn}
+                      >
+                        Reactivate
+                      </button>
                     )}
                   </td>
                 </tr>
