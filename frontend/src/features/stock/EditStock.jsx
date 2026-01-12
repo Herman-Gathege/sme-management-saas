@@ -1,3 +1,4 @@
+//frontend/src/features/stock/EditStock.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styles from "../dashboard/layout/DashboardLayout.module.css";
@@ -22,14 +23,13 @@ export default function EditStock() {
     const fetchStockItem = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://127.0.0.1:5000/api/stock/`, {
+        const res = await fetch(`http://127.0.0.1:5000/api/stock/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const data = await res.json();
+
         if (!res.ok) throw new Error("Failed to load stock");
 
-        const item = data.find((s) => s.id === Number(id));
-        if (!item) throw new Error("Stock item not found");
+        const item = await res.json();
 
         setForm({
           name: item.name,
@@ -100,18 +100,8 @@ export default function EditStock() {
           onChange={handleChange}
           required
         />
-        <input
-          name="sku"
-          placeholder="SKU"
-          value={form.sku}
-          onChange={handleChange}
-        />
-        <input
-          name="category"
-          placeholder="Category"
-          value={form.category}
-          onChange={handleChange}
-        />
+        <input name="sku" placeholder="SKU" value={form.sku} onChange={handleChange} />
+        <input name="category" placeholder="Category" value={form.category} onChange={handleChange} />
         <input
           type="number"
           name="quantity"

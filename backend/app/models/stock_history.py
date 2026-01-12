@@ -1,54 +1,42 @@
-from models.stock_history import StockHistory
-from models.user import User  # if you need user info
-import json
-from extensions import db
+from datetime import datetime
+from app.extensions import db
 
-# --- POST /add_stock ---
-history = StockHistory(
-    stock_id=stock.id,
-    organization_id=user["organization_id"],
-    user_id=user["id"],
-    action="created",
-    details=json.dumps({"name": stock.name, "quantity": stock.quantity}),
-)
-db.session.add(history)
-db.session.commit()
 
-# --- PATCH /update_stock ---
-changes = {}
-for field in ["name", "sku", "category", "quantity", "unit_price", "min_stock_level"]:
-    old = getattr(stock, field)
-    new = data.get(field, old)
-    if old != new:
-        changes[field] = {"old": old, "new": new}
-        setattr(stock, field, new)
+class StockHistory(db.Model):
+    __tablename__ = "stock_history"
 
-if changes:
-    history = StockHistory(
-        stock_id=stock.id,
-        organization_id=organization_id,
-        user_id=user["id"],
-        action="updated",
-        details=json.dumps(changes),
+    id = db.Column(db.Integer, primary_key=True)
+
+    stock_id = db.Column(
+        db.Integer,
+        db.ForeignKey("stock.id"),
+        nullable=False
     )
-    db.session.add(history)
 
-db.session.commit()
+    organization_id = db.Column(
+        db.Integer,
+        db.ForeignKey("organizations.id"),
+        nullable=False
+    )
 
-# --- DELETE /delete_stock ---
-history = StockHistory(
-    stock_id=stock.id,
-    organization_id=organization_id,
-    user_id=user["id"],
-    action="deleted",
-    details=json.dumps({
-        "name": stock.name,
-        "quantity": stock.quantity,
-        "unit_price": stock.unit_price,
-        "category": stock.category
-    }),
-)
-db.session.add(history)
-db.session.commit()
-db.session.delete(stock)
-db.session.commit()
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
+        nullable=False
+    )
+
+    action = db.Column(db.String(50), nullable=False)  # created | updated | deleted
+    details = db.Column(db.Text, nullable=True)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "stock_id": self.stock_id,
+            "organization_id": self.organization_id,
+            "user_id": self.user_id,
+            "action": self.action,
+            "details": self.details,
+            "created_at": self.created_at.isoformat(),
+        }

@@ -1,4 +1,5 @@
 // frontend/src/routes/AppRoutes.jsx
+// frontend/src/routes/AppRoutes.jsx
 import { Routes, Route } from "react-router-dom";
 import Home from "../pages/Home";
 import Login from "../features/auth/Login";
@@ -18,6 +19,7 @@ import StockLayout from "../features/stock/StockLayout";
 import StockList from "../features/stock/StockList";
 import AddStock from "../features/stock/AddStock";
 import EditStock from "../features/stock/EditStock";
+import StockHistory from "../features/stock/StockHistory";
 
 export default function AppRoutes() {
   return (
@@ -66,10 +68,10 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<StockList />} />   {/* /stock */}
-        <Route path="add" element={<AddStock />} /> {/* /stock/add */}
-        <Route path=":id/edit" element={<EditStock />} />  {/* /stock/:id/edit */}
-
+        <Route index element={<StockList />} />              {/* /stock */}
+        <Route path="add" element={<AddStock />} />         {/* /stock/add */}
+        <Route path=":id/edit" element={<EditStock />} />   {/* /stock/:id/edit */}
+        <Route path="history" element={<StockHistory />} /> {/* /stock/history */}
       </Route>
 
       {/* ============ Staff Dashboard ============ */}

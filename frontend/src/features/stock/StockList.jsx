@@ -1,3 +1,4 @@
+//frontend/src/features/stock/StockList.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "../dashboard/layout/DashboardLayout.module.css";
@@ -7,19 +8,32 @@ export default function StockList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const API_URL = "http://127.0.0.1:5000/api/stock";
+
+  // Fetch stock items
   useEffect(() => {
     const fetchStock = async () => {
       try {
         const token = localStorage.getItem("token");
+        console.log("JWT token being sent:", token); // ADD THIS LINE
+        if (!token) throw new Error("No auth token found");
 
-        const res = await fetch("http://127.0.0.1:5000/api/stock/", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const res = await fetch(API_URL, {
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        const data = await res.json();
-        if (!res.ok) throw new Error("Failed to load stock");
+        const contentType = res.headers.get("content-type");
+        let data;
+
+        if (contentType && contentType.includes("application/json")) {
+          data = await res.json();
+        } else {
+          const text = await res.text();
+          console.error("Unexpected response:", text);
+          throw new Error("Server returned non-JSON response");
+        }
+
+        if (!res.ok) throw new Error(data.error || "Failed to load stock");
 
         setStock(data);
       } catch (err) {
@@ -32,21 +46,30 @@ export default function StockList() {
     fetchStock();
   }, []);
 
-  // Handle delete stock item
+  // Delete stock item
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://127.0.0.1:5000/api/stock/${id}`, {
+      const res = await fetch(`${API_URL}/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get("content-type");
+      let data;
+
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        console.error("Unexpected delete response:", text);
+        throw new Error("Server returned non-JSON response");
+      }
+
       if (!res.ok) throw new Error(data.error || "Failed to delete stock");
 
-      // Remove deleted item from state
       setStock((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
       setError(err.message);
@@ -78,7 +101,7 @@ export default function StockList() {
               <th>Min</th>
               <th>Unit Price</th>
               <th>Status</th>
-              <th>Actions</th> {/* NEW */}
+              <th>Actions</th>
             </tr>
           </thead>
 

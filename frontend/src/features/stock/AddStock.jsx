@@ -1,3 +1,4 @@
+//frontend/src/features/stock/AddStock.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../dashboard/layout/DashboardLayout.module.css";
@@ -32,7 +33,7 @@ export default function AddStock() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://127.0.0.1:5000/api/stock/", {
+      const res = await fetch("http://127.0.0.1:5000/api/stock", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

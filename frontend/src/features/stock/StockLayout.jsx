@@ -1,3 +1,4 @@
+//frontend/src/features/stock/StockLayout.jsx
 import DashboardLayout from "../dashboard/layout/DashboardLayout";
 import { Outlet } from "react-router-dom";
 

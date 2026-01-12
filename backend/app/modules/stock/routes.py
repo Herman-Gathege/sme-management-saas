@@ -1,114 +1,226 @@
+#backend/app/modules/stock/routes.py
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from models.stock import Stock
-from modules.auth.utils import owner_required  # assuming you already use this
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+from flask_cors import cross_origin
+
+from app.extensions import db
+from app.models.stock import Stock
+from app.models.stock_history import StockHistory
+from app.models.user import User
+from app.auth.decorators import owner_required
+
+import json
 
 stock_bp = Blueprint("stock", __name__, url_prefix="/api/stock")
 
 
-@stock_bp.route("/", methods=["GET"])
+def get_auth_context():
+    """
+    Safely extract user ID and organization ID from JWT.
+    Returns tuple (user_id, organization_id) or raises JSON error.
+    """
+    try:
+        identity = get_jwt_identity()
+        if isinstance(identity, dict):
+            user_id = identity.get("id")
+        else:
+            user_id = int(identity)
+
+        claims = get_jwt()
+        org_id = claims.get("organization_id")
+        if not user_id or not org_id:
+            raise ValueError("Invalid token: missing identity or organization")
+        return user_id, org_id
+    except Exception as e:
+        # Return JSON error immediately
+        response = jsonify({"error": "Invalid or missing JWT", "detail": str(e)})
+        response.status_code = 401
+        raise Exception(response)
+
+
+# -------------------------
+# GET ALL STOCK
+# -------------------------
+@stock_bp.route("/", methods=["GET"], strict_slashes=False)
+@cross_origin()
 @jwt_required()
 @owner_required
 def get_stock():
-    user = get_jwt_identity()
-    organization_id = user["organization_id"]
-
-    stock_items = Stock.query.filter_by(
-        organization_id=organization_id
-    ).all()
-
-    return jsonify([item.to_dict() for item in stock_items])
+    try:
+        _, organization_id = get_auth_context()
+        stock_items = Stock.query.filter_by(organization_id=organization_id).all()
+        return jsonify([item.to_dict() for item in stock_items])
+    except Exception as e:
+        return e.args[0] if hasattr(e, "args") else jsonify({"error": str(e)}), 400
 
 
-@stock_bp.route("/", methods=["POST"])
+# -------------------------
+# ADD STOCK
+# -------------------------
+@stock_bp.route("/", methods=["POST"], strict_slashes=False)
+@cross_origin()
 @jwt_required()
 @owner_required
 def add_stock():
-    data = request.get_json()
-    user = get_jwt_identity()
+    try:
+        data = request.get_json()
+        user_id, organization_id = get_auth_context()
 
-    stock = Stock(
-        organization_id=user["organization_id"],
-        name=data["name"],
-        sku=data.get("sku"),
-        category=data.get("category"),
-        quantity=data["quantity"],
-        unit_price=data["unit_price"],
-        min_stock_level=data.get("min_stock_level", 0),
-    )
+        stock = Stock(
+            organization_id=organization_id,
+            name=data["name"],
+            sku=data.get("sku"),
+            category=data.get("category"),
+            quantity=data["quantity"],
+            unit_price=data["unit_price"],
+            min_stock_level=data.get("min_stock_level", 0),
+        )
 
-    db.session.add(stock)
-    db.session.commit()
+        db.session.add(stock)
+        db.session.commit()
 
-    return jsonify(stock.to_dict()), 201
+        # Add history log
+        history = StockHistory(
+            stock_id=stock.id,
+            organization_id=organization_id,
+            user_id=user_id,
+            action="created",
+            details=json.dumps({
+                "name": stock.name,
+                "quantity": stock.quantity,
+                "unit_price": stock.unit_price,
+            }),
+        )
+        db.session.add(history)
+        db.session.commit()
 
-@stock_bp.route("/<int:stock_id>", methods=["PATCH"])
+        return jsonify(stock.to_dict()), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
+# -------------------------
+# UPDATE STOCK
+# -------------------------
+@stock_bp.route("/<int:stock_id>", methods=["PATCH"], strict_slashes=False)
+@cross_origin()
 @jwt_required()
 @owner_required
 def update_stock(stock_id):
-    """
-    Update stock item fields
-    """
-    user = get_jwt_identity()
-    organization_id = user["organization_id"]
+    try:
+        data = request.get_json()
+        user_id, organization_id = get_auth_context()
 
-    stock = Stock.query.filter_by(id=stock_id, organization_id=organization_id).first()
-    if not stock:
-        return jsonify({"error": "Stock item not found"}), 404
+        stock = Stock.query.filter_by(id=stock_id, organization_id=organization_id).first()
+        if not stock:
+            return jsonify({"error": "Stock item not found"}), 404
 
-    data = request.get_json()
-    stock.name = data.get("name", stock.name)
-    stock.sku = data.get("sku", stock.sku)
-    stock.category = data.get("category", stock.category)
-    stock.quantity = data.get("quantity", stock.quantity)
-    stock.unit_price = data.get("unit_price", stock.unit_price)
-    stock.min_stock_level = data.get("min_stock_level", stock.min_stock_level)
+        changes = {}
+        for field in ["name", "sku", "category", "quantity", "unit_price", "min_stock_level"]:
+            old = getattr(stock, field)
+            new = data.get(field, old)
+            if old != new:
+                changes[field] = {"old": old, "new": new}
+                setattr(stock, field, new)
 
-    db.session.commit()
+        if changes:
+            history = StockHistory(
+                stock_id=stock.id,
+                organization_id=organization_id,
+                user_id=user_id,
+                action="updated",
+                details=json.dumps(changes),
+            )
+            db.session.add(history)
 
-    return jsonify(stock.to_dict())
+        db.session.commit()
+        return jsonify(stock.to_dict())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
-@stock_bp.route("/<int:stock_id>", methods=["DELETE"])
+
+# -------------------------
+# DELETE STOCK
+# -------------------------
+@stock_bp.route("/<int:stock_id>", methods=["DELETE"], strict_slashes=False)
+@cross_origin()
 @jwt_required()
 @owner_required
 def delete_stock(stock_id):
-    """
-    Delete a stock item
-    """
-    user = get_jwt_identity()
-    organization_id = user["organization_id"]
+    try:
+        user_id, organization_id = get_auth_context()
 
-    stock = Stock.query.filter_by(id=stock_id, organization_id=organization_id).first()
-    if not stock:
-        return jsonify({"error": "Stock item not found"}), 404
+        stock = Stock.query.filter_by(id=stock_id, organization_id=organization_id).first()
+        if not stock:
+            return jsonify({"error": "Stock item not found"}), 404
 
-    db.session.delete(stock)
-    db.session.commit()
+        # Add delete history
+        history = StockHistory(
+            stock_id=stock.id,
+            organization_id=organization_id,
+            user_id=user_id,
+            action="deleted",
+            details=json.dumps({
+                "name": stock.name,
+                "quantity": stock.quantity,
+                "unit_price": stock.unit_price,
+                "category": stock.category,
+            }),
+        )
+        db.session.add(history)
+        db.session.delete(stock)
+        db.session.commit()
 
-    return jsonify({"message": "Stock item deleted successfully"})
+        return jsonify({"message": "Stock item deleted successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
-@stock_bp.route("/history", methods=["GET"])
+
+# -------------------------
+# STOCK HISTORY
+# -------------------------
+@stock_bp.route("/history", methods=["GET"], strict_slashes=False)
+@cross_origin()
 @jwt_required()
 @owner_required
 def stock_history():
-    user = get_jwt_identity()
-    organization_id = user["organization_id"]
+    try:
+        _, organization_id = get_auth_context()
 
-    histories = StockHistory.query.filter_by(
-        organization_id=organization_id
-    ).order_by(StockHistory.created_at.desc()).all()
+        histories = StockHistory.query.filter_by(organization_id=organization_id) \
+            .order_by(StockHistory.created_at.desc()).all()
 
-    results = []
-    for h in histories:
-        stock_item = Stock.query.get(h.stock_id)
-        user_obj = User.query.get(h.user_id)
-        results.append({
-            "id": h.id,
-            "stock_name": stock_item.name if stock_item else "Deleted",
-            "action": h.action,
-            "details": json.loads(h.details) if h.details else {},
-            "user": user_obj.full_name if user_obj else "Unknown",
-            "created_at": h.created_at.isoformat(),
-        })
+        results = []
+        for h in histories:
+            stock_item = Stock.query.get(h.stock_id)
+            user_obj = User.query.get(h.user_id)
+            results.append({
+                "id": h.id,
+                "stock_name": stock_item.name if stock_item else "Deleted",
+                "action": h.action,
+                "details": json.loads(h.details) if h.details else {},
+                "user": user_obj.full_name if user_obj else "Unknown",
+                "created_at": h.created_at.isoformat(),
+            })
 
-    return jsonify(results)
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+# -------------------------
+# GET SINGLE STOCK ITEM
+# -------------------------
+@stock_bp.route("/<int:stock_id>", methods=["GET"], strict_slashes=False)
+@cross_origin()
+@jwt_required()
+@owner_required
+def get_single_stock(stock_id):
+    try:
+        _, organization_id = get_auth_context()
+        stock = Stock.query.filter_by(id=stock_id, organization_id=organization_id).first()
+        if not stock:
+            return jsonify({"error": "Stock item not found"}), 404
+
+        return jsonify(stock.to_dict())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400

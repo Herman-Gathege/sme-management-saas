@@ -1,3 +1,4 @@
+// frontend/src/features/stock/StockHistory.jsx
 import { useEffect, useState } from "react";
 import styles from "../dashboard/layout/DashboardLayout.module.css";
 
@@ -14,10 +15,26 @@ export default function StockHistory() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const data = await res.json();
         if (!res.ok) throw new Error("Failed to fetch stock history");
 
-        setHistory(data);
+        const data = await res.json();
+
+        // Transform details to simple string for easy reading
+        const transformed = data.map((h) => ({
+          ...h,
+          detailsText: h.details
+            ? Object.entries(h.details)
+                .map(
+                  ([key, value]) =>
+                    `${key}: ${
+                      value.new !== undefined ? `${value.old} → ${value.new}` : value
+                    }`
+                )
+                .join(", ")
+            : "",
+        }));
+
+        setHistory(transformed);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -32,12 +49,12 @@ export default function StockHistory() {
   if (error) return <p className={styles.message}>{error}</p>;
 
   return (
-    <section className={styles.card}>
+    <section className={styles["stock-history-card"]}>
       <h3>Stock History</h3>
       {history.length === 0 ? (
         <p>No history yet.</p>
       ) : (
-        <table style={{ width: "100%", marginTop: "1rem" }}>
+        <table className={styles["stock-history-table"]}>
           <thead>
             <tr>
               <th>Date</th>
@@ -54,11 +71,7 @@ export default function StockHistory() {
                 <td>{h.stock_name}</td>
                 <td>{h.action}</td>
                 <td>{h.user}</td>
-                <td>
-                  <pre style={{ margin: 0 }}>
-                    {JSON.stringify(h.details, null, 2)}
-                  </pre>
-                </td>
+                <td>{h.detailsText}</td>
               </tr>
             ))}
           </tbody>
