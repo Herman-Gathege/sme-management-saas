@@ -1,3 +1,4 @@
+//frontend/src/api/staff.js
 const API = "http://127.0.0.1:5000/api/staff";
 
 // Helper to get token

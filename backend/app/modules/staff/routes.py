@@ -4,7 +4,7 @@ from ...extensions import db
 from ...models.user import User
 from ...utils.decorators import owner_required, staff_required
 from werkzeug.security import generate_password_hash
-from flask_jwt_extended import get_jwt
+from flask_jwt_extended import get_jwt, jwt_required
 import secrets
 
 staff_bp = Blueprint("staff", __name__, url_prefix="/api/staff")
@@ -66,22 +66,32 @@ def create_staff():
 
 
 # ----------------------
-# Owner: List Staff in Org
+# List Staff (Owner sees all, staff sees themselves)
 # ----------------------
 @staff_bp.route("", methods=["GET"])
-@owner_required
+@jwt_required()
 def list_staff():
     claims = get_jwt()
     org_id = claims["organization_id"]
+    role = claims["role"]
+    user_id = int(claims["sub"])
 
-    staff_members = User.query.filter_by(organization_id=org_id, role="staff").all()
+    if role == "owner":
+        # Owner sees all staff in the org
+        staff_members = User.query.filter_by(organization_id=org_id, role="staff").all()
+    elif role == "staff":
+        # Staff sees only themselves
+        staff_members = User.query.filter_by(id=user_id, role="staff").all()
+    else:
+        return jsonify({"error": "Unauthorized"}), 403
+
     result = [
         {
             "id": s.id,
             "full_name": s.full_name,
             "email": s.email,
             "phone": s.phone,
-            "is_active": s.is_active
+            "is_active": s.is_active,
         } for s in staff_members
     ]
     return jsonify({"staff": result})
@@ -125,7 +135,7 @@ def update_staff(id):
 
 
 # ----------------------
-# Owner: Deactivate Staff (Soft Delete)
+# Owner: Deactivate Staff
 # ----------------------
 @staff_bp.route("/<int:id>/deactivate", methods=["PATCH"])
 @owner_required
