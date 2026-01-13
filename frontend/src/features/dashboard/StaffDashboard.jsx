@@ -11,13 +11,13 @@ import styles from "../dashboard/layout/DashboardLayout.module.css";
 // -----------------------------
 
 export function StaffSales() {
-  const { user, organization } = useAuth();
+  const { user } = useAuth();
   return (
     <>
       <header className={styles.header}>
-        <h2>Welcome, {user.full_name} 👋</h2>
-        <p>Organization: {organization?.name}</p>
-        <p>Role: Staff</p>
+        <h2>Welcome, <span>{user.full_name}</span> 👋</h2>
+        {/* <p>Organization: {organization?.name}</p>
+        <p>Role: Staff</p> */}
       </header>
 
       <section className={styles.card}>

@@ -59,15 +59,15 @@ export default function Sidebar() {
       <h2 className={styles.logo}>{organization?.name || "SmartShop"}</h2>
 
       <nav>
-        {/* HOME */}
-        <NavLink
-          to={isOwner ? "/dashboard" : "/staff/dashboard"}
-          className={(nav) =>
-            getLinkClass(nav, isOwner ? "/dashboard" : "/staff/dashboard")
-          }
-        >
-          Home
-        </NavLink>
+         {/* HOME (Only for owners) */}
+        {isOwner && (
+          <NavLink
+            to="/dashboard"
+            className={(nav) => getLinkClass(nav, "/dashboard")}
+          >
+            Home
+          </NavLink>
+        )}
 
         {/* SALES */}
         <NavLink
