@@ -8,17 +8,14 @@ export default function Sidebar() {
   const { user, organization } = useAuth();
   const location = useLocation();
 
-  if (!user) return null;
-
-  const isStaff = user.role === "staff";
-  const isOwner = user.role === "owner";
-
   // ---------------------------
-  // DROPDOWN STATE
+  // STATE & HOOKS (ALWAYS FIRST)
   // ---------------------------
   const [stockOpen, setStockOpen] = useState(false);
 
-  // Routes used for active detection
+  // ---------------------------
+  // STOCK ROUTES
+  // ---------------------------
   const stockRoutes = [
     "/owner/stock",
     "/owner/stock/add",
@@ -32,17 +29,25 @@ export default function Sidebar() {
         location.pathname.match(/^\/owner\/stock\/\d+\/edit$/)
     );
 
-  // Auto-open stock dropdown if on a stock route
+  // Auto-open stock dropdown when navigating to stock pages
   useEffect(() => {
-    if (isStockRouteActive()) setStockOpen(true);
+    if (isStockRouteActive()) {
+      setStockOpen(true);
+    }
   }, [location.pathname]);
 
   // ---------------------------
-  // Helpers
+  // EARLY RETURN (AFTER HOOKS)
   // ---------------------------
-  // works for NavLink and allows partial match if needed
+  if (!user) return null;
+
+  const isStaff = user.role === "staff";
+  const isOwner = user.role === "owner";
+
+  // ---------------------------
+  // HELPERS
+  // ---------------------------
   const getLinkClass = ({ isActive }, path) => {
-    // if a path is provided, we override isActive based on current location
     const active = path ? location.pathname.startsWith(path) : isActive;
     return active ? `${styles.link} ${styles.active}` : styles.link;
   };
@@ -55,11 +60,12 @@ export default function Sidebar() {
   // ---------------------------
   return (
     <aside className={styles.sidebar}>
-      {/* LOGO */}
-      <h2 className={styles.logo}>{organization?.name || "SmartShop"}</h2>
+      <h2 className={styles.logo}>
+        {organization?.name || "SmartShop"}
+      </h2>
 
       <nav>
-         {/* HOME (Only for owners) */}
+        {/* OWNER HOME */}
         {isOwner && (
           <NavLink
             to="/dashboard"
@@ -70,14 +76,14 @@ export default function Sidebar() {
         )}
 
         {/* SALES */}
-        <NavLink
-          to={isOwner ? "/sales" : "/staff/dashboard"}
-          className={(nav) =>
-            getLinkClass(nav, isOwner ? "/sales" : "/staff/dashboard")
-          }
-        >
-          View Sales
-        </NavLink>
+        {isOwner && (
+          <NavLink
+            to="/owner/sales"
+            className={(nav) => getLinkClass(nav, "/owner/sales")}
+          >
+            View All Sales
+          </NavLink>
+        )}
 
         {/* STAFF LINKS */}
         {isStaff && (
@@ -104,7 +110,7 @@ export default function Sidebar() {
             <button
               type="button"
               className={getButtonClass(isStockRouteActive())}
-              onClick={() => setStockOpen(!stockOpen)}
+              onClick={() => setStockOpen((prev) => !prev)}
             >
               <span>Manage Stock</span>
               <FiChevronDown
@@ -123,25 +129,29 @@ export default function Sidebar() {
                 <NavLink to="/owner/stock/add" className={getLinkClass}>
                   Add Stock
                 </NavLink>
-                <NavLink to="/owner/stock/history" className={getLinkClass}>
+                <NavLink
+                  to="/owner/stock/history"
+                  className={getLinkClass}
+                >
                   Stock History
                 </NavLink>
               </div>
             )}
 
-            {/* OTHER OWNER LINKS */}
             <NavLink
               to="/customers"
               className={(nav) => getLinkClass(nav, "/customers")}
             >
               Customers
             </NavLink>
+
             <NavLink
               to="/owner/staff"
               className={(nav) => getLinkClass(nav, "/owner/staff")}
             >
               Manage Staff
             </NavLink>
+
             <NavLink
               to="/reports"
               className={(nav) => getLinkClass(nav, "/reports")}

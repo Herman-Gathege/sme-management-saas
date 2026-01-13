@@ -1,9 +1,13 @@
 // frontend/src/features/dashboard/DashboardContent.jsx
 import { useAuth } from "../../context/AuthContext";
 import styles from "./Dashboard.module.css";
+import TodaysSales from "../dashboard/widgets/TodaysSales";
+
 
 export default function DashboardContent({ roleLabel }) {
   const { user, organization } = useAuth();
+
+  if (!user) return null; // or a loading spinner
 
   return (
     <div className={styles.dashboardContainer}>
@@ -12,13 +16,9 @@ export default function DashboardContent({ roleLabel }) {
       </div>
 
       <div className={styles.info}>
-        {/* <p>
-          Organization: <span>{organization.name}</span>
-        </p> */}
-        {/* <p>
-          You are loggen in as: <span>{roleLabel}</span>
-        </p> */}
+        <TodaysSales />
       </div>
     </div>
   );
 }
+

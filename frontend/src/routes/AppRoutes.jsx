@@ -13,6 +13,7 @@ import StockList from "../features/stock/StockList";
 import AddStock from "../features/stock/AddStock";
 import EditStock from "../features/stock/EditStock";
 import StockHistory from "../features/stock/StockHistory";
+import AllSales from "../features/sales/AllSales";
 import { Outlet } from "react-router-dom";
 
 // Staff
@@ -49,6 +50,8 @@ export default function AppRoutes() {
         {/* Dashboard */}
         <Route index element={<OwnerDashboard />} />
         <Route path="dashboard" element={<OwnerDashboard />} />
+        <Route path="sales" element={<AllSales />} />
+
 
         {/* Staff */}
         <Route path="staff/create" element={<CreateStaff />} />

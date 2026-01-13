@@ -1,6 +1,7 @@
 # backend/app/models/sale_item.py
 
 from ..extensions import db
+from .stock import Stock
 
 class SaleItem(db.Model):
     __tablename__ = "sale_items"
@@ -33,3 +34,5 @@ class SaleItem(db.Model):
         db.Numeric(10, 2),
         nullable=False
     )
+
+    stock = db.relationship("Stock", backref="sale_items")

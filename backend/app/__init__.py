@@ -39,12 +39,30 @@ def create_app():
 
     print("APP INSTANCE ID:", id(app))
 
-    CORS(app, resources={r"/*": {"origins": "*"}})
-
+    CORS(
+            app,
+            supports_credentials=True,
+            resources={
+                r"/api/*": {
+                    "origins": [
+                        "http://localhost:5173",
+                        "http://127.0.0.1:5173"
+                    ]
+                },
+                r"/auth/*": {
+                    "origins": [
+                        "http://localhost:5173",
+                        "http://127.0.0.1:5173"
+                    ]
+                }
+            },
+            allow_headers=["Content-Type", "Authorization"],
+            methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        )
     # Register blueprints (ONCE each)
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(staff_bp, url_prefix="/api/staff")
-    app.register_blueprint(sales_bp, url_prefix="/sales")
+    app.register_blueprint(sales_bp, url_prefix="/api/sales")
     app.register_blueprint(stock_bp, url_prefix="/api/stock")
     app.register_blueprint(customers_bp, url_prefix="/customers")
     app.register_blueprint(reports_bp, url_prefix="/reports")

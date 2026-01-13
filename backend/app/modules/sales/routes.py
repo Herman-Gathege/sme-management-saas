@@ -1,6 +1,4 @@
-# backend/app/modules/sales/routes.py
-
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
 from ...models.sale import Sale
@@ -13,22 +11,22 @@ sales_bp = Blueprint("sales", __name__)
 
 @sales_bp.route("/", methods=["GET"])
 def test_sales():
-    return jsonify({"status": "sales module OK"})
+    return jsonify({"status": "sales module OK"}), 200
 
 
 @sales_bp.route("", methods=["POST"])
 @jwt_required()
 def create_sale():
+    from flask import request
+
     data = request.get_json()
     user_id = get_jwt_identity()
+
     user = User.query.get(user_id)
     if not user:
         return jsonify({"error": "Invalid token"}), 401
 
-    org_id = user.organization_id
-    role = user.role
-
-    if role not in ["staff", "owner"]:
+    if user.role not in ["staff", "owner"]:
         return jsonify({"error": "Unauthorized"}), 403
 
     items_data = data.get("items", [])
@@ -36,15 +34,20 @@ def create_sale():
         return jsonify({"error": "Sale must have at least one item"}), 400
 
     try:
-        total_amount = 0.0
+        total_amount = 0
         sale_items = []
 
         for item in items_data:
-            stock = Stock.query.filter_by(id=item["stock_id"], organization_id=org_id).first()
+            stock = Stock.query.filter_by(
+                id=item["stock_id"],
+                organization_id=user.organization_id
+            ).first()
+
             if not stock:
-                return jsonify({"error": f"Stock item {item['stock_id']} not found"}), 404
+                return jsonify({"error": "Stock not found"}), 404
+
             if stock.quantity < item["quantity"]:
-                return jsonify({"error": f"Not enough stock for {stock.name}"}), 400
+                return jsonify({"error": "Insufficient stock"}), 400
 
             subtotal = stock.unit_price * item["quantity"]
             total_amount += subtotal
@@ -54,39 +57,70 @@ def create_sale():
                     stock_id=stock.id,
                     quantity=item["quantity"],
                     unit_price=stock.unit_price,
-                    line_total=subtotal  # ✅ use the correct column name
+                    line_total=subtotal,
                 )
             )
 
-        # Deduct stock
-        for item in sale_items:
-            stock = Stock.query.get(item.stock_id)
-            stock.quantity -= item.quantity
+            stock.quantity -= item["quantity"]
 
-        # Commit transaction
         sale = Sale(
-            organization_id=org_id,
-            user_id=user_id,
+            organization_id=user.organization_id,
+            user_id=user.id,
             total_amount=total_amount,
-            items=sale_items
+            items=sale_items,
         )
+
         db.session.add(sale)
         db.session.commit()
 
         return jsonify({
             "message": "Sale created successfully",
             "sale_id": sale.id,
-            "total_amount": sale.total_amount,
-            "items": [
-                {
-                    "stock_id": i.stock_id,
-                    "quantity": i.quantity,
-                    "unit_price": i.unit_price,
-                    "line_total": i.line_total,
-                } for i in sale_items
-            ]
+            "total_amount": float(sale.total_amount),
         }), 201
 
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
+
+# ✅ OWNER DASHBOARD SALES (CORS + JWT SAFE)
+@sales_bp.route("/owner", methods=["GET"])
+@jwt_required()
+def get_sales_for_owner():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+
+    if not user or user.role != "owner":
+        return jsonify({"error": "Owner access required"}), 403
+
+    sales = (
+        Sale.query
+        .filter_by(organization_id=user.organization_id)
+        .order_by(Sale.created_at.desc())
+        .all()
+    )
+
+    result = []
+    for sale in sales:
+        staff = User.query.get(sale.user_id)
+        sale_items = [
+            {
+                "stock_id": item.stock_id,
+                "name": item.stock.name if item.stock else "Unknown",  # ✅ safe access
+                "quantity": item.quantity,
+                "unit_price": float(item.unit_price),
+                "line_total": float(item.line_total),
+            }
+            for item in sale.items
+        ]
+
+        result.append({
+            "sale_id": sale.id,
+            "staff": staff.full_name if staff else "Unknown",
+            "total_amount": float(sale.total_amount),
+            "created_at": sale.created_at.isoformat(),
+            "items": sale_items,  # ✅ include item details here
+        })
+
+    return jsonify(result), 200
