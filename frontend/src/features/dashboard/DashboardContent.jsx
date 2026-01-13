@@ -8,16 +8,16 @@ export default function DashboardContent({ roleLabel }) {
   return (
     <div className={styles.dashboardContainer}>
       <div className={styles.welcome}>
-        Welcome, {user.full_name} 👋
+        Welcome, <span>{user.full_name}</span> 👋
       </div>
 
       <div className={styles.info}>
-        <p>
+        {/* <p>
           Organization: <span>{organization.name}</span>
-        </p>
-        <p>
-          Role: <span>{roleLabel}</span>
-        </p>
+        </p> */}
+        {/* <p>
+          You are loggen in as: <span>{roleLabel}</span>
+        </p> */}
       </div>
     </div>
   );

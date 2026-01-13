@@ -1,54 +1,70 @@
-// frontend/src/features/dashboard/layout/Sidebar.jsx
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useState, useEffect } from "react";
 import styles from "./DashboardLayout.module.css";
 import { FiChevronDown } from "react-icons/fi";
 
-
 export default function Sidebar() {
   const { user, organization } = useAuth();
   const location = useLocation();
 
+  if (!user) return null;
+
+  const isStaff = user.role === "staff";
+  const isOwner = user.role === "owner";
+
   // ---------------------------
-  // Hooks (must always run)
+  // DROPDOWN STATE
   // ---------------------------
   const [stockOpen, setStockOpen] = useState(false);
 
-  const isStaff = user?.role === "staff";
-  const isOwner = user?.role === "owner";
+  // Routes used for active detection
+  const stockRoutes = [
+    "/owner/stock",
+    "/owner/stock/add",
+    "/owner/stock/history",
+  ];
 
-  // Auto-open Stock dropdown if current path starts with /owner/stock
+  const isStockRouteActive = () =>
+    stockRoutes.some(
+      (route) =>
+        location.pathname === route ||
+        location.pathname.match(/^\/owner\/stock\/\d+\/edit$/)
+    );
+
+  // Auto-open stock dropdown if on a stock route
   useEffect(() => {
-    if (location.pathname.startsWith("/owner/stock")) {
-      setStockOpen(true);
-    }
+    if (isStockRouteActive()) setStockOpen(true);
   }, [location.pathname]);
 
-  // Dynamic class for NavLink
-  const linkClass = ({ isActive }) =>
-    isActive ? `${styles.link} ${styles.active}` : styles.link;
+  // ---------------------------
+  // Helpers
+  // ---------------------------
+  // works for NavLink and allows partial match if needed
+  const getLinkClass = ({ isActive }, path) => {
+    // if a path is provided, we override isActive based on current location
+    const active = path ? location.pathname.startsWith(path) : isActive;
+    return active ? `${styles.link} ${styles.active}` : styles.link;
+  };
+
+  const getButtonClass = (active) =>
+    active ? `${styles.link} ${styles.active}` : styles.link;
 
   // ---------------------------
-  // Early return for unauthenticated
-  // ---------------------------
-  if (!user) return null;
-
-  // ---------------------------
-  // Render Sidebar
+  // RENDER
   // ---------------------------
   return (
     <aside className={styles.sidebar}>
       {/* LOGO */}
-      <h2 className={styles.logo}>
-        {organization?.name || "SmartShop"}
-      </h2>
+      <h2 className={styles.logo}>{organization?.name || "SmartShop"}</h2>
 
       <nav>
         {/* HOME */}
         <NavLink
           to={isOwner ? "/dashboard" : "/staff/dashboard"}
-          className={linkClass}
+          className={(nav) =>
+            getLinkClass(nav, isOwner ? "/dashboard" : "/staff/dashboard")
+          }
         >
           Home
         </NavLink>
@@ -56,95 +72,81 @@ export default function Sidebar() {
         {/* SALES */}
         <NavLink
           to={isOwner ? "/sales" : "/staff/dashboard"}
-          className={linkClass}
+          className={(nav) =>
+            getLinkClass(nav, isOwner ? "/sales" : "/staff/dashboard")
+          }
         >
-          Sales
+          View Sales
         </NavLink>
 
-        {/* STAFF ONLY */}
+        {/* STAFF LINKS */}
         {isStaff && (
           <>
-            <NavLink to="/staff/profile" className={linkClass}>
+            <NavLink
+              to="/staff/profile"
+              className={(nav) => getLinkClass(nav, "/staff/profile")}
+            >
               My Profile
             </NavLink>
-            <NavLink to="/staff/password" className={linkClass}>
+            <NavLink
+              to="/staff/password"
+              className={(nav) => getLinkClass(nav, "/staff/password")}
+            >
               Change Password
             </NavLink>
           </>
         )}
 
-        {/* OWNER ONLY */}
+        {/* OWNER LINKS */}
         {isOwner && (
           <>
-            {/* STOCK DROPDOWN TRIGGER */}
+            {/* STOCK DROPDOWN */}
             <button
               type="button"
+              className={getButtonClass(isStockRouteActive())}
               onClick={() => setStockOpen(!stockOpen)}
-              className={styles.link}
-              style={{
-                background: "none",
-                border: "none",
-                width: "100%",
-                textAlign: "left",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                cursor: "pointer",
-              }}
             >
-              <span>Stock</span>
-
+              <span>Manage Stock</span>
               <FiChevronDown
+                className={styles.chevron}
                 style={{
-                  transition: "transform 0.2s ease",
                   transform: stockOpen ? "rotate(180deg)" : "rotate(0deg)",
                 }}
               />
             </button>
 
-            {/* STOCK SUB-MENU */}
             {stockOpen && (
-              <div style={{ marginLeft: "1rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                <NavLink
-                  to="/owner/stock"
-                  end
-                  className={({ isActive }) =>
-                    location.pathname === "/owner/stock" ||
-                    location.pathname.match(/^\/owner\/stock\/\d+\/edit$/)
-                      ? `${styles.link} ${styles.active}`
-                      : styles.link
-                  }
-                >
+              <div className={styles.subMenu}>
+                <NavLink to="/owner/stock" end className={getLinkClass}>
                   Stock List
                 </NavLink>
-
-                <NavLink
-                  to="/owner/stock/add"
-                  className={({ isActive }) => (isActive ? `${styles.link} ${styles.active}` : styles.link)}
-                >
+                <NavLink to="/owner/stock/add" className={getLinkClass}>
                   Add Stock
                 </NavLink>
-
-                <NavLink
-                  to="/owner/stock/history"
-                  className={({ isActive }) => (isActive ? `${styles.link} ${styles.active}` : styles.link)}
-                >
+                <NavLink to="/owner/stock/history" className={getLinkClass}>
                   Stock History
                 </NavLink>
               </div>
             )}
 
-            {/* Other Owner Links */}
-            <NavLink to="/customers" className={linkClass}>
+            {/* OTHER OWNER LINKS */}
+            <NavLink
+              to="/customers"
+              className={(nav) => getLinkClass(nav, "/customers")}
+            >
               Customers
             </NavLink>
-
-            <NavLink to="/owner/staff" className={linkClass}>
+            <NavLink
+              to="/owner/staff"
+              className={(nav) => getLinkClass(nav, "/owner/staff")}
+            >
               Manage Staff
             </NavLink>
-
-            <NavLink to="/reports" className={linkClass}>
-              Reports
+            <NavLink
+              to="/reports"
+              className={(nav) => getLinkClass(nav, "/reports")}
+            >
+              View Reports
             </NavLink>
           </>
         )}

@@ -13,6 +13,9 @@
   font-weight: 600;
   color: #111827;
 }
+.welcome span {
+  color: #2563eb; /* accent color for the name */
+}
 
 /* Info section */
 .info {

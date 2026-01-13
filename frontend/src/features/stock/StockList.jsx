@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "../dashboard/layout/DashboardLayout.module.css";
+import { FiEdit, FiTrash2, FiPlus } from "react-icons/fi";
 
 export default function StockList() {
   const [stock, setStock] = useState([]);
@@ -80,18 +81,20 @@ export default function StockList() {
   if (error) return <p className={styles.message}>{error}</p>;
 
   return (
-    <section className={styles.card}>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
+<section className={styles["stock-history-card"]}>
+      <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h3>Stock Inventory</h3>
-        <Link to="/owner/stock/add">
-          <button>Add Stock</button>
+        <Link to="/owner/stock/add" title="Add Stock">
+          <button  className={styles.iconBtn}>
+            <FiPlus /> Add Stock
+          </button>
         </Link>
       </div>
 
       {stock.length === 0 ? (
         <p>No stock items found.</p>
       ) : (
-        <table style={{ width: "100%", marginTop: "1rem" }}>
+<table className={styles["stock-history-table"]}>
           <thead>
             <tr>
               <th>Item Name</th>
@@ -124,19 +127,24 @@ export default function StockList() {
                       <span style={{ color: "green" }}>OK</span>
                     )}
                   </td>
-                  <td>
-                    <Link to={`/owner/stock/${item.id}/edit`}>
-                      <button>Edit</button>
+                  <td className={styles.actionsCell}>
+                    {/* Edit */}
+                    <Link
+                      to={`/owner/stock/${item.id}/edit`}
+                      title="Edit stock"
+                    >
+                      <button className={styles.iconBtn}>
+                        <FiEdit />
+                      </button>
                     </Link>
+
+                    {/* Delete */}
                     <button
-                      style={{
-                        marginLeft: "0.5rem",
-                        backgroundColor: "red",
-                        color: "#fff",
-                      }}
+                      className={`${styles.iconBtn} ${styles.danger}`}
+                      title="Delete stock"
                       onClick={() => handleDelete(item.id)}
                     >
-                      Delete
+                      <FiTrash2 />
                     </button>
                   </td>
                 </tr>
