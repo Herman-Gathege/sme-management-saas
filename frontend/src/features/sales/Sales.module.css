@@ -1,0 +1,71 @@
+.salesContainer {
+  padding: 1.5rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.salesContainer h2 {
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.stockList,
+.saleForm {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.stockList h3,
+.saleForm h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  color: #555;
+}
+
+.stockRow,
+.selectedRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.stockRow:last-child,
+.selectedRow:last-child {
+  border-bottom: none;
+}
+
+.stockRow button,
+.saleForm button {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.stockRow button:hover,
+.saleForm button:hover {
+  background-color: #4338ca;
+}
+
+.selectedRow input {
+  width: 60px;
+  padding: 0.2rem 0.4rem;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.message {
+  margin-top: 1rem;
+  font-weight: bold;
+  color: #111;
+}

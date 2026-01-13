@@ -21,6 +21,7 @@ import StaffDashboard, {
   StaffProfile,
   StaffPassword,
 } from "../features/dashboard/StaffDashboard";
+import CreateSale from "../features/sales/CreateSale";
 
 import ProtectedRoute from "./ProtectedRoute";
 import StaffManagement from "../features/staff/StaffManagement";
@@ -73,8 +74,9 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<StaffSales />} /> {/* /staff */}
-        <Route path="dashboard" element={<StaffSales />} />
+        <Route index element={<CreateSale />} /> {/* default /staff */}
+        <Route path="dashboard" element={<CreateSale />} />{" "}
+        {/* /staff/dashboard */}
         <Route path="profile" element={<StaffProfile />} />
         <Route path="password" element={<StaffPassword />} />
       </Route>

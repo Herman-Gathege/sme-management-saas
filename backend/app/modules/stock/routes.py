@@ -224,3 +224,25 @@ def get_single_stock(stock_id):
         return jsonify(stock.to_dict())
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
+
+@stock_bp.route("/staff", methods=["GET", "OPTIONS"], strict_slashes=False)
+@cross_origin(origins="*", headers=["Content-Type", "Authorization"], supports_credentials=True)
+@jwt_required()
+def get_stock_for_staff():
+    if request.method == "OPTIONS":
+        return jsonify({}), 200  # preflight success
+
+    # Use get_jwt() to get claims like role/org_id
+    claims = get_jwt()
+    role = claims.get("role")
+    org_id = claims.get("organization_id")
+
+    if role != "staff":
+        return jsonify({"error": "Staff access only"}), 403
+
+    stock_items = Stock.query.filter_by(organization_id=org_id).all()
+    return jsonify([item.to_dict() for item in stock_items])
+
+
+
