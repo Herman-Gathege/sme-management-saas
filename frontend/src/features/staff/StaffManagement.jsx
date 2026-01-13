@@ -9,6 +9,7 @@ import {
   resetStaffPassword as apiResetPassword,
 } from "../../api/staff";
 import styles from "./StaffManagement.module.css";
+import { FiEdit, FiLock, FiUnlock, FiRefreshCw } from "react-icons/fi";
 
 export default function StaffManagement() {
   const [staffList, setStaffList] = useState([]);
@@ -101,34 +102,44 @@ export default function StaffManagement() {
                   <td>{s.email}</td>
                   <td>{s.phone}</td>
                   <td>{s.is_active ? "Active" : "Inactive"}</td>
-                  <td>
+                  <td className={styles.actionsCell}>
+                    {/* Edit */}
                     <button
                       onClick={() => handleEditClick(s)}
-                      className={styles.editBtn}
+                      className={styles.iconBtn}
+                      title="Edit staff"
                     >
-                      Edit
+                      <FiEdit />
                     </button>
+
                     {s.is_active ? (
                       <>
+                        {/* Deactivate */}
                         <button
                           onClick={() => handleDeactivate(s.id)}
-                          className={styles.deactivateBtn}
+                          className={`${styles.iconBtn} ${styles.danger}`}
+                          title="Deactivate staff"
                         >
-                          Deactivate
+                          <FiLock />
                         </button>
+
+                        {/* Reset Password */}
                         <button
                           onClick={() => handleResetPassword(s.id)}
-                          className={styles.resetBtn}
+                          className={styles.iconBtn}
+                          title="Reset password"
                         >
-                          Reset Password
+                          <FiRefreshCw />
                         </button>
                       </>
                     ) : (
+                      /* Reactivate */
                       <button
                         onClick={() => handleReactivate(s.id)}
-                        className={styles.reactivateBtn}
+                        className={`${styles.iconBtn} ${styles.success}`}
+                        title="Reactivate staff"
                       >
-                        Reactivate
+                        <FiUnlock />
                       </button>
                     )}
                   </td>

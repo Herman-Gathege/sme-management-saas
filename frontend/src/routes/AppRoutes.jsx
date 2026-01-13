@@ -23,6 +23,7 @@ import StaffDashboard, {
 } from "../features/dashboard/StaffDashboard";
 
 import ProtectedRoute from "./ProtectedRoute";
+import StaffManagement from "../features/staff/StaffManagement";
 
 export default function AppRoutes() {
   return (
@@ -50,6 +51,7 @@ export default function AppRoutes() {
 
         {/* Staff */}
         <Route path="staff/create" element={<CreateStaff />} />
+        <Route path="staff" element={<StaffManagement />} />
 
         {/* Stock - Nested */}
         <Route path="stock" element={<Outlet />}>

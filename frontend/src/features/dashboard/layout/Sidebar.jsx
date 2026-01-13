@@ -3,6 +3,8 @@ import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useState, useEffect } from "react";
 import styles from "./DashboardLayout.module.css";
+import { FiChevronDown } from "react-icons/fi";
+
 
 export default function Sidebar() {
   const { user, organization } = useAuth();
@@ -79,9 +81,25 @@ export default function Sidebar() {
               type="button"
               onClick={() => setStockOpen(!stockOpen)}
               className={styles.link}
-              style={{ background: "none", border: "none", width: "100%", textAlign: "left" }}
+              style={{
+                background: "none",
+                border: "none",
+                width: "100%",
+                textAlign: "left",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                cursor: "pointer",
+              }}
             >
-              Stock
+              <span>Stock</span>
+
+              <FiChevronDown
+                style={{
+                  transition: "transform 0.2s ease",
+                  transform: stockOpen ? "rotate(180deg)" : "rotate(0deg)",
+                }}
+              />
             </button>
 
             {/* STOCK SUB-MENU */}
@@ -121,7 +139,7 @@ export default function Sidebar() {
               Customers
             </NavLink>
 
-            <NavLink to="/owner/staff/create" className={linkClass}>
+            <NavLink to="/owner/staff" className={linkClass}>
               Manage Staff
             </NavLink>
 

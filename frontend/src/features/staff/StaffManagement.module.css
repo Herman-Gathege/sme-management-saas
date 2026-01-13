@@ -45,40 +45,41 @@
 }
 
 /* Action buttons */
-.editBtn {
-  background: #fbbf24;
-  color: #000;
-  border-radius: 6px;
-  padding: 0.35rem 0.6rem;
-  margin-right: 0.25rem;
-  border: none;
-  cursor: pointer;
+.actionsCell {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 
-.deactivateBtn {
-  background: #ef4444;
-  color: #fff;
-  border-radius: 6px;
-  padding: 0.35rem 0.6rem;
-  margin-right: 0.25rem;
+.iconBtn {
+  background: none;
   border: none;
   cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+  color: #444;
+  transition: color 0.15s ease, transform 0.1s ease;
 }
 
-.reactivateBtn {
-  background: #22c55e;
-  color: #fff;
-  border-radius: 6px;
-  padding: 0.35rem 0.6rem;
-  border: none;
-  cursor: pointer;
+.iconBtn:hover {
+  transform: scale(1.1);
 }
 
-.resetBtn {
-  background: #3b82f6;
-  color: #fff;
-  border-radius: 6px;
-  padding: 0.35rem 0.6rem;
-  border: none;
-  cursor: pointer;
+.danger {
+  color: #c0392b;
 }
+
+.danger:hover {
+  color: #e74c3c;
+}
+
+.success {
+  color: #27ae60;
+}
+
+.success:hover {
+  color: #2ecc71;
+}
+
