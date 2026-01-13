@@ -1,9 +1,10 @@
+# backend/app/models/stock.py
 from datetime import datetime
 from app.extensions import db  
 
 
 class Stock(db.Model):
-    __tablename__ = "stock"
+    __tablename__ = "stocks"
 
     id = db.Column(db.Integer, primary_key=True)
 

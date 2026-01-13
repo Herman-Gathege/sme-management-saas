@@ -9,7 +9,7 @@ class StockHistory(db.Model):
 
     stock_id = db.Column(
         db.Integer,
-        db.ForeignKey("stock.id"),
+        db.ForeignKey("stocks.id"),
         nullable=False
     )
 

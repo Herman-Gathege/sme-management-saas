@@ -21,6 +21,9 @@ def create_app():
     jwt.init_app(app)
     migrate.init_app(app, db)
 
+    from . import models
+
+
     # 🔐 JWT ERROR HANDLERS
     @jwt.unauthorized_loader
     def missing_token(reason):
