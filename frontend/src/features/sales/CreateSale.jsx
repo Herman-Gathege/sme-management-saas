@@ -9,6 +9,8 @@ export default function CreateSale() {
   const [selectedItems, setSelectedItems] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // how many items per page
 
   // -----------------------------
   // Fetch available stock
@@ -39,13 +41,18 @@ export default function CreateSale() {
   }, []);
 
   // Add state for search
-const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
-// Filtered stock items based on search
-const filteredStock = stockItems.filter((s) =>
-  s.name.toLowerCase().includes(searchTerm.toLowerCase())
-);
+  // Filtered stock items based on search
+  const filteredStock = stockItems.filter((s) =>
+    s.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentStock = filteredStock.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredStock.length / itemsPerPage);
 
   // -----------------------------
   // Add stock item to sale
@@ -60,7 +67,12 @@ const filteredStock = stockItems.filter((s) =>
       }
       return [
         ...prev,
-        { stock_id: stock.id, name: stock.name, quantity: 1, unit_price: stock.unit_price },
+        {
+          stock_id: stock.id,
+          name: stock.name,
+          quantity: 1,
+          unit_price: stock.unit_price,
+        },
       ];
     });
   };
@@ -132,30 +144,51 @@ const filteredStock = stockItems.filter((s) =>
       <h2>Create Sale</h2>
 
       {/* Search Bar */}
-<input
-  type="text"
-  placeholder="Search stock..."
-  value={searchTerm}
-  onChange={(e) => setSearchTerm(e.target.value)}
-  className={styles.searchInput}
-/>
+      <input
+        type="text"
+        placeholder="Search stock..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className={styles.searchInput}
+      />
 
-{/* Available Stock */}
-<section className={styles.stockList}>
-  <h3>Available Stock</h3>
-  {filteredStock.map((s) => (
-  <div key={s.id} className={styles.stockRow}>
-    <span>{s.name}</span>
-    <span>@ KES {s.unit_price}</span>
-    <span className={styles.remainingStock}>In Stock: {s.quantity}</span>  {/* <-- NEW */}
-    <button onClick={() => addItem(s)} disabled={s.quantity === 0}>
-      {s.quantity === 0 ? "Out of Stock" : "Add"}
-    </button>
-  </div>
-))}
+      {/* Available Stock */}
+      <section className={styles.stockList}>
+        <h3>Available Stock</h3>
+        {currentStock.map((s) => (
+          <div key={s.id} className={styles.stockRow}>
+            <span>{s.name}</span>
+            <span>@ KES {s.unit_price}</span>
+            <span className={styles.remainingStock}>
+              In Stock: {s.quantity}
+            </span>
+            <button onClick={() => addItem(s)} disabled={s.quantity === 0}>
+              {s.quantity === 0 ? "Out of Stock" : "Add"}
+            </button>
+          </div>
+        ))}
 
-</section>
+        {/* Pagination Controls */}
+        <div className={styles.pagination}>
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </button>
 
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      </section>
 
       {/* Selected Items */}
       <form onSubmit={handleSubmit} className={styles.saleForm}>
@@ -172,15 +205,19 @@ const filteredStock = stockItems.filter((s) =>
                 value={item.quantity}
                 onChange={(e) => updateQuantity(i, parseInt(e.target.value))}
               />
-              <span>${item.unit_price}</span>
-              <span>Subtotal: ${(item.unit_price * item.quantity).toFixed(2)}</span>
-              <button type="button" onClick={() => removeItem(i)}>Remove</button>
+              <span>KES {item.unit_price}</span>
+              <span>
+                Subtotal: KES {(item.unit_price * item.quantity).toFixed(2)}
+              </span>
+              <button type="button" onClick={() => removeItem(i)}>
+                Remove
+              </button>
             </div>
           ))
         )}
 
         {/* Total */}
-        <h3>Total: ${total.toFixed(2)}</h3>
+        <h3>Total: KES {total.toFixed(2)}</h3>
 
         <button type="submit" disabled={loading}>
           {loading ? "Submitting..." : "Submit Sale"}
