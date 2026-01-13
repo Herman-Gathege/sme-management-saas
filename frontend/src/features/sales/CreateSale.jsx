@@ -38,6 +38,15 @@ export default function CreateSale() {
     fetchStock();
   }, []);
 
+  // Add state for search
+const [searchTerm, setSearchTerm] = useState("");
+
+// Filtered stock items based on search
+const filteredStock = stockItems.filter((s) =>
+  s.name.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
+
   // -----------------------------
   // Add stock item to sale
   // -----------------------------
@@ -122,21 +131,31 @@ export default function CreateSale() {
     <div className={styles.salesContainer}>
       <h2>Create Sale</h2>
 
-      {/* Available Stock */}
-      <section className={styles.stockList}>
-        <h3>Available Stock</h3>
-        {stockItems.length === 0 ? (
-          <p>No stock available</p>
-        ) : (
-          stockItems.map((s) => (
-            <div key={s.id} className={styles.stockRow}>
-              <span>{s.name}</span>
-              <span>${s.unit_price}</span>
-              <button onClick={() => addItem(s)}>Add</button>
-            </div>
-          ))
-        )}
-      </section>
+      {/* Search Bar */}
+<input
+  type="text"
+  placeholder="Search stock..."
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  className={styles.searchInput}
+/>
+
+{/* Available Stock */}
+<section className={styles.stockList}>
+  <h3>Available Stock</h3>
+  {filteredStock.map((s) => (
+  <div key={s.id} className={styles.stockRow}>
+    <span>{s.name}</span>
+    <span>@ KES {s.unit_price}</span>
+    <span className={styles.remainingStock}>In Stock: {s.quantity}</span>  {/* <-- NEW */}
+    <button onClick={() => addItem(s)} disabled={s.quantity === 0}>
+      {s.quantity === 0 ? "Out of Stock" : "Add"}
+    </button>
+  </div>
+))}
+
+</section>
+
 
       {/* Selected Items */}
       <form onSubmit={handleSubmit} className={styles.saleForm}>
