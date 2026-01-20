@@ -89,6 +89,12 @@ export default function Sidebar() {
         {isStaff && (
           <>
             <NavLink
+              to="/staff"
+              className={(nav) => getLinkClass(nav, "/staff")}
+            >
+              Dashboard
+            </NavLink>
+            <NavLink
               to="/staff/profile"
               className={(nav) => getLinkClass(nav, "/staff/profile")}
             >

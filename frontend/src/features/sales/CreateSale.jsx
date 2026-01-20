@@ -1,4 +1,3 @@
-// frontend/src/features/sales/CreateSale.jsx
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./Sales.module.css";
@@ -9,41 +8,28 @@ export default function CreateSale() {
   const [selectedItems, setSelectedItems] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // how many items per page
+  const itemsPerPage = 5;
 
-  // -----------------------------
-  // Fetch available stock
-  // -----------------------------
+  // Fetch stock
   useEffect(() => {
     const fetchStock = async () => {
       const token = localStorage.getItem("token");
       try {
         const res = await fetch("http://127.0.0.1:5000/api/stock/staff", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        console.log("Stock API response:", data);
-
         if (!res.ok) throw new Error(data.error || "Failed to fetch stock");
-
         setStockItems(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error(err);
         setMessage(err.message);
       }
     };
-
     fetchStock();
   }, []);
 
-  // Add state for search
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Filtered stock items based on search
   const filteredStock = stockItems.filter((s) =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -51,99 +37,45 @@ export default function CreateSale() {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentStock = filteredStock.slice(indexOfFirstItem, indexOfLastItem);
-
   const totalPages = Math.ceil(filteredStock.length / itemsPerPage);
 
-  // -----------------------------
-  // Add stock item to sale
-  // -----------------------------
   const addItem = (stock) => {
     setSelectedItems((prev) => {
       const exists = prev.find((i) => i.stock_id === stock.id);
-      if (exists) {
-        return prev.map((i) =>
-          i.stock_id === stock.id ? { ...i, quantity: i.quantity + 1 } : i
-        );
-      }
-      return [
-        ...prev,
-        {
-          stock_id: stock.id,
-          name: stock.name,
-          quantity: 1,
-          unit_price: stock.unit_price,
-        },
-      ];
+      if (exists) return prev.map((i) => (i.stock_id === stock.id ? { ...i, quantity: i.quantity + 1 } : i));
+      return [...prev, { stock_id: stock.id, name: stock.name, quantity: 1, unit_price: stock.unit_price }];
     });
   };
 
-  // -----------------------------
-  // Update quantity of selected item
-  // -----------------------------
-  const updateQuantity = (index, qty) => {
-    if (qty < 1) return;
-    setSelectedItems((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, quantity: qty } : item))
-    );
-  };
+  const updateQuantity = (index, qty) => { if (qty < 1) return; setSelectedItems(prev => prev.map((i, idx) => idx === index ? {...i, quantity: qty} : i)); };
+  const removeItem = (index) => setSelectedItems(prev => prev.filter((_, i) => i !== index));
+  const total = selectedItems.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
 
-  // -----------------------------
-  // Remove item from selection
-  // -----------------------------
-  const removeItem = (index) => {
-    setSelectedItems((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  // -----------------------------
-  // Calculate total
-  // -----------------------------
-  const total = selectedItems.reduce(
-    (sum, item) => sum + item.unit_price * item.quantity,
-    0
-  );
-
-  // -----------------------------
-  // Submit sale
-  // -----------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (selectedItems.length === 0) {
-      setMessage("Select at least one item for sale");
-      return;
-    }
+    if (selectedItems.length === 0) return setMessage("Select at least one item");
 
-    setLoading(true);
-    setMessage("");
-
+    setLoading(true); setMessage("");
     try {
       const token = localStorage.getItem("token");
       const res = await fetch("http://127.0.0.1:5000/api/sales", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ items: selectedItems }),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Sale creation failed");
-
-      setMessage(`Sale created successfully! Total: $${data.total_amount}`);
+      setMessage(`Sale created successfully! Total: KES ${data.total_amount}`);
       setSelectedItems([]);
-    } catch (err) {
-      console.error(err);
-      setMessage(err.message);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { setMessage(err.message); }
+    finally { setLoading(false); }
   };
 
   return (
-    <div className={styles.salesContainer}>
+    <section className={styles["sales-card"]}>
       <h2>Create Sale</h2>
 
-      {/* Search Bar */}
+      {/* Search */}
       <input
         type="text"
         placeholder="Search stock..."
@@ -152,79 +84,86 @@ export default function CreateSale() {
         className={styles.searchInput}
       />
 
-      {/* Available Stock */}
-      <section className={styles.stockList}>
+      {/* Stock List */}
+      <div className={styles["card"]}>
         <h3>Available Stock</h3>
-        {currentStock.map((s) => (
-          <div key={s.id} className={styles.stockRow}>
-            <span>{s.name}</span>
-            <span>@ KES {s.unit_price}</span>
-            <span className={styles.remainingStock}>
-              In Stock: {s.quantity}
-            </span>
-            <button onClick={() => addItem(s)} disabled={s.quantity === 0}>
-              {s.quantity === 0 ? "Out of Stock" : "Add"}
-            </button>
+        {currentStock.length === 0 ? <p>No stock items found</p> :
+          <table className={styles["stock-table"]}>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Qty Available</th>
+                <th>Add</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentStock.map((s) => (
+                <tr key={s.id}>
+                  <td>{s.name}</td>
+                  <td>KES {s.unit_price.toFixed(2)}</td>
+                  <td>{s.quantity}</td>
+                  <td>
+                    <button onClick={() => addItem(s)} disabled={s.quantity === 0}>
+                      {s.quantity === 0 ? "Out of Stock" : "Add"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        }
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className={styles.pagination}>
+            <button onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}>Prev</button>
+            <span>Page {currentPage} of {totalPages}</span>
+            <button onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages}>Next</button>
           </div>
-        ))}
-
-        {/* Pagination Controls */}
-        <div className={styles.pagination}>
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            Prev
-          </button>
-
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </button>
-        </div>
-      </section>
+        )}
+      </div>
 
       {/* Selected Items */}
-      <form onSubmit={handleSubmit} className={styles.saleForm}>
+      <form onSubmit={handleSubmit} className={styles["card"]}>
         <h3>Selected Items</h3>
-        {selectedItems.length === 0 ? (
-          <p>No items selected</p>
-        ) : (
-          selectedItems.map((item, i) => (
-            <div key={i} className={styles.selectedRow}>
-              <span>{item.name}</span>
-              <input
-                type="number"
-                min="1"
-                value={item.quantity}
-                onChange={(e) => updateQuantity(i, parseInt(e.target.value))}
-              />
-              <span>KES {item.unit_price}</span>
-              <span>
-                Subtotal: KES {(item.unit_price * item.quantity).toFixed(2)}
-              </span>
-              <button type="button" onClick={() => removeItem(i)}>
-                Remove
-              </button>
-            </div>
-          ))
-        )}
+        {selectedItems.length === 0 ? <p>No items selected</p> :
+          <table className={styles["stock-table"]}>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Subtotal</th>
+                <th>Remove</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedItems.map((item, i) => (
+                <tr key={i}>
+                  <td>{item.name}</td>
+                  <td>
+                    <input type="number" min="1" value={item.quantity}
+                      onChange={(e) => updateQuantity(i, parseInt(e.target.value))} />
+                  </td>
+                  <td>KES {item.unit_price.toFixed(2)}</td>
+                  <td>KES {(item.unit_price * item.quantity).toFixed(2)}</td>
+                  <td>
+                    <button type="button" onClick={() => removeItem(i)}>Remove</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        }
 
-        {/* Total */}
         <h3>Total: KES {total.toFixed(2)}</h3>
-
         <button type="submit" disabled={loading}>
           {loading ? "Submitting..." : "Submit Sale"}
         </button>
       </form>
 
       {message && <p className={styles.message}>{message}</p>}
-    </div>
+    </section>
   );
 }

@@ -5,15 +5,17 @@ from ...models.sale import Sale
 from ...models.sale_item import SaleItem
 from ...models.stock import Stock
 from ...models.user import User
+from datetime import timezone
+from zoneinfo import ZoneInfo
 
 sales_bp = Blueprint("sales", __name__)
-
 
 @sales_bp.route("/", methods=["GET"])
 def test_sales():
     return jsonify({"status": "sales module OK"}), 200
 
 
+# ✅ CREATE SALE
 @sales_bp.route("", methods=["POST"])
 @jwt_required()
 def create_sale():
@@ -73,10 +75,15 @@ def create_sale():
         db.session.add(sale)
         db.session.commit()
 
+        # ✅ Convert created_at to Nairobi time
+        tz = ZoneInfo("Africa/Nairobi")
+        created_at_nairobi = sale.created_at.replace(tzinfo=timezone.utc).astimezone(tz).isoformat()
+
         return jsonify({
             "message": "Sale created successfully",
             "sale_id": sale.id,
             "total_amount": float(sale.total_amount),
+            "created_at": created_at_nairobi,
         }), 201
 
     except Exception as e:
@@ -84,7 +91,7 @@ def create_sale():
         return jsonify({"error": str(e)}), 500
 
 
-# ✅ OWNER DASHBOARD SALES (CORS + JWT SAFE)
+# ✅ OWNER DASHBOARD SALES
 @sales_bp.route("/owner", methods=["GET"])
 @jwt_required()
 def get_sales_for_owner():
@@ -102,12 +109,14 @@ def get_sales_for_owner():
     )
 
     result = []
+    tz = ZoneInfo("Africa/Nairobi")  # Nairobi timezone
+
     for sale in sales:
         staff = User.query.get(sale.user_id)
         sale_items = [
             {
                 "stock_id": item.stock_id,
-                "name": item.stock.name if item.stock else "Unknown",  # ✅ safe access
+                "name": item.stock.name if item.stock else "Unknown",
                 "quantity": item.quantity,
                 "unit_price": float(item.unit_price),
                 "line_total": float(item.line_total),
@@ -119,8 +128,9 @@ def get_sales_for_owner():
             "sale_id": sale.id,
             "staff": staff.full_name if staff else "Unknown",
             "total_amount": float(sale.total_amount),
-            "created_at": sale.created_at.isoformat(),
-            "items": sale_items,  # ✅ include item details here
+            # ✅ Convert created_at from UTC to Nairobi
+            "created_at": sale.created_at.replace(tzinfo=timezone.utc).astimezone(tz).isoformat(),
+            "items": sale_items,
         })
 
     return jsonify(result), 200
