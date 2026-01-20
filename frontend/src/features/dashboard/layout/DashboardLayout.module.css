@@ -10,31 +10,47 @@
   width: 220px;
   background: #ffffff;
   color: #1f2937;
-  padding: 1.5rem;
+  padding: 1rem;
   flex-shrink: 0;
   border-right: 1px solid #e5e7eb;
+  transition: width 0.25s ease;
 }
 
-.sidebar button.link {
-  text-align: left;
-  cursor: pointer;
+.collapsed {
+  width: 72px;
 }
 
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
 
 /* Logo */
 .logo {
-  margin-bottom: 2rem;
   font-size: 1.2rem;
   font-weight: 700;
   color: #2563eb;
+}
+
+/* Collapse button */
+.collapseBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  font-size: 1.2rem;
+  color: #374151;
 }
 
 /* Links */
 .link {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* dropdown chevron */
-  gap: 0.6rem;
+  justify-content: space-between;
+  gap: 0.75rem;
   padding: 0.65rem 0.75rem;
   margin-bottom: 0.3rem;
   color: #374151;
@@ -47,6 +63,12 @@
   border: none;
   width: 100%;
   text-align: left;
+}
+
+/* Icons */
+.icon {
+  font-size: 18px;
+  min-width: 18px;
 }
 
 /* Hover */
@@ -67,13 +89,14 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  margin-left: 1rem;
+  margin-left: 1.5rem;
 }
 
-/* Chevron rotation */
+/* Chevron */
 .chevron {
   transition: transform 0.2s ease;
 }
+
 
 
 /* Main area */

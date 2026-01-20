@@ -2,13 +2,22 @@ import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useEffect, useState } from "react";
 import styles from "./DashboardLayout.module.css";
-import { FiChevronDown } from "react-icons/fi";
+import {
+  FiChevronDown,
+  FiHome,
+  FiBarChart2,
+  FiBox,
+  FiUsers,
+  FiFileText,
+  FiMenu,
+} from "react-icons/fi";
 
 export default function Sidebar() {
   const { user, organization } = useAuth();
   const location = useLocation();
 
   const [stockOpen, setStockOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   if (!user) return null;
 
@@ -25,7 +34,7 @@ export default function Sidebar() {
   ];
 
   const isStockRouteActive = stockRoutes.some((path) =>
-    location.pathname.startsWith(path)
+    location.pathname.startsWith(path),
   );
 
   // Auto-open dropdown when inside stock section
@@ -39,21 +48,33 @@ export default function Sidebar() {
     isActive ? `${styles.link} ${styles.active}` : styles.link;
 
   return (
-    <aside className={styles.sidebar}>
-      <h2 className={styles.logo}>
-        {organization?.name || "SmartShop"}
-      </h2>
+    <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}>
+      <div className={styles.header}>
+        {!collapsed && (
+          <h2 className={styles.logo}>{organization?.name || "SmartShop"}</h2>
+        )}
+
+        <button
+          type="button"
+          className={styles.collapseBtn}
+          onClick={() => setCollapsed((c) => !c)}
+        >
+          <FiMenu />
+        </button>
+      </div>
 
       <nav>
         {/* ================= OWNER ================= */}
         {isOwner && (
           <>
             <NavLink to="/owner/dashboard" end className={linkClass}>
-              Home
+              {!collapsed && <span>Home</span>}
+              <FiHome className={styles.icon} />
             </NavLink>
 
             <NavLink to="/owner/sales" className={linkClass}>
-              View All Sales
+              {!collapsed && <span>View All Sales</span>}
+              <FiBarChart2 className={styles.icon} />
             </NavLink>
 
             {/* STOCK DROPDOWN */}
@@ -64,16 +85,21 @@ export default function Sidebar() {
               }`}
               onClick={() => setStockOpen((o) => !o)}
             >
-              <span>Manage Stock</span>
-              <FiChevronDown
-                className={styles.chevron}
-                style={{
-                  transform: stockOpen ? "rotate(180deg)" : "rotate(0deg)",
-                }}
-              />
+              {!collapsed && <span>Manage Stock</span>}
+              {!collapsed && (
+                <FiChevronDown
+                  className={styles.chevron}
+                  style={{
+                    transform: stockOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                />
+              )}
+              <FiBox className={styles.icon} />
+
+              
             </button>
 
-            {stockOpen && (
+            {stockOpen && !collapsed && (
               <div className={styles.subMenu}>
                 <NavLink to="/owner/stock" end className={linkClass}>
                   Stock List
@@ -90,15 +116,18 @@ export default function Sidebar() {
             )}
 
             <NavLink to="/customers" className={linkClass}>
-              Customers
+              {!collapsed && <span>Customers</span>}
+              <FiUsers className={styles.icon} />
             </NavLink>
 
             <NavLink to="/owner/staff" className={linkClass}>
-              Manage Staff
+              {!collapsed && <span>Manage Staff</span>}
+              <FiUsers className={styles.icon} />
             </NavLink>
 
             <NavLink to="/reports" className={linkClass}>
-              View Reports
+              {!collapsed && <span>Reports</span>}
+              <FiFileText className={styles.icon} />
             </NavLink>
           </>
         )}
@@ -107,15 +136,18 @@ export default function Sidebar() {
         {isStaff && (
           <>
             <NavLink to="/staff" end className={linkClass}>
-              Dashboard
+              {!collapsed && <span>Dashboard</span>}
+              <FiHome className={styles.icon} />
             </NavLink>
 
             <NavLink to="/staff/profile" className={linkClass}>
-              My Profile
+              {!collapsed && <span>My Profile</span>}
+              <FiUsers className={styles.icon} />
             </NavLink>
 
             <NavLink to="/staff/password" className={linkClass}>
-              Change Password
+              {!collapsed && <span>Change Password</span>}
+              <FiFileText className={styles.icon} />
             </NavLink>
           </>
         )}
