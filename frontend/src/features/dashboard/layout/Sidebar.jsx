@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import styles from "./DashboardLayout.module.css";
 import { FiChevronDown } from "react-icons/fi";
 
@@ -8,10 +8,12 @@ export default function Sidebar() {
   const { user, organization } = useAuth();
   const location = useLocation();
 
-  // ---------------------------
-  // STATE & HOOKS (ALWAYS FIRST)
-  // ---------------------------
   const [stockOpen, setStockOpen] = useState(false);
+
+  if (!user) return null;
+
+  const isOwner = user.role === "owner";
+  const isStaff = user.role === "staff";
 
   // ---------------------------
   // STOCK ROUTES
@@ -22,42 +24,20 @@ export default function Sidebar() {
     "/owner/stock/history",
   ];
 
-  const isStockRouteActive = () =>
-    stockRoutes.some(
-      (route) =>
-        location.pathname === route ||
-        location.pathname.match(/^\/owner\/stock\/\d+\/edit$/)
-    );
+  const isStockRouteActive = stockRoutes.some((path) =>
+    location.pathname.startsWith(path)
+  );
 
-  // Auto-open stock dropdown when navigating to stock pages
+  // Auto-open dropdown when inside stock section
   useEffect(() => {
-    if (isStockRouteActive()) {
+    if (isStockRouteActive) {
       setStockOpen(true);
     }
-  }, [location.pathname]);
+  }, [isStockRouteActive]);
 
-  // ---------------------------
-  // EARLY RETURN (AFTER HOOKS)
-  // ---------------------------
-  if (!user) return null;
+  const linkClass = ({ isActive }) =>
+    isActive ? `${styles.link} ${styles.active}` : styles.link;
 
-  const isStaff = user.role === "staff";
-  const isOwner = user.role === "owner";
-
-  // ---------------------------
-  // HELPERS
-  // ---------------------------
-  const getLinkClass = ({ isActive }, path) => {
-    const active = path ? location.pathname.startsWith(path) : isActive;
-    return active ? `${styles.link} ${styles.active}` : styles.link;
-  };
-
-  const getButtonClass = (active) =>
-    active ? `${styles.link} ${styles.active}` : styles.link;
-
-  // ---------------------------
-  // RENDER
-  // ---------------------------
   return (
     <aside className={styles.sidebar}>
       <h2 className={styles.logo}>
@@ -65,58 +45,24 @@ export default function Sidebar() {
       </h2>
 
       <nav>
-        {/* OWNER HOME */}
-        {isOwner && (
-          <NavLink
-            to="/dashboard"
-            className={(nav) => getLinkClass(nav, "/dashboard")}
-          >
-            Home
-          </NavLink>
-        )}
-
-        {/* SALES */}
-        {isOwner && (
-          <NavLink
-            to="/owner/sales"
-            className={(nav) => getLinkClass(nav, "/owner/sales")}
-          >
-            View All Sales
-          </NavLink>
-        )}
-
-        {/* STAFF LINKS */}
-        {isStaff && (
-          <>
-            <NavLink
-              to="/staff"
-              className={(nav) => getLinkClass(nav, "/staff")}
-            >
-              Dashboard
-            </NavLink>
-            <NavLink
-              to="/staff/profile"
-              className={(nav) => getLinkClass(nav, "/staff/profile")}
-            >
-              My Profile
-            </NavLink>
-            <NavLink
-              to="/staff/password"
-              className={(nav) => getLinkClass(nav, "/staff/password")}
-            >
-              Change Password
-            </NavLink>
-          </>
-        )}
-
-        {/* OWNER LINKS */}
+        {/* ================= OWNER ================= */}
         {isOwner && (
           <>
+            <NavLink to="/owner/dashboard" end className={linkClass}>
+              Home
+            </NavLink>
+
+            <NavLink to="/owner/sales" className={linkClass}>
+              View All Sales
+            </NavLink>
+
             {/* STOCK DROPDOWN */}
             <button
               type="button"
-              className={getButtonClass(isStockRouteActive())}
-              onClick={() => setStockOpen((prev) => !prev)}
+              className={`${styles.link} ${
+                isStockRouteActive ? styles.active : ""
+              }`}
+              onClick={() => setStockOpen((o) => !o)}
             >
               <span>Manage Stock</span>
               <FiChevronDown
@@ -129,40 +75,47 @@ export default function Sidebar() {
 
             {stockOpen && (
               <div className={styles.subMenu}>
-                <NavLink to="/owner/stock" end className={getLinkClass}>
+                <NavLink to="/owner/stock" end className={linkClass}>
                   Stock List
                 </NavLink>
-                <NavLink to="/owner/stock/add" className={getLinkClass}>
+
+                <NavLink to="/owner/stock/add" className={linkClass}>
                   Add Stock
                 </NavLink>
-                <NavLink
-                  to="/owner/stock/history"
-                  className={getLinkClass}
-                >
+
+                <NavLink to="/owner/stock/history" className={linkClass}>
                   Stock History
                 </NavLink>
               </div>
             )}
 
-            <NavLink
-              to="/customers"
-              className={(nav) => getLinkClass(nav, "/customers")}
-            >
+            <NavLink to="/customers" className={linkClass}>
               Customers
             </NavLink>
 
-            <NavLink
-              to="/owner/staff"
-              className={(nav) => getLinkClass(nav, "/owner/staff")}
-            >
+            <NavLink to="/owner/staff" className={linkClass}>
               Manage Staff
             </NavLink>
 
-            <NavLink
-              to="/reports"
-              className={(nav) => getLinkClass(nav, "/reports")}
-            >
+            <NavLink to="/reports" className={linkClass}>
               View Reports
+            </NavLink>
+          </>
+        )}
+
+        {/* ================= STAFF ================= */}
+        {isStaff && (
+          <>
+            <NavLink to="/staff" end className={linkClass}>
+              Dashboard
+            </NavLink>
+
+            <NavLink to="/staff/profile" className={linkClass}>
+              My Profile
+            </NavLink>
+
+            <NavLink to="/staff/password" className={linkClass}>
+              Change Password
             </NavLink>
           </>
         )}
