@@ -36,14 +36,25 @@
 }
 
 /* Collapse button */
-.collapseBtn {
+.collapseBtn1 {
   background: none;
   border: none;
   cursor: pointer;
   padding: 0.5rem;
   font-size: 1.2rem;
   color: #374151;
+  display: flex;
+  align-items: center;
+  transform: rotate(90deg); /* initial tilt */
+  transition: transform 0.2s ease; /* smooth rotation */
 }
+
+/* Rotated icon when collapsed */
+.rotated {
+  transform: rotate(180deg); /* flips arrow */
+  transition: transform 0.2s ease; /* smooth */
+}
+
 
 /* Links */
 .link {

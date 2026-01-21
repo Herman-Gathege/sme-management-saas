@@ -19,10 +19,10 @@ export default function Sidebar() {
   const [stockOpen, setStockOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
-  if (!user) return null;
 
-  const isOwner = user.role === "owner";
-  const isStaff = user.role === "staff";
+  const isOwner = user?.role === "owner";
+  const isStaff = user?.role === "staff";
+
 
   // ---------------------------
   // STOCK ROUTES
@@ -44,6 +44,9 @@ export default function Sidebar() {
     }
   }, [isStockRouteActive]);
 
+  if (!user) return null;
+
+
   const linkClass = ({ isActive }) =>
     isActive ? `${styles.link} ${styles.active}` : styles.link;
 
@@ -55,12 +58,15 @@ export default function Sidebar() {
         )}
 
         <button
-          type="button"
-          className={styles.collapseBtn}
-          onClick={() => setCollapsed((c) => !c)}
-        >
-          <FiMenu />
-        </button>
+  type="button"
+  className={styles.collapseBtn1}
+  onClick={() => setCollapsed((c) => !c)}
+>
+  <FiChevronDown
+    className={collapsed ? styles.rotated : ""}
+  />
+</button>
+
       </div>
 
       <nav>

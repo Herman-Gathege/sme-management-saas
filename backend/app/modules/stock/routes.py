@@ -246,3 +246,29 @@ def get_stock_for_staff():
 
 
 
+# -------------------------
+# STOCK ALERTS (LOW / OUT)
+# -------------------------
+@stock_bp.route("/alerts", methods=["GET"], strict_slashes=False)
+@cross_origin()
+@jwt_required()
+@owner_required
+def stock_alerts():
+    try:
+        _, organization_id = get_auth_context()
+
+        alerts = (
+            Stock.query
+            .filter(
+                Stock.organization_id == organization_id,
+                Stock.quantity <= Stock.min_stock_level
+            )
+            .order_by(Stock.quantity.asc())
+            .all()
+        )
+
+        return jsonify([item.to_dict() for item in alerts])
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
