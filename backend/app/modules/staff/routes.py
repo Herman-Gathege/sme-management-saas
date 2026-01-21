@@ -6,6 +6,8 @@ from ...utils.decorators import owner_required, staff_required
 from werkzeug.security import generate_password_hash
 from flask_jwt_extended import get_jwt, jwt_required
 import secrets
+from flask_cors import cross_origin
+
 
 staff_bp = Blueprint("staff", __name__, url_prefix="/api/staff")
 
@@ -186,6 +188,7 @@ def reactivate_staff(id):
 # Staff: Update Own Password
 # ----------------------
 @staff_bp.route("/<int:id>/password", methods=["PATCH"])
+@cross_origin(origins="*", methods=["PATCH"], supports_credentials=True)
 @staff_required
 def update_password(id):
     claims = get_jwt()
@@ -202,3 +205,4 @@ def update_password(id):
     db.session.commit()
 
     return jsonify({"message": "Password updated successfully"})
+

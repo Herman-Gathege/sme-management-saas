@@ -46,33 +46,42 @@ export function StaffProfile() {
 export function StaffPassword() {
   const { user } = useAuth();
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // new state
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const API_BASE = import.meta.env.VITE_API_URL;
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     setMessage("");
+
+    // validate confirm password
+    if (newPassword !== confirmPassword) {
+      setMessage("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(
-        `http://127.0.0.1:5000/api/staff/${user.id}/password`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ new_password: newPassword }),
-        }
-      );
+
+      const res = await fetch(`${API_BASE}/api/staff/${user.id}/password`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ new_password: newPassword }),
+      });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Password update failed");
 
       setMessage("Password updated successfully");
       setNewPassword("");
+      setConfirmPassword(""); // reset confirm field
     } catch (err) {
       setMessage(err.message);
     } finally {
@@ -91,6 +100,13 @@ export function StaffPassword() {
           onChange={(e) => setNewPassword(e.target.value)}
           required
         />
+        <input
+          type="password"
+          placeholder="Confirm password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
         <button type="submit" disabled={loading}>
           {loading ? "Updating..." : "Update Password"}
         </button>
@@ -99,6 +115,7 @@ export function StaffPassword() {
     </section>
   );
 }
+
 
 // -----------------------------
 // StaffDashboard Layout
