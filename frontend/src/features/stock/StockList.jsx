@@ -9,31 +9,21 @@ export default function StockList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const API_URL = "http://127.0.0.1:5000/api/stock";
+  const API_BASE = import.meta.env.VITE_API_URL;
+  const API_URL = `${API_BASE}/api/stock`;
 
   // Fetch stock items
   useEffect(() => {
     const fetchStock = async () => {
       try {
         const token = localStorage.getItem("token");
-        console.log("JWT token being sent:", token); // ADD THIS LINE
         if (!token) throw new Error("No auth token found");
 
         const res = await fetch(API_URL, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const contentType = res.headers.get("content-type");
-        let data;
-
-        if (contentType && contentType.includes("application/json")) {
-          data = await res.json();
-        } else {
-          const text = await res.text();
-          console.error("Unexpected response:", text);
-          throw new Error("Server returned non-JSON response");
-        }
-
+        const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to load stock");
 
         setStock(data);
@@ -45,7 +35,7 @@ export default function StockList() {
     };
 
     fetchStock();
-  }, []);
+  }, [API_URL]);
 
   // Delete stock item
   const handleDelete = async (id) => {
@@ -58,22 +48,20 @@ export default function StockList() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const contentType = res.headers.get("content-type");
-      let data;
-
-      if (contentType && contentType.includes("application/json")) {
-        data = await res.json();
-      } else {
-        const text = await res.text();
-        console.error("Unexpected delete response:", text);
-        throw new Error("Server returned non-JSON response");
-      }
-
+      const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to delete stock");
 
       setStock((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
-      setError(err.message);
+      // Show UX-friendly message
+      if (err.message.includes("linked to existing sales")) {
+        alert(
+          "Cannot delete this stock item because it is linked to existing sales. Consider reducing its quantity or marking it inactive instead.",
+        );
+      } else {
+        alert(`Failed to delete stock: ${err.message}`);
+      }
+      console.error(err);
     }
   };
 
@@ -81,11 +69,18 @@ export default function StockList() {
   if (error) return <p className={styles.message}>{error}</p>;
 
   return (
-<section className={styles["stock-history-card"]}>
-      <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <section className={styles["stock-history-card"]}>
+      <div
+        style={{
+          marginBottom: "1rem",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <h3>Stock Inventory</h3>
         <Link to="/owner/stock/add" title="Add Stock">
-          <button  className={styles.iconBtn}>
+          <button className={styles.iconBtn}>
             <FiPlus /> Add Stock
           </button>
         </Link>
@@ -94,7 +89,7 @@ export default function StockList() {
       {stock.length === 0 ? (
         <p>No stock items found.</p>
       ) : (
-<table className={styles["stock-history-table"]}>
+        <table className={styles["stock-history-table"]}>
           <thead>
             <tr>
               <th>Item Name</th>

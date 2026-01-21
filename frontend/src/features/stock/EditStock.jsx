@@ -18,12 +18,14 @@ export default function EditStock() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const API_BASE = import.meta.env.VITE_API_URL;
+
 
   useEffect(() => {
     const fetchStockItem = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://127.0.0.1:5000/api/stock/${id}`, {
+        const res = await fetch(`${API_BASE}/api/stock/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -47,7 +49,7 @@ export default function EditStock() {
     };
 
     fetchStockItem();
-  }, [id]);
+  }, [id, API_BASE]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -60,7 +62,7 @@ export default function EditStock() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://127.0.0.1:5000/api/stock/${id}`, {
+      const res = await fetch(`${API_BASE}/api/stock/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

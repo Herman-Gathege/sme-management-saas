@@ -8,6 +8,9 @@ from app.models.stock import Stock
 from app.models.stock_history import StockHistory
 from app.models.user import User
 from app.auth.decorators import owner_required
+from datetime import timezone
+from zoneinfo import ZoneInfo
+
 
 import json
 
@@ -149,12 +152,16 @@ def update_stock(stock_id):
 def delete_stock(stock_id):
     try:
         user_id, organization_id = get_auth_context()
-
         stock = Stock.query.filter_by(id=stock_id, organization_id=organization_id).first()
         if not stock:
             return jsonify({"error": "Stock item not found"}), 404
 
-        # Add delete history
+        # Check for linked sale items
+        from app.models.sale_item import SaleItem
+        linked = SaleItem.query.filter_by(stock_id=stock.id).first()
+        if linked:
+            return jsonify({"error": "Cannot delete stock: linked to existing sales"}), 400
+
         history = StockHistory(
             stock_id=stock.id,
             organization_id=organization_id,
@@ -176,6 +183,7 @@ def delete_stock(stock_id):
         return jsonify({"error": str(e)}), 400
 
 
+
 # -------------------------
 # STOCK HISTORY
 # -------------------------
@@ -187,25 +195,39 @@ def stock_history():
     try:
         _, organization_id = get_auth_context()
 
-        histories = StockHistory.query.filter_by(organization_id=organization_id) \
-            .order_by(StockHistory.created_at.desc()).all()
+        # Fetch stock history
+        histories = (
+            StockHistory.query
+            .filter_by(organization_id=organization_id)
+            .order_by(StockHistory.created_at.desc())
+            .all()
+        )
+
+        from zoneinfo import ZoneInfo
+        tz = ZoneInfo("Africa/Nairobi")
 
         results = []
         for h in histories:
             stock_item = Stock.query.get(h.stock_id)
             user_obj = User.query.get(h.user_id)
+
+            # Convert created_at from UTC to Nairobi
+            created_at_nairobi = h.created_at.replace(tzinfo=timezone.utc).astimezone(tz).isoformat()
+
             results.append({
                 "id": h.id,
                 "stock_name": stock_item.name if stock_item else "Deleted",
                 "action": h.action,
                 "details": json.loads(h.details) if h.details else {},
                 "user": user_obj.full_name if user_obj else "Unknown",
-                "created_at": h.created_at.isoformat(),
+                "created_at": created_at_nairobi,
             })
 
-        return jsonify(results)
+        return jsonify(results), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
 
 # -------------------------
 # GET SINGLE STOCK ITEM

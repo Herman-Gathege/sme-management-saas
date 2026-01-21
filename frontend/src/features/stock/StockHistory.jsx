@@ -7,11 +7,16 @@ export default function StockHistory() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const API_BASE = import.meta.env.VITE_API_URL;
+
+
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://127.0.0.1:5000/api/stock/history", {
+        if (!token) throw new Error("No auth token found");
+
+        const res = await fetch(`${API_BASE}/api/stock/history`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -19,16 +24,16 @@ export default function StockHistory() {
 
         const data = await res.json();
 
-        // Transform details to simple string for easy reading
+        // Transform details to readable text
         const transformed = data.map((h) => ({
           ...h,
           detailsText: h.details
             ? Object.entries(h.details)
                 .map(
                   ([key, value]) =>
-                    `${key}: ${
-                      value.new !== undefined ? `${value.old} → ${value.new}` : value
-                    }`
+                    value?.new !== undefined
+                      ? `${key}: ${value.old} → ${value.new}`
+                      : `${key}: ${value}`
                 )
                 .join(", ")
             : "",

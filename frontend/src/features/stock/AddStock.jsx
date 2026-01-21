@@ -18,6 +18,9 @@ export default function AddStock() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const API_BASE = import.meta.env.VITE_API_URL;
+
+
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -33,7 +36,7 @@ export default function AddStock() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://127.0.0.1:5000/api/stock", {
+      const res = await fetch(`${API_BASE}/api/stock`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
