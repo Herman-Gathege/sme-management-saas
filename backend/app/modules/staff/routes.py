@@ -103,6 +103,7 @@ def list_staff():
 # Owner: Update Staff
 # ----------------------
 @staff_bp.route("/<int:id>", methods=["PATCH"])
+@cross_origin(origins="*", methods=["PATCH"], supports_credentials=True)
 @owner_required
 def update_staff(id):
     claims = get_jwt()
@@ -113,6 +114,13 @@ def update_staff(id):
         return jsonify({"error": "Staff not found"}), 404
 
     data = request.get_json()
+
+    # Check for email conflict
+    if "email" in data:
+        existing = User.query.filter_by(email=data["email"]).filter(User.id != staff.id).first()
+        if existing:
+            return jsonify({"error": "Another staff with this email already exists"}), 400
+
     staff.full_name = data.get("full_name", staff.full_name)
     staff.email = data.get("email", staff.email)
     staff.phone = data.get("phone", staff.phone)
@@ -136,10 +144,12 @@ def update_staff(id):
     })
 
 
+
 # ----------------------
-# Owner: Deactivate Staff
+# Owner: Deactivate /  Staff
 # ----------------------
 @staff_bp.route("/<int:id>/deactivate", methods=["PATCH"])
+@cross_origin(origins="*", methods=["PATCH"], supports_credentials=True)
 @owner_required
 def deactivate_staff(id):
     claims = get_jwt()
@@ -150,7 +160,6 @@ def deactivate_staff(id):
         return jsonify({"error": "Staff not found"}), 404
 
     staff.is_active = False
-
     try:
         db.session.commit()
     except Exception as e:
@@ -161,9 +170,10 @@ def deactivate_staff(id):
 
 
 # ----------------------
-# Owner: Reactivate Staff
+# Owner:  Reactivate Staff
 # ----------------------
 @staff_bp.route("/<int:id>/reactivate", methods=["PATCH"])
+@cross_origin(origins="*", methods=["PATCH"], supports_credentials=True)
 @owner_required
 def reactivate_staff(id):
     claims = get_jwt()
@@ -174,7 +184,6 @@ def reactivate_staff(id):
         return jsonify({"error": "Staff not found"}), 404
 
     staff.is_active = True
-
     try:
         db.session.commit()
     except Exception as e:
@@ -182,6 +191,7 @@ def reactivate_staff(id):
         return jsonify({"error": str(e)}), 500
 
     return jsonify({"message": f"{staff.full_name} has been reactivated"})
+
 
 
 # ----------------------
@@ -206,3 +216,29 @@ def update_password(id):
 
     return jsonify({"message": "Password updated successfully"})
 
+
+# ----------------------
+# Owner: Reset Staff Password
+# ----------------------
+@staff_bp.route("/<int:id>/password/reset", methods=["PATCH"])
+@cross_origin(origins="*", methods=["PATCH"], supports_credentials=True)
+@owner_required
+def reset_staff_password(id):
+    claims = get_jwt()
+    org_id = claims["organization_id"]
+
+    staff = User.query.filter_by(id=id, organization_id=org_id, role="staff").first()
+    if not staff:
+        return jsonify({"error": "Staff not found"}), 404
+
+    # Generate temporary password
+    temp_password = secrets.token_urlsafe(8)
+    staff.password_hash = generate_password_hash(temp_password)
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"temporary_password": temp_password})

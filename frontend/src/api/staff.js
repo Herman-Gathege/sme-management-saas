@@ -1,5 +1,6 @@
 //frontend/src/api/staff.js
-const API = "http://127.0.0.1:5000/api/staff";
+const API_BASE = import.meta.env.VITE_API_URL;
+const API = `${API_BASE}/api/staff`;
 
 // Helper to get token
 const getToken = () => localStorage.getItem("token");
@@ -69,8 +70,9 @@ export const reactivateStaff = async (id, token = getToken()) => {
 };
 
 // Reset staff password
+// Reset staff password (OWNER)
 export const resetStaffPassword = async (id, token = getToken()) => {
-  const res = await fetch(`${API}/${id}/password`, {
+  const res = await fetch(`${API}/${id}/password/reset`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
   });
@@ -80,4 +82,5 @@ export const resetStaffPassword = async (id, token = getToken()) => {
   }
   return res.json(); // { temporary_password: "..." }
 };
+
 
