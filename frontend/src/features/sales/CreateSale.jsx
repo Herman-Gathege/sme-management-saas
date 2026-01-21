@@ -12,12 +12,14 @@ export default function CreateSale() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  const API_BASE = import.meta.env.VITE_API_URL;
+
   // Fetch stock
   useEffect(() => {
     const fetchStock = async () => {
       const token = localStorage.getItem("token");
       try {
-        const res = await fetch("http://127.0.0.1:5000/api/stock/staff", {
+        const res = await fetch(`${API_BASE}/api/stock/staff`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -28,7 +30,7 @@ export default function CreateSale() {
       }
     };
     fetchStock();
-  }, []);
+  }, [API_BASE]);
 
   const filteredStock = stockItems.filter((s) =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -58,7 +60,7 @@ export default function CreateSale() {
     setLoading(true); setMessage("");
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://127.0.0.1:5000/api/sales", {
+      const res = await fetch(`${API_BASE}/api/sales`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ items: selectedItems }),

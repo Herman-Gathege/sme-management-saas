@@ -10,7 +10,7 @@ export default function AllSales() {
   const [searchTerm, setSearchTerm] = useState("");
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
 
-  const API_URL = "http://127.0.0.1:5000/api/sales/owner";
+  const API_BASE = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchSales = async () => {
@@ -18,7 +18,7 @@ export default function AllSales() {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No auth token found");
 
-        const res = await fetch(API_URL, {
+        const res = await fetch(`${API_BASE}/api/sales/owner`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -44,7 +44,7 @@ export default function AllSales() {
     };
 
     fetchSales();
-  }, []);
+  }, [API_BASE]);
 
   const toggleSale = (saleId) => {
     setExpandedSale(expandedSale === saleId ? null : saleId);
