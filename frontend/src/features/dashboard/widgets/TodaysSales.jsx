@@ -5,24 +5,31 @@ export default function TodaysSales() {
   const [sales, setSales] = useState([]);
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-  const fetchSales = async () => {
-    const token = localStorage.getItem("token");
-    try {
-      const res = await fetch("http://127.0.0.1:5000/api/sales/owner", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to fetch sales");
-      setSales(data);
-    } catch (err) {
-      setMessage(err.message);
-      console.error(err);
-    }
-  };
+  const API_BASE = import.meta.env.VITE_API_URL;
 
-  fetchSales();
-}, []);
+
+  useEffect(() => {
+    const fetchSales = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        // Use API_BASE instead of hardcoded URL
+        const res = await fetch(`${API_BASE}/api/sales/owner`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || "Failed to fetch sales");
+
+        setSales(data);
+      } catch (err) {
+        setMessage(err.message);
+        console.error(err);
+      }
+    };
+
+    fetchSales();
+  }, [API_BASE]); // optional: include API_BASE in deps
 
 
   const totalToday = sales.reduce((sum, s) => sum + s.total_amount, 0);

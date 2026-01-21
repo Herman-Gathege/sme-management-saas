@@ -5,6 +5,7 @@ import styles from "./StockAlerts.module.css"; // correct import
 export default function StockAlerts() {
   const [alerts, setAlerts] = useState([]);
   const navigate = useNavigate();
+  
   const API_BASE = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
