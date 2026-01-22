@@ -272,7 +272,9 @@
   margin-right: auto; /* pushes avatar to the right */
   text-align: left;
   font-size: 0.85rem;
-  color: #4570b6;
+  /* color: #4570b6; */
+  background: rgba(224, 231, 255, 0.74);
+  padding: 0.4rem 0.6rem;
 }
 
 .timeWrapper .date {
@@ -280,6 +282,6 @@
 }
 
 .timeWrapper .time {
-  font-weight: 700;
+  font-weight: 600;
   color: #4570b6;
 }
