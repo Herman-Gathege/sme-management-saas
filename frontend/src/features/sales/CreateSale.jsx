@@ -145,8 +145,24 @@ export default function CreateSale() {
                 <tr key={i}>
                   <td>{item.name}</td>
                   <td>
-                    <input type="number" min="1" value={item.quantity}
-                      onChange={(e) => updateQuantity(i, parseInt(e.target.value))} />
+                    <div className={styles.qtyControl}>
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(i, item.quantity - 1)}
+                        disabled={item.quantity === 1}
+                      >
+                        −
+                      </button>
+
+                      <span className={styles.qtyValue}>{item.quantity}</span>
+
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(i, item.quantity + 1)}
+                      >
+                        +
+                      </button>
+                    </div>
                   </td>
                   <td>KES {item.unit_price.toFixed(2)}</td>
                   <td>KES {(item.unit_price * item.quantity).toFixed(2)}</td>

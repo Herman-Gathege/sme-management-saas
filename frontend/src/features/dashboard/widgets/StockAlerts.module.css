@@ -1,49 +1,23 @@
-/* StockAlerts card */
-.widgetCard {
-  border: 1px solid #ccc;
-  padding: 0.5rem;             /* tighter card padding */
-  border-radius: 2px;
-  margin-bottom: 0.5rem;       /* less space below card */
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 120px;           /* slightly shorter, still matches other widgets */
-  cursor: pointer;
-}
-
-/* Card title */
-.title {
-  font-weight: 600;
-  margin-bottom: 0.25rem;      /* tighter spacing below title */
-  font-size: 1rem;
-}
-
-/* Horizontal alerts row */
 .alertsRow {
   display: flex;
-  flex-direction: row;
-  gap: 0.5rem;                 /* tighter spacing between alerts */
+  gap: 0.75rem;
   align-items: center;
-  margin-bottom: 0.25rem;      /* less space below alerts row */
 }
 
-/* Out of stock */
 .danger {
-  color: #f44336;
+  color: #dc2626;
   font-size: 0.9rem;
-  margin: 0;
+  font-weight: 600;
 }
 
-/* Low stock */
 .warning {
-  color: #ff9800;
+  color: #d97706;
   font-size: 0.9rem;
-  margin: 0;
+  font-weight: 600;
 }
 
-/* CTA */
-.cta {
-  font-size: 0.85rem;
-  opacity: 0.7;
-  margin-top: 2px;             /* minimal spacing from alerts row */
+.ok {
+  color: #15803d;              /* calm green */
+  font-size: 0.9rem;
+  font-weight: 500;
 }
