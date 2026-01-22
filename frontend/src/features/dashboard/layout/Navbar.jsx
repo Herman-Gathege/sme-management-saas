@@ -4,18 +4,20 @@ import styles from "./DashboardLayout.module.css";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+
+  // Hooks are always called first
   const [open, setOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-
-  if (!user) return null;
 
   // Update time every second
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer); // cleanup on unmount
+    return () => clearInterval(timer);
   }, []);
 
-  // Format date & time nicely
+  // If user not loaded yet, render empty header (no hooks skipped)
+  if (!user) return <header className={styles.navbar} />;
+
   const formattedTime = currentTime.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",

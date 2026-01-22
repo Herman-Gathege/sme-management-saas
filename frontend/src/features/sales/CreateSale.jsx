@@ -10,6 +10,7 @@ export default function CreateSale() {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [paymentMethod, setPaymentMethod] = useState("Cash"); // placeholder
   const itemsPerPage = 5;
 
   const API_BASE = import.meta.env.VITE_API_URL;
@@ -32,45 +33,75 @@ export default function CreateSale() {
     fetchStock();
   }, [API_BASE]);
 
+  // Stock filtering
   const filteredStock = stockItems.filter((s) =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentStock = filteredStock.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredStock.length / itemsPerPage);
 
+  // Cart logic
   const addItem = (stock) => {
     setSelectedItems((prev) => {
       const exists = prev.find((i) => i.stock_id === stock.id);
-      if (exists) return prev.map((i) => (i.stock_id === stock.id ? { ...i, quantity: i.quantity + 1 } : i));
-      return [...prev, { stock_id: stock.id, name: stock.name, quantity: 1, unit_price: stock.unit_price }];
+      if (exists)
+        return prev.map((i) =>
+          i.stock_id === stock.id ? { ...i, quantity: i.quantity + 1 } : i
+        );
+      return [
+        ...prev,
+        {
+          stock_id: stock.id,
+          name: stock.name,
+          quantity: 1,
+          unit_price: stock.unit_price,
+        },
+      ];
     });
   };
 
-  const updateQuantity = (index, qty) => { if (qty < 1) return; setSelectedItems(prev => prev.map((i, idx) => idx === index ? {...i, quantity: qty} : i)); };
-  const removeItem = (index) => setSelectedItems(prev => prev.filter((_, i) => i !== index));
-  const total = selectedItems.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
+  const updateQuantity = (index, qty) => {
+    if (qty < 1) return;
+    setSelectedItems((prev) =>
+      prev.map((i, idx) => (idx === index ? { ...i, quantity: qty } : i))
+    );
+  };
+
+  const removeItem = (index) =>
+    setSelectedItems((prev) => prev.filter((_, i) => i !== index));
+
+  const total = selectedItems.reduce(
+    (sum, item) => sum + item.unit_price * item.quantity,
+    0
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (selectedItems.length === 0) return setMessage("Select at least one item");
 
-    setLoading(true); setMessage("");
+    setLoading(true);
+    setMessage("");
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`${API_BASE}/api/sales`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ items: selectedItems }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ items: selectedItems, paymentMethod }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Sale creation failed");
       setMessage(`Sale created successfully! Total: KES ${data.total_amount}`);
       setSelectedItems([]);
-    } catch (err) { setMessage(err.message); }
-    finally { setLoading(false); }
+    } catch (err) {
+      setMessage(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -82,6 +113,7 @@ export default function CreateSale() {
         type="text"
         placeholder="Search stock..."
         value={searchTerm}
+        autoFocus
         onChange={(e) => setSearchTerm(e.target.value)}
         className={styles.searchInput}
       />
@@ -89,7 +121,9 @@ export default function CreateSale() {
       {/* Stock List */}
       <div className={styles["card"]}>
         <h3>Available Stock</h3>
-        {currentStock.length === 0 ? <p>No stock items found</p> :
+        {currentStock.length === 0 ? (
+          <p>No stock items found</p>
+        ) : (
           <table className={styles["stock-table"]}>
             <thead>
               <tr>
@@ -106,7 +140,10 @@ export default function CreateSale() {
                   <td>KES {s.unit_price.toFixed(2)}</td>
                   <td>{s.quantity}</td>
                   <td>
-                    <button onClick={() => addItem(s)} disabled={s.quantity === 0}>
+                    <button
+                      onClick={() => addItem(s)}
+                      disabled={s.quantity === 0}
+                    >
                       {s.quantity === 0 ? "Out of Stock" : "Add"}
                     </button>
                   </td>
@@ -114,14 +151,26 @@ export default function CreateSale() {
               ))}
             </tbody>
           </table>
-        }
+        )}
 
         {/* Pagination */}
         {totalPages > 1 && (
           <div className={styles.pagination}>
-            <button onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}>Prev</button>
-            <span>Page {currentPage} of {totalPages}</span>
-            <button onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages}>Next</button>
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Prev
+            </button>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
           </div>
         )}
       </div>
@@ -129,7 +178,9 @@ export default function CreateSale() {
       {/* Selected Items */}
       <form onSubmit={handleSubmit} className={styles["card"]}>
         <h3>Selected Items</h3>
-        {selectedItems.length === 0 ? <p>No items selected</p> :
+        {selectedItems.length === 0 ? (
+          <p>No items selected</p>
+        ) : (
           <table className={styles["stock-table"]}>
             <thead>
               <tr>
@@ -153,9 +204,7 @@ export default function CreateSale() {
                       >
                         −
                       </button>
-
                       <span className={styles.qtyValue}>{item.quantity}</span>
-
                       <button
                         type="button"
                         onClick={() => updateQuantity(i, item.quantity + 1)}
@@ -167,17 +216,48 @@ export default function CreateSale() {
                   <td>KES {item.unit_price.toFixed(2)}</td>
                   <td>KES {(item.unit_price * item.quantity).toFixed(2)}</td>
                   <td>
-                    <button type="button" onClick={() => removeItem(i)}>Remove</button>
+                    <button type="button" onClick={() => removeItem(i)}>
+                      Remove
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        }
+        )}
 
-        <h3>Total: KES {total.toFixed(2)}</h3>
-        <button type="submit" disabled={loading}>
-          {loading ? "Submitting..." : "Submit Sale"}
+        {/* Cart Summary */}
+        <div className={styles.cartSummary}>
+          <p>
+            {selectedItems.length} item(s) | Total: KES {total.toFixed(2)}
+          </p>
+        </div>
+
+        {/* Payment Method */}
+        <div className={styles.paymentMethods}>
+          <p>Select Payment Method (placeholder)</p>
+          <div className={styles.paymentButtons}>
+            <button type="button" onClick={() => setPaymentMethod("Cash")}>
+              Cash
+            </button>
+            <button type="button" onClick={() => setPaymentMethod("M-Pesa")}>
+              M-Pesa
+            </button>
+            <button type="button" onClick={() => setPaymentMethod("Credit")}>
+              Credit
+            </button>
+          </div>
+
+          {paymentMethod === "Credit" && (
+            <div className={styles.customerSelector}>
+              <p>Customer selector placeholder</p>
+            </div>
+          )}
+        </div>
+
+        {/* Confirm Sale */}
+        <button type="submit" disabled={loading} className={styles.confirmButton}>
+          {loading ? "Submitting..." : "Confirm Sale"}
         </button>
       </form>
 
