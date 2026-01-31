@@ -1,3 +1,4 @@
+#backend/app/models/stock_history.py
 from datetime import datetime
 from app.extensions import db
 

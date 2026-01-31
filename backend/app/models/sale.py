@@ -3,6 +3,7 @@
 from datetime import datetime
 from ..extensions import db
 
+
 class Sale(db.Model):
     __tablename__ = "sales"
 
@@ -20,6 +21,17 @@ class Sale(db.Model):
         nullable=False
     )
 
+    customer_id = db.Column(
+        db.Integer,
+        db.ForeignKey("customers.id"),
+        nullable=True
+    )
+
+    payment_method = db.Column(
+        db.String(20),  # cash | mpesa | credit
+        nullable=False
+    )
+
     total_amount = db.Column(
         db.Numeric(10, 2),
         nullable=False,
@@ -32,7 +44,6 @@ class Sale(db.Model):
         nullable=False
     )
 
-    # Relationships
     items = db.relationship(
         "SaleItem",
         backref="sale",

@@ -1,8 +1,8 @@
-"""add sales tables
+"""initial schema
 
-Revision ID: 78ef6f131486
+Revision ID: ace3e041bd5d
 Revises: 
-Create Date: 2026-01-13 15:21:19.885234
+Create Date: 2026-01-31 01:25:01.528586
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '78ef6f131486'
+revision = 'ace3e041bd5d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -27,6 +27,21 @@ def upgrade():
     sa.Column('subscription_status', sa.String(length=20), nullable=True),
     sa.Column('plan', sa.String(length=20), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('customers',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('organization_id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=255), nullable=False),
+    sa.Column('business_name', sa.String(length=255), nullable=True),
+    sa.Column('phone', sa.String(length=50), nullable=True),
+    sa.Column('email', sa.String(length=100), nullable=True),
+    sa.Column('role', sa.String(length=20), nullable=False),
+    sa.Column('notes', sa.Text(), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('stocks',
@@ -62,8 +77,11 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('organization_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('customer_id', sa.Integer(), nullable=True),
+    sa.Column('payment_method', sa.String(length=20), nullable=False),
     sa.Column('total_amount', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['customer_id'], ['customers.id'], ),
     sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -102,5 +120,6 @@ def downgrade():
     op.drop_table('sales')
     op.drop_table('users')
     op.drop_table('stocks')
+    op.drop_table('customers')
     op.drop_table('organizations')
     # ### end Alembic commands ###

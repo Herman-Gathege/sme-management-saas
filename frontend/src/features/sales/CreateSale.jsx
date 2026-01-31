@@ -1,3 +1,4 @@
+// frontend/src/features/sales/CreateSale.jsx
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./Sales.module.css";
@@ -6,11 +7,13 @@ export default function CreateSale() {
   const { user } = useAuth();
   const [stockItems, setStockItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState("Cash"); // placeholder
+  const [paymentMethod, setPaymentMethod] = useState("Cash");
   const itemsPerPage = 5;
 
   const API_BASE = import.meta.env.VITE_API_URL;
@@ -32,6 +35,25 @@ export default function CreateSale() {
     };
     fetchStock();
   }, [API_BASE]);
+
+  // Fetch customers (for Credit sales)
+  useEffect(() => {
+    if (paymentMethod !== "Credit") return;
+    const fetchCustomers = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const res = await fetch(`${API_BASE}/api/customers`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to fetch customers");
+        setCustomers(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setMessage(err.message);
+      }
+    };
+    fetchCustomers();
+  }, [API_BASE, paymentMethod]);
 
   // Stock filtering
   const filteredStock = stockItems.filter((s) =>
@@ -81,22 +103,38 @@ export default function CreateSale() {
     e.preventDefault();
     if (selectedItems.length === 0) return setMessage("Select at least one item");
 
+    if (paymentMethod === "Credit" && !selectedCustomer)
+      return setMessage("Select a customer for credit sale");
+
     setLoading(true);
     setMessage("");
     try {
       const token = localStorage.getItem("token");
+      const payload = {
+        items: selectedItems,
+        paymentMethod,
+      };
+      if (paymentMethod === "Credit") payload.customer_id = selectedCustomer;
+
       const res = await fetch(`${API_BASE}/api/sales`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ items: selectedItems, paymentMethod }),
+        body: JSON.stringify(payload),
       });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Sale creation failed");
-      setMessage(`Sale created successfully! Total: KES ${data.total_amount}`);
+
+      setMessage(
+        `Sale created successfully! Total: KES ${data.total_amount}${
+          data.customer ? ` | Customer: ${data.customer}` : ""
+        }`
+      );
       setSelectedItems([]);
+      setSelectedCustomer("");
     } catch (err) {
       setMessage(err.message);
     } finally {
@@ -235,7 +273,7 @@ export default function CreateSale() {
 
         {/* Payment Method */}
         <div className={styles.paymentMethods}>
-          <p>Select Payment Method (placeholder)</p>
+          <p>Select Payment Method</p>
           <div className={styles.paymentButtons}>
             <button type="button" onClick={() => setPaymentMethod("Cash")}>
               Cash
@@ -248,9 +286,21 @@ export default function CreateSale() {
             </button>
           </div>
 
+          {/* Customer Selector for Credit */}
           {paymentMethod === "Credit" && (
             <div className={styles.customerSelector}>
-              <p>Customer selector placeholder</p>
+              <label>Select Customer:</label>
+              <select
+                value={selectedCustomer}
+                onChange={(e) => setSelectedCustomer(e.target.value)}
+              >
+                <option value="">--Select Customer--</option>
+                {customers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.full_name}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
         </div>

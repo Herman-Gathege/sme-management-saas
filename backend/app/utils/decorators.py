@@ -24,3 +24,13 @@ def staff_required(fn):
             return jsonify({"error": "Unauthorized: staff only"}), 403
         return fn(*args, **kwargs)
     return wrapper
+
+def owner_or_staff_required(fn):
+    @wraps(fn)
+    @jwt_required()
+    def wrapper(*args, **kwargs):
+        claims = get_jwt()
+        if claims.get("role") not in ["owner", "staff"]:
+            return jsonify({"error": "Unauthorized"}), 403
+        return fn(*args, **kwargs)
+    return wrapper

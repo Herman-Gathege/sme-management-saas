@@ -12,6 +12,7 @@ from .modules.reports.routes import reports_bp
 from .auth.routes import auth_bp
 
 
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -64,7 +65,8 @@ def create_app():
     app.register_blueprint(staff_bp, url_prefix="/api/staff")
     app.register_blueprint(sales_bp, url_prefix="/api/sales")
     app.register_blueprint(stock_bp, url_prefix="/api/stock")
-    app.register_blueprint(customers_bp, url_prefix="/customers")
     app.register_blueprint(reports_bp, url_prefix="/reports")
+    app.register_blueprint(customers_bp)
+
 
     return app

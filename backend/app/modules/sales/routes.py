@@ -1,3 +1,4 @@
+#backend/app/modules/sales/routes.py
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
@@ -20,6 +21,7 @@ def test_sales():
 @jwt_required()
 def create_sale():
     from flask import request
+    from ...models.customer import Customer
 
     data = request.get_json()
     user_id = get_jwt_identity()
@@ -30,6 +32,27 @@ def create_sale():
 
     if user.role not in ["staff", "owner"]:
         return jsonify({"error": "Unauthorized"}), 403
+
+    payment_method = data.get("paymentMethod", "").lower()
+
+    if payment_method not in ["cash", "mpesa", "credit"]:
+        return jsonify({"error": "Invalid payment method"}), 400
+
+    customer = None
+    if payment_method == "credit":
+        customer_id = data.get("customer_id")
+        if not customer_id:
+            return jsonify({"error": "Customer required for credit sale"}), 400
+
+        customer = Customer.query.filter_by(
+            id=customer_id,
+            organization_id=user.organization_id,
+            role="debtor",
+            is_active=True
+        ).first()
+
+        if not customer:
+            return jsonify({"error": "Invalid debtor selected"}), 400
 
     items_data = data.get("items", [])
     if not items_data:
@@ -49,7 +72,7 @@ def create_sale():
                 return jsonify({"error": "Stock not found"}), 404
 
             if stock.quantity < item["quantity"]:
-                return jsonify({"error": "Insufficient stock"}), 400
+                return jsonify({"error": f"Insufficient stock for {stock.name}"}), 400
 
             subtotal = stock.unit_price * item["quantity"]
             total_amount += subtotal
@@ -68,6 +91,8 @@ def create_sale():
         sale = Sale(
             organization_id=user.organization_id,
             user_id=user.id,
+            customer_id=customer.id if customer else None,
+            payment_method=payment_method,
             total_amount=total_amount,
             items=sale_items,
         )
@@ -75,15 +100,18 @@ def create_sale():
         db.session.add(sale)
         db.session.commit()
 
-        # ✅ Convert created_at to Nairobi time
         tz = ZoneInfo("Africa/Nairobi")
-        created_at_nairobi = sale.created_at.replace(tzinfo=timezone.utc).astimezone(tz).isoformat()
+        created_at = sale.created_at.replace(
+            tzinfo=timezone.utc
+        ).astimezone(tz).isoformat()
 
         return jsonify({
             "message": "Sale created successfully",
             "sale_id": sale.id,
+            "customer": customer.full_name if customer else None,
             "total_amount": float(sale.total_amount),
-            "created_at": created_at_nairobi,
+            "payment_method": sale.payment_method,
+            "created_at": created_at,
         }), 201
 
     except Exception as e:
