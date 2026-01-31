@@ -10,6 +10,10 @@ from .modules.customers.routes import customers_bp
 from .modules.staff.routes import staff_bp
 from .modules.reports.routes import reports_bp
 from .auth.routes import auth_bp
+from .modules.customers.payments_routes import payments_bp
+
+# Import models so Flask-Migrate sees them
+from .models import payment, customer, user
 
 
 
@@ -22,10 +26,7 @@ def create_app():
     jwt.init_app(app)
     migrate.init_app(app, db)
 
-    from . import models
-
-
-    # 🔐 JWT ERROR HANDLERS
+    # JWT error handlers
     @jwt.unauthorized_loader
     def missing_token(reason):
         return {"error": "Missing token"}, 401
@@ -38,35 +39,24 @@ def create_app():
     def expired_token_callback(jwt_header, jwt_payload):
         return {"error": "Token expired"}, 401
 
-    print("APP INSTANCE ID:", id(app))
-
     CORS(
-            app,
-            supports_credentials=True,
-            resources={
-                r"/api/*": {
-                    "origins": [
-                        "http://localhost:5173",
-                        "http://127.0.0.1:5173"
-                    ]
-                },
-                r"/auth/*": {
-                    "origins": [
-                        "http://localhost:5173",
-                        "http://127.0.0.1:5173"
-                    ]
-                }
-            },
-            allow_headers=["Content-Type", "Authorization"],
-            methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        )
-    # Register blueprints (ONCE each)
+        app,
+        supports_credentials=True,
+        resources={
+            r"/api/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173"]},
+            r"/auth/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173"]}
+        },
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    )
+
+    # Register blueprints
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(staff_bp, url_prefix="/api/staff")
     app.register_blueprint(sales_bp, url_prefix="/api/sales")
     app.register_blueprint(stock_bp, url_prefix="/api/stock")
     app.register_blueprint(reports_bp, url_prefix="/reports")
     app.register_blueprint(customers_bp)
-
+    app.register_blueprint(payments_bp)
 
     return app
