@@ -1,4 +1,5 @@
 // frontend/src/features/customers/OwnerCustomers.jsx
+
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Pencil, Trash2 } from "lucide-react";
