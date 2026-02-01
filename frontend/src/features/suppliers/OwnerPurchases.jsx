@@ -1,104 +1,175 @@
 // frontend/src/features/suppliers/OwnerPurchases.jsx
-import { useEffect, useState } from "react";
-import { listSuppliers, listPurchases, createPurchase } from "../../api/suppliers";
-import './SupplierModule.css';
+import React, { useEffect, useState } from "react";
+import {
+  listSuppliers,
+  listPurchases,
+  createPurchase
+} from "../../api/suppliers";
+import "./SupplierModule.css";
 
 export default function OwnerSupplierPurchases() {
   const [suppliers, setSuppliers] = useState([]);
   const [purchases, setPurchases] = useState([]);
+  const [expanded, setExpanded] = useState({});
+
   const [newPurchase, setNewPurchase] = useState({
     supplier_id: "",
     payment_method: "credit",
+    notes: "",
     items: []
   });
-  const [expanded, setExpanded] = useState({}); // Tracks expanded rows
 
+  // ---------------- Fetch Data ----------------
   const fetchData = async () => {
     try {
-      setSuppliers(await listSuppliers());
-      setPurchases(await listPurchases());
+      const [suppliersData, purchasesData] = await Promise.all([
+        listSuppliers(),
+        listPurchases()
+      ]);
+      setSuppliers(suppliersData);
+      setPurchases(purchasesData);
     } catch (err) {
       console.error(err);
-      alert("Error fetching data: " + err.message);
+      alert("Error fetching data: " + (err.message || err));
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  // Add new empty item row
+  // ---------------- Items Logic ----------------
   const addItem = () => {
-    setNewPurchase({
-      ...newPurchase,
-      items: [...newPurchase.items, { name: "", quantity: "", unit_price: "" }]
-    });
+    setNewPurchase(prev => ({
+      ...prev,
+      items: [
+        ...prev.items,
+        { name: "", quantity: "", buying_price: "" }
+      ]
+    }));
   };
 
-  // Remove item row
-  const removeItem = (index) => {
-    const updatedItems = [...newPurchase.items];
-    updatedItems.splice(index, 1);
-    setNewPurchase({ ...newPurchase, items: updatedItems });
+  const removeItem = index => {
+    setNewPurchase(prev => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index)
+    }));
   };
 
-  // Update item fields
   const updateItem = (index, field, value) => {
-    const updatedItems = [...newPurchase.items];
-    updatedItems[index][field] = value;
-    setNewPurchase({ ...newPurchase, items: updatedItems });
+    setNewPurchase(prev => ({
+      ...prev,
+      items: prev.items.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      )
+    }));
   };
 
-  // Submit new purchase
+  // ---------------- Submit Purchase ----------------
   const handleAddPurchase = async () => {
-    if (!newPurchase.supplier_id || newPurchase.items.length === 0) {
-      return alert("Supplier and at least one item are required");
+    // ---- validate supplier ----
+    if (!newPurchase.supplier_id) {
+      return alert("Please select a supplier");
     }
 
-    // Validate items
-    for (const item of newPurchase.items) {
-      if (!item.name || !item.quantity || !item.unit_price) {
-        return alert("All item fields are required");
-      }
-      item.quantity = parseFloat(item.quantity);
-      item.unit_price = parseFloat(item.unit_price);
-      if (isNaN(item.quantity) || isNaN(item.unit_price)) {
-        return alert("Quantity and unit price must be valid numbers");
-      }
+    // ---- validate items ----
+    if (newPurchase.items.length === 0) {
+      return alert("Add at least one item");
     }
+
+    const cleanedItems = [];
+
+    for (const item of newPurchase.items) {
+      const qty = Number(item.quantity);
+      const price = Number(item.buying_price);
+
+      if (!item.name || isNaN(qty) || qty <= 0 || isNaN(price) || price <= 0) {
+        return alert(
+          "Each item must have a valid name, quantity, and buying price greater than 0"
+        );
+      }
+
+      cleanedItems.push({
+        name: item.name.trim(),
+        quantity: qty,
+        buying_price: price,
+        sku: item.sku?.trim() || null,
+        category: item.category?.trim() || null,
+        min_stock_level: item.min_stock_level ? Number(item.min_stock_level) : 0
+      });
+    }
+
+    // ---- payload with proper number conversions ----
+    const payload = {
+      supplier_id: Number(newPurchase.supplier_id),
+      payment_method: newPurchase.payment_method,
+      notes: newPurchase.notes.trim(),
+      items: cleanedItems
+    };
+
+    console.log("Submitting purchase:", payload);
 
     try {
-      await createPurchase(newPurchase);
-      setNewPurchase({ supplier_id: "", payment_method: "credit", items: [] });
+      await createPurchase(payload);
+
+      // ---- reset form ----
+      setNewPurchase({
+        supplier_id: "",
+        payment_method: "credit",
+        notes: "",
+        items: []
+      });
+
+      // ---- refresh data ----
       fetchData();
     } catch (err) {
-      alert("Error creating purchase: " + err.message);
+      console.error(err);
+      alert("Failed to create purchase: " + (err.message || err));
     }
   };
 
-  // Toggle row expansion
-  const toggleExpand = (purchaseId) => {
-    setExpanded(prev => ({ ...prev, [purchaseId]: !prev[purchaseId] }));
+  // ---------------- UI Helpers ----------------
+  const toggleExpand = purchaseId => {
+    setExpanded(prev => ({
+      ...prev,
+      [purchaseId]: !prev[purchaseId]
+    }));
   };
 
+  const purchaseTotal = newPurchase.items.reduce(
+    (sum, i) =>
+      sum +
+      (Number(i.quantity) || 0) * (Number(i.buying_price) || 0),
+    0
+  );
+
+  // ---------------- Render ----------------
   return (
     <div className="content">
       <h2>Supplier Purchases</h2>
 
-      {/* ---------- New Purchase Form ---------- */}
+      {/* ---------- New Purchase ---------- */}
       <div className="purchase-form">
         <div className="purchase-controls">
           <select
             value={newPurchase.supplier_id}
-            onChange={e => setNewPurchase({ ...newPurchase, supplier_id: e.target.value })}
+            onChange={e =>
+              setNewPurchase({ ...newPurchase, supplier_id: e.target.value })
+            }
           >
             <option value="">Select Supplier</option>
             {suppliers.map(s => (
-              <option key={s.id} value={s.id}>{s.name}</option>
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
             ))}
           </select>
 
           <select
             value={newPurchase.payment_method}
-            onChange={e => setNewPurchase({ ...newPurchase, payment_method: e.target.value })}
+            onChange={e =>
+              setNewPurchase({ ...newPurchase, payment_method: e.target.value })
+            }
           >
             <option value="credit">Credit</option>
             <option value="cash">Cash</option>
@@ -106,19 +177,18 @@ export default function OwnerSupplierPurchases() {
             <option value="bank">Bank</option>
           </select>
 
-          <button type="button" className="btn-small" onClick={addItem}>
+          <button className="btn-small" onClick={addItem}>
             + Add Item
           </button>
         </div>
 
-        {/* Inline items table */}
         {newPurchase.items.length > 0 && (
           <table className="items-form-table">
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
+                <th>Qty</th>
+                <th>Buying Price</th>
                 <th></th>
               </tr>
             </thead>
@@ -127,30 +197,40 @@ export default function OwnerSupplierPurchases() {
                 <tr key={index}>
                   <td>
                     <input
-                      type="text"
-                      placeholder="Name"
                       value={item.name}
-                      onChange={e => updateItem(index, "name", e.target.value)}
+                      onChange={e =>
+                        updateItem(index, "name", e.target.value)
+                      }
                     />
                   </td>
                   <td>
                     <input
                       type="number"
-                      placeholder="Qty"
+                      min="1"
                       value={item.quantity}
-                      onChange={e => updateItem(index, "quantity", e.target.value)}
+                      onChange={e =>
+                        updateItem(index, "quantity", e.target.value)
+                      }
                     />
                   </td>
                   <td>
                     <input
                       type="number"
-                      placeholder="Price"
-                      value={item.unit_price}
-                      onChange={e => updateItem(index, "unit_price", e.target.value)}
+                      min="0"
+                      step="0.01"
+                      value={item.buying_price}
+                      onChange={e =>
+                        updateItem(index, "buying_price", e.target.value)
+                      }
                     />
                   </td>
                   <td>
-                    <button type="button" className="btn-small remove-btn" onClick={() => removeItem(index)}>×</button>
+                    <button
+                      className="btn-small remove-btn"
+                      onClick={() => removeItem(index)}
+                    >
+                      ×
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -158,65 +238,77 @@ export default function OwnerSupplierPurchases() {
           </table>
         )}
 
-        <button className="btn-primary" onClick={handleAddPurchase}>Create Purchase</button>
+        <div style={{ marginTop: "8px", fontWeight: "bold" }}>
+          Total: {purchaseTotal.toFixed(2)}
+        </div>
+
+        <button className="btn-primary" onClick={handleAddPurchase}>
+          Create Purchase
+        </button>
       </div>
 
-      {/* ---------- Purchases Table ---------- */}
+      {/* ---------- Purchases List ---------- */}
       <h3>All Purchases</h3>
       <table className="payments-table">
         <thead>
           <tr>
-            <th></th> {/* Arrow column */}
+            <th></th>
             <th>Supplier</th>
-            <th>Total Amount</th>
-            <th>Payment Method</th>
-            <th>#Items</th>
+            <th>Total</th>
+            <th>Payment</th>
+            <th>Items</th>
             <th>Date</th>
           </tr>
         </thead>
         <tbody>
           {purchases.length === 0 ? (
             <tr>
-              <td colSpan="6" style={{ textAlign: "center" }}>No purchases found</td>
+              <td colSpan="6" style={{ textAlign: "center" }}>
+                No purchases found
+              </td>
             </tr>
           ) : (
             purchases.map(p => {
-              const purchase = p.purchase;
-              const items = p.items || [];
-              const supplierName = suppliers.find(s => s.id === purchase.supplier_id)?.name || "N/A";
-              const isExpanded = expanded[purchase.id] || false;
+              const supplier =
+                suppliers.find(s => s.id === p.purchase.supplier_id)?.name ||
+                "N/A";
 
               return (
-                <tbody key={purchase.id}>
-                  <tr className="purchase-row">
-                    <td onClick={() => toggleExpand(purchase.id)} style={{ cursor: "pointer" }}>
-                      {isExpanded ? "▼" : "▶"}
+                <React.Fragment key={p.purchase.id}>
+                  <tr>
+                    <td onClick={() => toggleExpand(p.purchase.id)}>
+                      {expanded[p.purchase.id] ? "▼" : "▶"}
                     </td>
-                    <td>{supplierName}</td>
-                    <td>{purchase.total_amount}</td>
-                    <td>{purchase.payment_method}</td>
-                    <td>{items.length}</td>
-                    <td>{new Date(purchase.created_at || purchase.date).toLocaleString()}</td>
+                    <td>{supplier}</td>
+                    <td>{p.purchase.total_amount.toFixed(2)}</td>
+                    <td>{p.purchase.payment_method}</td>
+                    <td>{p.items.length}</td>
+                    <td>
+                      {new Date(p.purchase.created_at).toLocaleString()}
+                    </td>
                   </tr>
-                  {isExpanded && (
-                    <tr className="items-row">
+
+                  {expanded[p.purchase.id] && (
+                    <tr>
                       <td colSpan="6">
                         <table className="items-table">
                           <thead>
                             <tr>
                               <th>Name</th>
-                              <th>Quantity</th>
-                              <th>Unit Price</th>
+                              <th>Qty</th>
+                              <th>Buying</th>
                               <th>Total</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {items.map((item, idx) => (
+                            {p.items.map((i, idx) => (
                               <tr key={idx}>
-                                <td>{item.name}</td>
-                                <td>{item.quantity}</td>
-                                <td>{item.unit_price}</td>
-                                <td>{item.quantity * item.unit_price}</td>
+                                <td>{i.name}</td>
+                                <td>{i.quantity}</td>
+                                <td>{i.buying_price.toFixed(2)}</td>
+                                <td>
+                                  {(i.quantity * i.buying_price).toFixed(2)}
+                                </td>
                               </tr>
                             ))}
                           </tbody>
@@ -224,7 +316,7 @@ export default function OwnerSupplierPurchases() {
                       </td>
                     </tr>
                   )}
-                </tbody>
+                </React.Fragment>
               );
             })
           )}

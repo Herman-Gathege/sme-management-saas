@@ -7,7 +7,6 @@ class Stock(db.Model):
     __tablename__ = "stocks"
 
     id = db.Column(db.Integer, primary_key=True)
-
     organization_id = db.Column(
         db.Integer,
         db.ForeignKey("organizations.id"),
@@ -19,7 +18,12 @@ class Stock(db.Model):
     category = db.Column(db.String(100), nullable=True)
 
     quantity = db.Column(db.Integer, nullable=False, default=0)
-    unit_price = db.Column(db.Float, nullable=False)
+
+    # Supplier cost (auto-updated on purchase)
+    buying_price = db.Column(db.Float, nullable=True)
+
+    # Selling price (owner-controlled)
+    selling_price = db.Column(db.Float, nullable=True)
 
     min_stock_level = db.Column(db.Integer, nullable=False, default=0)
 
@@ -38,7 +42,8 @@ class Stock(db.Model):
             "sku": self.sku,
             "category": self.category,
             "quantity": self.quantity,
-            "unit_price": self.unit_price,
+            "buying_price": self.buying_price,
+            "selling_price": self.selling_price,
             "min_stock_level": self.min_stock_level,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),

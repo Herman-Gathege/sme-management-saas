@@ -1,4 +1,4 @@
-//frontend/src/features/stock/StockList.jsx
+// frontend/src/features/stock/StockList.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "../dashboard/layout/DashboardLayout.module.css";
@@ -53,10 +53,9 @@ export default function StockList() {
 
       setStock((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
-      // Show UX-friendly message
       if (err.message.includes("linked to existing sales")) {
         alert(
-          "Cannot delete this stock item because it is linked to existing sales. Consider reducing its quantity or marking it inactive instead.",
+          "Cannot delete this stock item because it is linked to existing sales. Consider reducing its quantity or marking it inactive instead."
         );
       } else {
         alert(`Failed to delete stock: ${err.message}`);
@@ -97,7 +96,8 @@ export default function StockList() {
               <th>Category</th>
               <th>Quantity</th>
               <th>Minimum stock level</th>
-              <th>Price per item</th>
+              <th>Buying Price</th>
+              <th>Selling Price</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -114,7 +114,12 @@ export default function StockList() {
                   <td>{item.category || "—"}</td>
                   <td>{item.quantity}</td>
                   <td>{item.min_stock_level}</td>
-                  <td>KES {item.unit_price.toFixed(2)}</td>
+                  <td>
+                    {item.unit_price ? `KES ${item.unit_price.toFixed(2)}` : "—"}
+                  </td>
+                  <td>
+                    {item.selling_price ? `KES ${item.selling_price.toFixed(2)}` : "—"}
+                  </td>
                   <td>
                     {isLow ? (
                       <span style={{ color: "red" }}>Low Stock</span>
@@ -123,17 +128,12 @@ export default function StockList() {
                     )}
                   </td>
                   <td className={styles.actionsCell}>
-                    {/* Edit */}
-                    <Link
-                      to={`/owner/stock/${item.id}/edit`}
-                      title="Edit stock"
-                    >
+                    <Link to={`/owner/stock/${item.id}/edit`} title="Edit stock">
                       <button className={styles.iconBtn}>
                         <FiEdit />
                       </button>
                     </Link>
 
-                    {/* Delete */}
                     <button
                       className={`${styles.iconBtn} ${styles.danger}`}
                       title="Delete stock"
