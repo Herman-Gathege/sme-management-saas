@@ -273,3 +273,92 @@ h2, h3 {
     font-size: 13px;
   }
 }
+
+/* ---------------- CREDITORS ---------------- */
+.creditors-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.creditors-table th,
+.creditors-table td {
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.creditors-row:hover {
+  background: #f9fafb;
+}
+
+.expand-toggle {
+  cursor: pointer;
+  font-weight: bold;
+  user-select: none;
+}
+
+.balance-cell {
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+/* ---------------- EXPANDED SECTION ---------------- */
+.expanded-row td {
+  background: #f8fafc;
+}
+
+.payments-section {
+  padding: 12px;
+}
+
+.payments-subtable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+}
+
+.payments-subtable th,
+.payments-subtable td {
+  padding: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+/* ---------------- PAYMENT FORM ---------------- */
+.inline-payment-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.inline-payment-form input,
+.inline-payment-form select {
+  padding: 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+}
+
+.inline-payment-form button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-add-payment {
+  margin-top: 10px;
+  background: #16a34a;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ---------------- ERROR ---------------- */
+.error-text {
+  color: #dc2626;
+}

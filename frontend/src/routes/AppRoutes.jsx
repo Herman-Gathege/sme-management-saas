@@ -22,7 +22,6 @@ import OwnerCreditors from "../features/suppliers/OwnerCreditors";
 // Suppliers
 import OwnerSuppliers from "../features/suppliers/OwnerSuppliers";
 import OwnerPurchases from "../features/suppliers/OwnerPurchases";
-import OwnerPayments from "../features/suppliers/OwnerPayments";
 
 // Staff
 import StaffDashboard, {
@@ -80,7 +79,6 @@ export default function AppRoutes() {
         {/* Suppliers */}
         <Route path="suppliers" element={<OwnerSuppliers />} /> {/* All Suppliers */}
         <Route path="supplier-purchases" element={<OwnerPurchases />} />
-        <Route path="supplier-payments" element={<OwnerPayments />} />
         <Route path="suppliers/creditors" element={<OwnerCreditors />} />
       </Route>
 

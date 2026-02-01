@@ -126,9 +126,6 @@ export default function Sidebar() {
                 <NavLink to="/owner/supplier-purchases" className={linkClass}>
                   Supplier Purchases
                 </NavLink>
-                <NavLink to="/owner/supplier-payments" className={linkClass}>
-                  Supplier Payments
-                </NavLink>
                 <NavLink to="/owner/suppliers/creditors" className={linkClass}>
                   Creditors
                 </NavLink>
@@ -183,9 +180,6 @@ export default function Sidebar() {
               <div className={styles.subMenu}>
                 <NavLink to="/owner/customers/debtors" className={linkClass}>
                   Debtors
-                </NavLink>
-                <NavLink to="/owner/customers/creditors" className={linkClass}>
-                  Creditors
                 </NavLink>
                 <NavLink to="/owner/customers/add" className={linkClass}>
                   Add Customer
