@@ -16,6 +16,13 @@ import StockHistory from "../features/stock/StockHistory";
 import AllSales from "../features/sales/AllSales";
 import OwnerCustomers from "../features/customers/OwnerCustomers";
 import CreateCustomer from "../features/customers/CreateCustomer";
+import OwnerCreditors from "../features/suppliers/OwnerCreditors"; 
+
+
+// Suppliers
+import OwnerSuppliers from "../features/suppliers/OwnerSuppliers";
+import OwnerPurchases from "../features/suppliers/OwnerPurchases";
+import OwnerPayments from "../features/suppliers/OwnerPayments";
 
 // Staff
 import StaffDashboard, {
@@ -69,7 +76,14 @@ export default function AppRoutes() {
           <Route path=":id/edit" element={<EditStock />} />
           <Route path="history" element={<StockHistory />} />
         </Route>
+
+        {/* Suppliers */}
+        <Route path="suppliers" element={<OwnerSuppliers />} /> {/* All Suppliers */}
+        <Route path="supplier-purchases" element={<OwnerPurchases />} />
+        <Route path="supplier-payments" element={<OwnerPayments />} />
+        <Route path="suppliers/creditors" element={<OwnerCreditors />} />
       </Route>
+
 
       {/* ============ Staff Layout ============ */}
       <Route

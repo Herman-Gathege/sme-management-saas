@@ -1,3 +1,4 @@
+//frontend/src/features/dashboard/widgets/TodaysSales.jsx
 import { useEffect, useState } from "react";
 import widget from "./DashboardWidget.module.css";
 import { useNavigate } from "react-router-dom";

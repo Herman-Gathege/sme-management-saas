@@ -10,6 +10,7 @@ export default function CreateSale() {
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [message, setMessage] = useState("");
+  const [lowStockAlert, setLowStockAlert] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -36,26 +37,31 @@ export default function CreateSale() {
     fetchStock();
   }, [API_BASE]);
 
-  // Fetch customers (for Credit sales)
+  // Fetch debtors only when Credit is selected
   useEffect(() => {
     if (paymentMethod !== "Credit") return;
-    const fetchCustomers = async () => {
+
+    const fetchDebtors = async () => {
       const token = localStorage.getItem("token");
       try {
-        const res = await fetch(`${API_BASE}/api/customers`, {
+        const res = await fetch(`${API_BASE}/api/customers/debtors`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to fetch customers");
-        setCustomers(Array.isArray(data) ? data : []);
+        if (!res.ok) throw new Error(data.error || "Failed to fetch debtors");
+
+        const activeDebtors = Array.isArray(data)
+          ? data.filter((c) => c.balance > 0)
+          : [];
+        setCustomers(activeDebtors);
       } catch (err) {
         setMessage(err.message);
       }
     };
-    fetchCustomers();
+    fetchDebtors();
   }, [API_BASE, paymentMethod]);
 
-  // Stock filtering
+  // Stock filtering & pagination
   const filteredStock = stockItems.filter((s) =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -99,21 +105,19 @@ export default function CreateSale() {
     0
   );
 
+  // Handle sale submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (selectedItems.length === 0) return setMessage("Select at least one item");
-
     if (paymentMethod === "Credit" && !selectedCustomer)
       return setMessage("Select a customer for credit sale");
 
     setLoading(true);
     setMessage("");
+    setLowStockAlert([]);
     try {
       const token = localStorage.getItem("token");
-      const payload = {
-        items: selectedItems,
-        paymentMethod,
-      };
+      const payload = { items: selectedItems, paymentMethod };
       if (paymentMethod === "Credit") payload.customer_id = selectedCustomer;
 
       const res = await fetch(`${API_BASE}/api/sales`, {
@@ -127,6 +131,11 @@ export default function CreateSale() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Sale creation failed");
+
+      // Show low stock alerts
+      if (Array.isArray(data.low_stock_items) && data.low_stock_items.length > 0) {
+        setLowStockAlert(data.low_stock_items);
+      }
 
       setMessage(
         `Sale created successfully! Total: KES ${data.total_amount}${
@@ -297,7 +306,7 @@ export default function CreateSale() {
                 <option value="">--Select Customer--</option>
                 {customers.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.full_name}
+                    {c.full_name} | Owes: KES {c.balance.toFixed(2)}
                   </option>
                 ))}
               </select>
@@ -311,7 +320,22 @@ export default function CreateSale() {
         </button>
       </form>
 
+      {/* Messages */}
       {message && <p className={styles.message}>{message}</p>}
+
+      {/* Low stock alerts */}
+      {lowStockAlert.length > 0 && (
+        <div className={styles.lowStockAlert}>
+          <h4>⚠ Low Stock Alert</h4>
+          <ul>
+            {lowStockAlert.map((item) => (
+              <li key={item.id}>
+                {item.name} — Remaining: {item.quantity}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }

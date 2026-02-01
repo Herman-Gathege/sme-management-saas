@@ -1,8 +1,16 @@
 # backend/app/modules/customers/services.py
+from app import db
+
+# Debtors
 from app.models.customer import Customer
 from app.models.sale import Sale
 from app.models.payment import Payment
-from app.extensions import db
+
+# Creditors (suppliers)
+from app.models.supplier import Supplier
+from app.models.supplier_purchase import SupplierPurchase
+from app.models.supplier_payment import SupplierPayment
+
 
 def get_debtors_summary(org_id):
     """
@@ -52,40 +60,41 @@ def get_debtors_summary(org_id):
 
 def get_creditors_summary(org_id):
     """
-    Creditors = customers we owe money
-    Balance = sum of purchases/payables - payments made
-    Only include those with balance > 0
+    Creditors = suppliers we owe money
+    Balance = credit purchases - payments made
     """
+
     creditors = []
 
-    customers = Customer.query.filter_by(
+    suppliers = Supplier.query.filter_by(
         organization_id=org_id,
-        is_active=True,
-        role="creditor"
+        is_active=True
     ).all()
 
-    for customer in customers:
+    for supplier in suppliers:
+        # Total credit purchases
         total_credit = db.session.query(
-            db.func.coalesce(db.func.sum(Sale.total_amount), 0)
+            db.func.coalesce(db.func.sum(SupplierPurchase.total_amount), 0)
         ).filter(
-            Sale.customer_id == customer.id,
-            Sale.organization_id == org_id,
-            Sale.payment_method == "credit"  # adjust if needed
+            SupplierPurchase.organization_id == org_id,
+            SupplierPurchase.supplier_id == supplier.id,
+            SupplierPurchase.payment_method == "credit"
         ).scalar()
 
-        total_payments = db.session.query(
-            db.func.coalesce(db.func.sum(Payment.amount), 0)
+        # Total payments made
+        total_paid = db.session.query(
+            db.func.coalesce(db.func.sum(SupplierPayment.amount), 0)
         ).filter(
-            Payment.customer_id == customer.id,
-            Payment.organization_id == org_id
+            SupplierPayment.organization_id == org_id,
+            SupplierPayment.supplier_id == supplier.id
         ).scalar()
 
-        balance = float(total_credit - total_payments)
+        balance = float(total_credit - total_paid)
 
-        if balance > 0:  # Only include actual creditors
+        if balance > 0:
             creditors.append({
-                "id": customer.id,
-                "full_name": f"{customer.name} ({customer.business_name})" if customer.business_name else customer.name,
+                "supplier_id": supplier.id,
+                "supplier_name": supplier.name,
                 "balance": balance,
                 "status": "OWED"
             })

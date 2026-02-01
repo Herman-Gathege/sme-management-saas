@@ -1,3 +1,4 @@
+//frontend/src/features/dashboard/widgets/StockAlerts.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import widget from "./DashboardWidget.module.css";
