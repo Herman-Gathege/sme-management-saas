@@ -16,7 +16,9 @@ export default function OwnerSupplierPurchases() {
     supplier_id: "",
     payment_method: "credit",
     notes: "",
-    items: []
+    items: [
+      { name: "", quantity: 1, unit_price: 0, sku: "", category: "", min_stock_level: 0 }
+    ]
   });
 
   // ---------------- Fetch Data ----------------
@@ -44,7 +46,7 @@ export default function OwnerSupplierPurchases() {
       ...prev,
       items: [
         ...prev.items,
-        { name: "", quantity: "", buying_price: "" }
+        { name: "", quantity: 1, unit_price: 0, sku: "", category: "", min_stock_level: 0 }
       ]
     }));
   };
@@ -65,45 +67,33 @@ export default function OwnerSupplierPurchases() {
     }));
   };
 
-  // ---------------- Submit Purchase ----------------
   const handleAddPurchase = async () => {
-    // ---- validate supplier ----
-    if (!newPurchase.supplier_id) {
-      return alert("Please select a supplier");
-    }
+    if (!newPurchase.supplier_id) return alert("Please select a supplier");
+    if (!newPurchase.items.length) return alert("Add at least one item");
 
-    // ---- validate items ----
-    if (newPurchase.items.length === 0) {
-      return alert("Add at least one item");
-    }
+    // Prepare and sanitize items
+    const cleanedItems = newPurchase.items.map(item => ({
+      name: (item.name || "").trim(),
+      quantity: Number(item.quantity) || 0,
+      unit_price: Number(item.unit_price) || 0,
+      sku: item.sku?.trim() || null,
+      category: item.category?.trim() || null,
+      min_stock_level: Number(item.min_stock_level) || 0
+    }));
 
-    const cleanedItems = [];
-
-    for (const item of newPurchase.items) {
-      const qty = Number(item.quantity);
-      const price = Number(item.buying_price);
-
-      if (!item.name || isNaN(qty) || qty <= 0 || isNaN(price) || price <= 0) {
+    // Validate
+    for (const i of cleanedItems) {
+      if (!i.name || i.quantity <= 0 || i.unit_price <= 0) {
         return alert(
-          "Each item must have a valid name, quantity, and buying price greater than 0"
+          "Each item must have a valid name, quantity, and unit price greater than 0"
         );
       }
-
-      cleanedItems.push({
-        name: item.name.trim(),
-        quantity: qty,
-        buying_price: price,
-        sku: item.sku?.trim() || null,
-        category: item.category?.trim() || null,
-        min_stock_level: item.min_stock_level ? Number(item.min_stock_level) : 0
-      });
     }
 
-    // ---- payload with proper number conversions ----
     const payload = {
       supplier_id: Number(newPurchase.supplier_id),
       payment_method: newPurchase.payment_method,
-      notes: newPurchase.notes.trim(),
+      notes: (newPurchase.notes || "").trim(),
       items: cleanedItems
     };
 
@@ -111,16 +101,14 @@ export default function OwnerSupplierPurchases() {
 
     try {
       await createPurchase(payload);
-
-      // ---- reset form ----
       setNewPurchase({
         supplier_id: "",
         payment_method: "credit",
         notes: "",
-        items: []
+        items: [
+          { name: "", quantity: 1, unit_price: 0, sku: "", category: "", min_stock_level: 0 }
+        ]
       });
-
-      // ---- refresh data ----
       fetchData();
     } catch (err) {
       console.error(err);
@@ -139,7 +127,7 @@ export default function OwnerSupplierPurchases() {
   const purchaseTotal = newPurchase.items.reduce(
     (sum, i) =>
       sum +
-      (Number(i.quantity) || 0) * (Number(i.buying_price) || 0),
+      (Number(i.quantity) || 0) * (Number(i.unit_price) || 0),
     0
   );
 
@@ -188,7 +176,10 @@ export default function OwnerSupplierPurchases() {
               <tr>
                 <th>Name</th>
                 <th>Qty</th>
-                <th>Buying Price</th>
+                <th>Unit Price</th>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Min Stock</th>
                 <th></th>
               </tr>
             </thead>
@@ -197,10 +188,11 @@ export default function OwnerSupplierPurchases() {
                 <tr key={index}>
                   <td>
                     <input
+                      type="text"
                       value={item.name}
-                      onChange={e =>
-                        updateItem(index, "name", e.target.value)
-                      }
+                      placeholder="Item Name"
+                      onChange={e => updateItem(index, "name", e.target.value)}
+                      required
                     />
                   </td>
                   <td>
@@ -208,9 +200,8 @@ export default function OwnerSupplierPurchases() {
                       type="number"
                       min="1"
                       value={item.quantity}
-                      onChange={e =>
-                        updateItem(index, "quantity", e.target.value)
-                      }
+                      onChange={e => updateItem(index, "quantity", Math.max(1, Number(e.target.value)))}
+                      required
                     />
                   </td>
                   <td>
@@ -218,17 +209,37 @@ export default function OwnerSupplierPurchases() {
                       type="number"
                       min="0"
                       step="0.01"
-                      value={item.buying_price}
-                      onChange={e =>
-                        updateItem(index, "buying_price", e.target.value)
-                      }
+                      value={item.unit_price}
+                      onChange={e => updateItem(index, "unit_price", Math.max(0, parseFloat(e.target.value) || 0))}
+                      required
                     />
                   </td>
                   <td>
-                    <button
-                      className="btn-small remove-btn"
-                      onClick={() => removeItem(index)}
-                    >
+                    <input
+                      type="text"
+                      value={item.sku}
+                      placeholder="SKU"
+                      onChange={e => updateItem(index, "sku", e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      value={item.category}
+                      placeholder="Category"
+                      onChange={e => updateItem(index, "category", e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      min="0"
+                      value={item.min_stock_level}
+                      onChange={e => updateItem(index, "min_stock_level", Math.max(0, Number(e.target.value) || 0))}
+                    />
+                  </td>
+                  <td>
+                    <button className="btn-small remove-btn" onClick={() => removeItem(index)}>
                       ×
                     </button>
                   </td>
@@ -283,9 +294,7 @@ export default function OwnerSupplierPurchases() {
                     <td>{p.purchase.total_amount.toFixed(2)}</td>
                     <td>{p.purchase.payment_method}</td>
                     <td>{p.items.length}</td>
-                    <td>
-                      {new Date(p.purchase.created_at).toLocaleString()}
-                    </td>
+                    <td>{new Date(p.purchase.created_at).toLocaleString()}</td>
                   </tr>
 
                   {expanded[p.purchase.id] && (
@@ -296,7 +305,7 @@ export default function OwnerSupplierPurchases() {
                             <tr>
                               <th>Name</th>
                               <th>Qty</th>
-                              <th>Buying</th>
+                              <th>Unit Price</th>
                               <th>Total</th>
                             </tr>
                           </thead>
@@ -305,10 +314,8 @@ export default function OwnerSupplierPurchases() {
                               <tr key={idx}>
                                 <td>{i.name}</td>
                                 <td>{i.quantity}</td>
-                                <td>{i.buying_price.toFixed(2)}</td>
-                                <td>
-                                  {(i.quantity * i.buying_price).toFixed(2)}
-                                </td>
+                                <td>{i.unit_price.toFixed(2)}</td>
+                                <td>{(i.quantity * i.unit_price).toFixed(2)}</td>
                               </tr>
                             ))}
                           </tbody>

@@ -27,7 +27,7 @@ class SupplierPurchaseItem(db.Model):
     quantity = db.Column(db.Integer, nullable=False, default=0)
 
     # Cost at time of purchase (historical record)
-    buying_price = db.Column(db.Numeric(10, 2), nullable=False)
+    unit_price = db.Column(db.Numeric(10, 2), nullable=False)
 
     min_stock_level = db.Column(db.Integer, nullable=True)
 
@@ -53,7 +53,7 @@ class SupplierPurchaseItem(db.Model):
             "sku": self.sku,
             "category": self.category,
             "quantity": self.quantity,
-            "buying_price": float(self.buying_price),
+            "unit_price": float(self.unit_price),
             "min_stock_level": self.min_stock_level,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),

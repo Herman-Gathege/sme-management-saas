@@ -20,7 +20,7 @@ class Stock(db.Model):
     quantity = db.Column(db.Integer, nullable=False, default=0)
 
     # Supplier cost (auto-updated on purchase)
-    buying_price = db.Column(db.Float, nullable=True)
+    unit_price = db.Column(db.Float, nullable=True)
 
     # Selling price (owner-controlled)
     selling_price = db.Column(db.Float, nullable=True)
@@ -42,7 +42,7 @@ class Stock(db.Model):
             "sku": self.sku,
             "category": self.category,
             "quantity": self.quantity,
-            "buying_price": self.buying_price,
+            "unit_price": self.unit_price,
             "selling_price": self.selling_price,
             "min_stock_level": self.min_stock_level,
             "created_at": self.created_at.isoformat(),
