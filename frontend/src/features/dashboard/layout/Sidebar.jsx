@@ -109,7 +109,7 @@ export default function Sidebar() {
               className={`${styles.link} ${isSupplierRouteActive ? styles.active : ""}`}
               onClick={() => setSupplierOpen((o) => !o)}
             >
-              {!collapsed && <span>Manage Suppliers</span>}
+              {!collapsed && <span>Suppliers</span>}
               {!collapsed && (
                 <FiChevronDown
                   className={styles.chevron}
@@ -167,7 +167,7 @@ export default function Sidebar() {
               className={`${styles.link} ${isCustomerRouteActive ? styles.active : ""}`}
               onClick={() => setCustomerOpen((o) => !o)}
             >
-              {!collapsed && <span>Manage Customers</span>}
+              {!collapsed && <span>Customers</span>}
               {!collapsed && (
                 <FiChevronDown
                   className={styles.chevron}

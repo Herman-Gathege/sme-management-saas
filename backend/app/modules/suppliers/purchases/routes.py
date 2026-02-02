@@ -164,6 +164,32 @@ def create_purchase():
             return jsonify({"error": "At least one purchase item is required"}), 400
 
         # ---------------- Validate and normalize items ----------------
+        # for idx, item in enumerate(items):
+        #     name = (item.get("name") or "").strip()
+        #     if not name:
+        #         return jsonify({"error": f"Item {idx + 1}: name is required"}), 400
+
+        #     try:
+        #         qty = int(item.get("quantity"))
+        #     except (TypeError, ValueError):
+        #         return jsonify({"error": f"Item {name}: quantity must be an integer"}), 400
+
+        #     try:
+        #         price = float(item.get("unit_price"))
+        #     except (TypeError, ValueError):
+        #         return jsonify({"error": f"Item {name}: unit_price must be a number"}), 400
+
+        #     if qty <= 0 or price <= 0:
+        #         return jsonify({"error": f"Item {name}: quantity and unit_price must be > 0"}), 400
+
+        #     # Ensure all fields are properly set
+        #     item["quantity"] = qty
+        #     item["unit_price"] = price
+        #     item["sku"] = (item.get("sku") or "").strip() or None
+        #     item["category"] = (item.get("category") or "").strip() or None
+        #     item["min_stock_level"] = int(item.get("min_stock_level") or 0)
+
+        # ---------------- Validate and normalize items ----------------
         for idx, item in enumerate(items):
             name = (item.get("name") or "").strip()
             if not name:
@@ -179,15 +205,26 @@ def create_purchase():
             except (TypeError, ValueError):
                 return jsonify({"error": f"Item {name}: unit_price must be a number"}), 400
 
-            if qty <= 0 or price <= 0:
-                return jsonify({"error": f"Item {name}: quantity and unit_price must be > 0"}), 400
+            # Optional selling price
+            selling_price = item.get("selling_price")
+            if selling_price not in (None, ""):
+                try:
+                    selling_price = float(selling_price)
+                    if selling_price <= 0:
+                        return jsonify({"error": f"Item {name}: selling_price must be > 0"}), 400
+                except (TypeError, ValueError):
+                    return jsonify({"error": f"Item {name}: selling_price must be a number"}), 400
+            else:
+                selling_price = None
 
-            # Ensure all fields are properly set
+            # Normalize the item
             item["quantity"] = qty
             item["unit_price"] = price
+            item["selling_price"] = selling_price
             item["sku"] = (item.get("sku") or "").strip() or None
             item["category"] = (item.get("category") or "").strip() or None
             item["min_stock_level"] = int(item.get("min_stock_level") or 0)
+
 
         total_amount = sum(i["quantity"] * i["unit_price"] for i in items)
 
@@ -237,7 +274,7 @@ def create_purchase():
                     category=i["category"],
                     quantity=i["quantity"],
                     unit_price=i["unit_price"],
-                    selling_price=None,
+                    selling_price=i.get("selling_price") or None,
                     min_stock_level=i["min_stock_level"],
                 )
                 db.session.add(stock)

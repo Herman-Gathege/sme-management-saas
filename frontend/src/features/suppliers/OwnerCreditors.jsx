@@ -93,8 +93,9 @@ export default function OwnerCreditors() {
   if (error) return <p className="error-text">{error}</p>;
 
   return (
+
     <div className="ownersuppliers-container">
-      <h2>Supplier Creditors</h2>
+      <h2>Suppliers your Owe Money</h2>
 
       <table className="creditors-table">
         <thead>

@@ -17,7 +17,7 @@ export default function OwnerSupplierPurchases() {
     payment_method: "credit",
     notes: "",
     items: [
-      { name: "", quantity: 1, unit_price: 0, sku: "", category: "", min_stock_level: 0 }
+      { name: "", quantity: 1, unit_price: 0, sku: "", category: "", min_stock_level: 0, selling_price: 0}
     ]
   });
 
@@ -46,7 +46,7 @@ export default function OwnerSupplierPurchases() {
       ...prev,
       items: [
         ...prev.items,
-        { name: "", quantity: 1, unit_price: 0, sku: "", category: "", min_stock_level: 0 }
+        { name: "", quantity: 1, unit_price: 0, sku: "", category: "", min_stock_level: 0, selling_price: 0}
       ]
     }));
   };
@@ -78,7 +78,8 @@ export default function OwnerSupplierPurchases() {
       unit_price: Number(item.unit_price) || 0,
       sku: item.sku?.trim() || null,
       category: item.category?.trim() || null,
-      min_stock_level: Number(item.min_stock_level) || 0
+      min_stock_level: Number(item.min_stock_level) || 0,
+      selling_price: Number(item.selling_price) || null, 
     }));
 
     // Validate
@@ -106,7 +107,7 @@ export default function OwnerSupplierPurchases() {
         payment_method: "credit",
         notes: "",
         items: [
-          { name: "", quantity: 1, unit_price: 0, sku: "", category: "", min_stock_level: 0 }
+          { name: "", quantity: 1, unit_price: 0, sku: "", category: "", min_stock_level: 0, selling_price: 0}
         ]
       });
       fetchData();
@@ -134,7 +135,7 @@ export default function OwnerSupplierPurchases() {
   // ---------------- Render ----------------
   return (
     <div className="content">
-      <h2>Supplier Purchases</h2>
+      <h2>Add New Purchase to your Stock</h2>
 
       {/* ---------- New Purchase ---------- */}
       <div className="purchase-form">
@@ -180,6 +181,7 @@ export default function OwnerSupplierPurchases() {
                 <th>SKU</th>
                 <th>Category</th>
                 <th>Min Stock</th>
+                <th>Selling Price</th>
                 <th></th>
               </tr>
             </thead>
@@ -236,6 +238,15 @@ export default function OwnerSupplierPurchases() {
                       min="0"
                       value={item.min_stock_level}
                       onChange={e => updateItem(index, "min_stock_level", Math.max(0, Number(e.target.value) || 0))}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={item.selling_price}
+                      onChange={e => updateItem(index, "selling_price", Math.max(0, parseFloat(e.target.value) || 0))}
                     />
                   </td>
                   <td>
