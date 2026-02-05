@@ -32,6 +32,10 @@ import StaffDashboard, {
 import CreateSale from "../features/sales/CreateSale";
 import ProtectedRoute from "./ProtectedRoute";
 import StaffManagement from "../features/staff/StaffManagement";
+import AllCustomers from "../features/customers/AllCustomers";
+
+
+
 
 export default function AppRoutes() {
   return (
@@ -63,6 +67,7 @@ export default function AppRoutes() {
         <Route path="customers/debtors" element={<OwnerCustomers type="debtor" />} />
         <Route path="customers/creditors" element={<OwnerCustomers type="creditor" />} />
         <Route path="customers/add" element={<CreateCustomer />} />
+        <Route path="all/customers" element={<AllCustomers />} /> 
 
         {/* Staff */}
         <Route path="staff/create" element={<CreateStaff />} />

@@ -1,23 +1,29 @@
 // frontend/src/features/customers/CreateCustomer.jsx
+
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 import styles from "../sales/Sales.module.css";
 
-export default function CreateCustomer() {
+export default function CreateCustomer({ onSuccess, onClose }) {
   const { user } = useAuth();
-  const navigate = useNavigate();
 
-  const [name, setName] = useState("");
-  const [businessName, setBusinessName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState("debtor");
-  const [notes, setNotes] = useState("");
-  const [message, setMessage] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    business_name: "",
+    phone: "",
+    email: "",
+    role: "debtor",
+    notes: "",
+  });
+
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
   const API_BASE = import.meta.env.VITE_API_URL;
+
+  const handleChange = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +32,7 @@ export default function CreateCustomer() {
 
     try {
       const token = localStorage.getItem("token");
+
       const res = await fetch(`${API_BASE}/api/customers`, {
         method: "POST",
         headers: {
@@ -33,28 +40,29 @@ export default function CreateCustomer() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          name,
-          business_name: businessName,
-          phone,
-          email,
-          role,
-          notes,
+          ...form,
           organization_id: user.organization_id,
         }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to create customer");
+      if (!res.ok) throw new Error(data.error);
 
-      setMessage("Customer created successfully!");
-      setName("");
-      setBusinessName("");
-      setPhone("");
-      setEmail("");
-      setRole("debtor");
-      setNotes("");
+      // ✅ return created customer
+      onSuccess?.(data);
 
-      navigate("/owner/customers");
+      // reset
+      setForm({
+        name: "",
+        business_name: "",
+        phone: "",
+        email: "",
+        role: "debtor",
+        notes: "",
+      });
+
+      onClose?.();
+
     } catch (err) {
       setMessage(err.message);
     } finally {
@@ -63,76 +71,44 @@ export default function CreateCustomer() {
   };
 
   return (
-    <section className={styles["sales-card"]}>
-      <h2>Create Customer</h2>
-      {message && <p className={styles.message}>{message}</p>}
+    <form onSubmit={handleSubmit} className={styles.customerForm}>
+      <h3>Add Customer</h3>
+      {message && <p>{message}</p>}
 
-      <form onSubmit={handleSubmit} className={styles["customer-form"]}>
-        {/* Row 1: Name & Business Name */}
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
-            <label>Name:</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Business Name:</label>
-            <input
-              type="text"
-              value={businessName}
-              onChange={(e) => setBusinessName(e.target.value)}
-            />
-          </div>
-        </div>
+      <input
+        placeholder="Name"
+        value={form.name}
+        onChange={(e) => handleChange("name", e.target.value)}
+        required
+      />
 
-        {/* Row 2: Phone & Email */}
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
-            <label>Phone:</label>
-            <input
-              type="text"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Email:</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-        </div>
+      <input
+        placeholder="Phone"
+        value={form.phone}
+        onChange={(e) => handleChange("phone", e.target.value)}
+      />
 
-        {/* Row 3: Role */}
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
-            <label>Role:</label>
-            <select value={role} onChange={(e) => setRole(e.target.value)}>
-              <option value="debtor">Debtor</option>
-              <option value="creditor">Creditor</option>
-              <option value="both">Both</option>
-            </select>
-          </div>
-        </div>
+      <input
+        placeholder="Email"
+        value={form.email}
+        onChange={(e) => handleChange("email", e.target.value)}
+      />
 
-        {/* Row 4: Notes */}
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
-            <label>Notes:</label>
-            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} />
-          </div>
-        </div>
+      <input
+        placeholder="Business Name"
+        value={form.business_name}
+        onChange={(e) => handleChange("business_name", e.target.value)}
+      />
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Saving..." : "Create Customer"}
-        </button>
-      </form>
-    </section>
+      <textarea
+        placeholder="Notes"
+        value={form.notes}
+        onChange={(e) => handleChange("notes", e.target.value)}
+      />
+
+      <button disabled={loading}>
+        {loading ? "Saving..." : "Save Customer"}
+      </button>
+    </form>
   );
 }

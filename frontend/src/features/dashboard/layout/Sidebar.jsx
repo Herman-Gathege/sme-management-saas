@@ -38,6 +38,7 @@ export default function Sidebar() {
     "/owner/customers/debtors",
     "/owner/customers/creditors",
     "/owner/customers/add",
+    "/owner/all/customers",
   ];
   const supplierRoutes = [
     "/owner/suppliers",
@@ -127,7 +128,7 @@ export default function Sidebar() {
                   Supplier Purchases
                 </NavLink>
                 <NavLink to="/owner/suppliers/creditors" className={linkClass}>
-                  Creditors
+                  I owe them
                 </NavLink>
               </div>
             )}
@@ -179,10 +180,13 @@ export default function Sidebar() {
             {customerOpen && !collapsed && (
               <div className={styles.subMenu}>
                 <NavLink to="/owner/customers/debtors" className={linkClass}>
-                  Debtors
+                 They owes me
                 </NavLink>
                 <NavLink to="/owner/customers/add" className={linkClass}>
                   Add Customer
+                </NavLink>
+                <NavLink to="/owner/all/customers" className={linkClass}>
+                  All Customers
                 </NavLink>
               </div>
             )}

@@ -312,3 +312,9 @@
   font-weight: 600;
   color: #4570b6;
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}

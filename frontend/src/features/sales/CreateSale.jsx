@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./Sales.module.css";
+import CreateCustomer from "../customers/CreateCustomer";
 
 export default function CreateSale() {
   const { user } = useAuth();
@@ -14,6 +15,7 @@ export default function CreateSale() {
   const [message, setMessage] = useState("");
   const [lowStockAlert, setLowStockAlert] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
 
   const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -38,28 +40,51 @@ export default function CreateSale() {
     fetchStock();
   }, [API_BASE]);
 
+  // useEffect(() => {
+  //   if (paymentMethod === "Credit") {
+  //     fetchDebtors();
+  //   }
+  // }, [paymentMethod]);
+
+  // const fetchDebtors = async () => {
+  //   const token = localStorage.getItem("token");
+
+  //   try {
+  //     const res = await fetch(`${API_BASE}/api/customers/debtors`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+
+  //     const data = await res.json();
+  //     if (!res.ok) throw new Error(data.error || "Failed to fetch debtors");
+
+  //     setCustomers(Array.isArray(data) ? data : []);
+  //   } catch (err) {
+  //     setMessage(err.message);
+  //   }
+  // };
+
   useEffect(() => {
-    if (paymentMethod !== "Credit") return;
+    if (paymentMethod === "Credit") {
+      fetchCustomers();
+    }
+  }, [paymentMethod]);
 
-    const fetchDebtors = async () => {
-      const token = localStorage.getItem("token");
-      try {
-        const res = await fetch(`${API_BASE}/api/customers/debtors`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to fetch debtors");
+  const fetchCustomers = async () => {
+    const token = localStorage.getItem("token");
 
-        setCustomers(
-          Array.isArray(data) ? data.filter((c) => c.balance > 0) : [],
-        );
-      } catch (err) {
-        setMessage(err.message);
-      }
-    };
+    try {
+      const res = await fetch(`${API_BASE}/api/customers`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    fetchDebtors();
-  }, [API_BASE, paymentMethod]);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to fetch customers");
+
+      setCustomers(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setMessage(err.message);
+    }
+  };
 
   /* =======================
      SEARCH
@@ -69,17 +94,16 @@ export default function CreateSale() {
     `${s.name} ${s.sku || ""}`.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
- const handleSearchKeyDown = (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault(); // 🔥 STOP form submission
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // 🔥 STOP form submission
 
-    if (filteredStock.length > 0) {
-      addItem(filteredStock[0]);
-      setSearchTerm("");
+      if (filteredStock.length > 0) {
+        addItem(filteredStock[0]);
+        setSearchTerm("");
+      }
     }
-  }
-};
-
+  };
 
   /* =======================
      CART LOGIC
@@ -209,6 +233,7 @@ export default function CreateSale() {
         {paymentMethod === "Credit" && (
           <div className={styles.customerSelector}>
             <label>Customer</label>
+
             <select
               value={selectedCustomer}
               onChange={(e) => setSelectedCustomer(e.target.value)}
@@ -216,10 +241,20 @@ export default function CreateSale() {
               <option value="">Select customer</option>
               {customers.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.full_name} — KES {c.balance.toFixed(2)}
+                  {c.name}
+                  {typeof c.balance === "number" &&
+                    ` — KES ${c.balance.toFixed(2)}`}
                 </option>
               ))}
             </select>
+
+            <button
+              type="button"
+              onClick={() => setShowCustomerModal(true)}
+              style={{ marginTop: "6px" }}
+            >
+              + Add Customer
+            </button>
           </div>
         )}
 
@@ -273,11 +308,12 @@ export default function CreateSale() {
                 >
                   {" "}
                   <span className={styles.resSku}>{s.sku || "—"}</span>
-  <span className={styles.resName}>{s.name}</span>
-  <span className={styles.resPrice}>
-    KES {(Number(s.selling_price ?? s.unit_price) || 0).toFixed(2)}
-  </span>
-  <span className={styles.resQuantity}>{s.quantity}</span>
+                  <span className={styles.resName}>{s.name}</span>
+                  <span className={styles.resPrice}>
+                    KES{" "}
+                    {(Number(s.selling_price ?? s.unit_price) || 0).toFixed(2)}
+                  </span>
+                  <span className={styles.resQuantity}>{s.quantity}</span>
                 </div>
               ))}
               {filteredStock.length === 0 && (
@@ -348,6 +384,43 @@ export default function CreateSale() {
           </table>
         </div>
       </form>
+      {/* {showCustomerModal && (
+        <div className={styles.modalBackdrop}>
+          <div className={styles.modal}>
+            <CreateCustomer
+              onClose={() => setShowCustomerModal(false)}
+              onSuccess={(newCustomer) => {
+                fetchDebtors(); // 🔥 refresh list
+                setSelectedCustomer(newCustomer.id); // auto select
+              }}
+            />
+          </div>
+        </div>
+      )} */}
+
+      {showCustomerModal && (
+        <div className={styles.modalBackdrop}>
+          <div className={styles.modal}>
+            {/* Close button */}
+            <button
+              type="button"
+              className={styles.modalCloseBtn}
+              onClick={() => setShowCustomerModal(false)}
+            >
+              ✕
+            </button>
+
+            <CreateCustomer
+              onClose={() => setShowCustomerModal(false)}
+              onSuccess={(newCustomer) => {
+                fetchCustomers(); // refresh list
+                setSelectedCustomer(newCustomer.id); // auto select
+                setShowCustomerModal(false); // close after success
+              }}
+            />
+          </div>
+        </div>
+      )}
     </section>
   );
 }

@@ -24,7 +24,8 @@ def validate_role(role):
 
 @customers_bp.route("", methods=["POST"])
 @jwt_required()
-@owner_required
+@owner_or_staff_required
+# @owner_required
 def create_customer():
     try:
         data = request.get_json()
