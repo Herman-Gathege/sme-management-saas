@@ -3,6 +3,8 @@ import { useAuth } from "../../context/AuthContext";
 import styles from "./Dashboard.module.css";
 import TodaysSales from "../dashboard/widgets/TodaysSales";
 import StockAlerts from "../dashboard/widgets/StockAlerts";
+import TodaysCreditSales from "./widgets/TodaysCreditSales";
+
 
 
 export default function DashboardContent({ roleLabel }) {
@@ -19,7 +21,7 @@ export default function DashboardContent({ roleLabel }) {
       <div className={styles.info}>
          <StockAlerts />
         <TodaysSales />
-       
+        <TodaysCreditSales />       
       </div>
     </div>
   );
