@@ -5,17 +5,30 @@ import styles from "./DashboardLayout.module.css";
 export default function Navbar() {
   const { user, logout } = useAuth();
 
-  // Hooks are always called first
+  // hooks FIRST
   const [open, setOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isFullscreen, setIsFullscreen] = useState(
+    !!document.fullscreenElement
+  );
 
-  // Update time every second
+  // update clock
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // If user not loaded yet, render empty header (no hooks skipped)
+  // track fullscreen changes (esc, f11, button)
+  useEffect(() => {
+    const handler = () =>
+      setIsFullscreen(!!document.fullscreenElement);
+
+    document.addEventListener("fullscreenchange", handler);
+    return () =>
+      document.removeEventListener("fullscreenchange", handler);
+  }, []);
+
+  // user not loaded
   if (!user) return <header className={styles.navbar} />;
 
   const formattedTime = currentTime.toLocaleTimeString([], {
@@ -31,13 +44,35 @@ export default function Navbar() {
     year: "numeric",
   });
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(console.error);
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
   return (
     <header className={styles.navbar}>
+      {/* LEFT */}
+      <div className={styles.left}>
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          className={styles.fullscreenBtn}
+          title="Toggle Fullscreen"
+        >
+          {isFullscreen ? "⤫" : "⛶"}
+        </button>
+      </div>
+
+      {/* CENTER */}
       <div className={styles.timeWrapper}>
         <span className={styles.date}>{formattedDate}</span>
         <span className={styles.time}>{formattedTime}</span>
       </div>
 
+      {/* RIGHT */}
       <div className={styles.avatarWrapper}>
         <div
           className={styles.avatar}

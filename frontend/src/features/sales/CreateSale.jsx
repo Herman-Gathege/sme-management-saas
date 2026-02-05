@@ -1,25 +1,26 @@
-// frontend/src/features/sales/CreateSale.jsx
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./Sales.module.css";
 
 export default function CreateSale() {
   const { user } = useAuth();
+
   const [stockItems, setStockItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("Cash");
+  const [searchTerm, setSearchTerm] = useState("");
   const [message, setMessage] = useState("");
   const [lowStockAlert, setLowStockAlert] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState("Cash");
-  const itemsPerPage = 5;
 
   const API_BASE = import.meta.env.VITE_API_URL;
 
-  // Fetch stock
+  /* =======================
+     DATA FETCHING
+  ======================= */
+
   useEffect(() => {
     const fetchStock = async () => {
       const token = localStorage.getItem("token");
@@ -37,7 +38,6 @@ export default function CreateSale() {
     fetchStock();
   }, [API_BASE]);
 
-  // Fetch debtors only when Credit is selected
   useEffect(() => {
     if (paymentMethod !== "Credit") return;
 
@@ -50,41 +50,62 @@ export default function CreateSale() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to fetch debtors");
 
-        const activeDebtors = Array.isArray(data)
-          ? data.filter((c) => c.balance > 0)
-          : [];
-        setCustomers(activeDebtors);
+        setCustomers(
+          Array.isArray(data) ? data.filter((c) => c.balance > 0) : [],
+        );
       } catch (err) {
         setMessage(err.message);
       }
     };
+
     fetchDebtors();
   }, [API_BASE, paymentMethod]);
 
-  // Stock filtering & pagination
-  const filteredStock = stockItems.filter((s) =>
-    s.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentStock = filteredStock.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredStock.length / itemsPerPage);
+  /* =======================
+     SEARCH
+  ======================= */
 
-  // Cart logic
+  const filteredStock = stockItems.filter((s) =>
+    `${s.name} ${s.sku || ""}`.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+ const handleSearchKeyDown = (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault(); // 🔥 STOP form submission
+
+    if (filteredStock.length > 0) {
+      addItem(filteredStock[0]);
+      setSearchTerm("");
+    }
+  }
+};
+
+
+  /* =======================
+     CART LOGIC
+  ======================= */
+
   const addItem = (stock) => {
+    const price = Number(stock.selling_price ?? stock.unit_price ?? 0);
+
     setSelectedItems((prev) => {
-      const exists = prev.find((i) => i.stock_id === stock.id);
-      if (exists)
+      const existing = prev.find((i) => i.stock_id === stock.id);
+
+      if (existing) {
         return prev.map((i) =>
           i.stock_id === stock.id ? { ...i, quantity: i.quantity + 1 } : i,
         );
+      }
+
       return [
         ...prev,
         {
           stock_id: stock.id,
+          sku: stock.sku,
           name: stock.name,
+          category: stock.category,
           quantity: 1,
-          unit_price: stock.unit_price,
+          selling_price: price, // 🔒 always a number
         },
       ];
     });
@@ -97,57 +118,64 @@ export default function CreateSale() {
     );
   };
 
-  const removeItem = (index) =>
+  const removeItem = (index) => {
     setSelectedItems((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const total = selectedItems.reduce(
-    (sum, item) => sum + item.unit_price * item.quantity,
+    (sum, i) => sum + i.selling_price * i.quantity,
     0,
   );
 
-  // Handle sale submission
+  /* =======================
+     SUBMIT SALE
+  ======================= */
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (selectedItems.length === 0)
-      return setMessage("Select at least one item");
+
+    if (selectedItems.length === 0) return setMessage("Add at least one item");
     if (paymentMethod === "Credit" && !selectedCustomer)
-      return setMessage("Select a customer for credit sale");
+      return setMessage("Select customer for credit sale");
 
     setLoading(true);
     setMessage("");
     setLowStockAlert([]);
+
     try {
       const token = localStorage.getItem("token");
-      const payload = { items: selectedItems, paymentMethod };
-      if (paymentMethod === "Credit") payload.customer_id = selectedCustomer;
+
+      const payload = {
+        items: selectedItems.map((i) => ({
+          stock_id: i.stock_id,
+          quantity: i.quantity,
+          price: i.selling_price, // 🔥 explicit selling price
+        })),
+        paymentMethod,
+        ...(paymentMethod === "Credit" && {
+          customer_id: selectedCustomer,
+        }),
+      };
 
       const res = await fetch(`${API_BASE}/api/sales`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Sale creation failed");
+      if (!res.ok) throw new Error(data.error || "Sale failed");
 
-      // Show low stock alerts
-      if (
-        Array.isArray(data.low_stock_items) &&
-        data.low_stock_items.length > 0
-      ) {
+      if (Array.isArray(data.low_stock_items)) {
         setLowStockAlert(data.low_stock_items);
       }
 
-      setMessage(
-        `Sale created successfully! Total: KES ${data.total_amount}${
-          data.customer ? ` | Customer: ${data.customer}` : ""
-        }`,
-      );
       setSelectedItems([]);
       setSelectedCustomer("");
+      setMessage(`Sale completed — Total KES ${data.total_amount}`);
     } catch (err) {
       setMessage(err.message);
     } finally {
@@ -155,221 +183,40 @@ export default function CreateSale() {
     }
   };
 
+  /* =======================
+     UI
+  ======================= */
+
   return (
-    // <section className={styles["sales-card"]}>
-    //   <h2>Create Sale</h2>
-
-    //   {/* Search */}
-    //   <input
-    //     type="text"
-    //     placeholder="Search stock..."
-    //     value={searchTerm}
-    //     autoFocus
-    //     onChange={(e) => setSearchTerm(e.target.value)}
-    //     className={styles.searchInput}
-    //   />
-
-    //   {/* Stock List */}
-    //   <div className={styles["card"]}>
-    //     <h3>Available Stock</h3>
-    //     {currentStock.length === 0 ? (
-    //       <p>No stock items found</p>
-    //     ) : (
-    //       <table className={styles["stock-table"]}>
-    //         <thead>
-    //           <tr>
-    //             <th>Name</th>
-    //             <th>Price</th>
-    //             <th>Qty Available</th>
-    //             <th>Add</th>
-    //           </tr>
-    //         </thead>
-    //         <tbody>
-    //           {currentStock.map((s) => (
-    //             <tr key={s.id}>
-    //               <td>{s.name}</td>
-    //               <td>KES {s.unit_price.toFixed(2)}</td>
-    //               <td>{s.quantity}</td>
-    //               <td>
-    //                 <button
-    //                   onClick={() => addItem(s)}
-    //                   disabled={s.quantity === 0}
-    //                 >
-    //                   {s.quantity === 0 ? "Out of Stock" : "Add"}
-    //                 </button>
-    //               </td>
-    //             </tr>
-    //           ))}
-    //         </tbody>
-    //       </table>
-    //     )}
-
-    //     {/* Pagination */}
-    //     {totalPages > 1 && (
-    //       <div className={styles.pagination}>
-    //         <button
-    //           onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-    //           disabled={currentPage === 1}
-    //         >
-    //           Prev
-    //         </button>
-    //         <span>
-    //           Page {currentPage} of {totalPages}
-    //         </span>
-    //         <button
-    //           onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-    //           disabled={currentPage === totalPages}
-    //         >
-    //           Next
-    //         </button>
-    //       </div>
-    //     )}
-    //   </div>
-
-    //   {/* Selected Items */}
-    //   <form onSubmit={handleSubmit} className={styles["card"]}>
-    //     <h3>Selected Items</h3>
-    //     {selectedItems.length === 0 ? (
-    //       <p>No items selected</p>
-    //     ) : (
-    //       <table className={styles["stock-table"]}>
-    //         <thead>
-    //           <tr>
-    //             <th>Name</th>
-    //             <th>Quantity</th>
-    //             <th>Unit Price</th>
-    //             <th>Subtotal</th>
-    //             <th>Remove</th>
-    //           </tr>
-    //         </thead>
-    //         <tbody>
-    //           {selectedItems.map((item, i) => (
-    //             <tr key={i}>
-    //               <td>{item.name}</td>
-    //               <td>
-    //                 <div className={styles.qtyControl}>
-    //                   <button
-    //                     type="button"
-    //                     onClick={() => updateQuantity(i, item.quantity - 1)}
-    //                     disabled={item.quantity === 1}
-    //                   >
-    //                     −
-    //                   </button>
-    //                   <span className={styles.qtyValue}>{item.quantity}</span>
-    //                   <button
-    //                     type="button"
-    //                     onClick={() => updateQuantity(i, item.quantity + 1)}
-    //                   >
-    //                     +
-    //                   </button>
-    //                 </div>
-    //               </td>
-    //               <td>KES {item.unit_price.toFixed(2)}</td>
-    //               <td>KES {(item.unit_price * item.quantity).toFixed(2)}</td>
-    //               <td>
-    //                 <button type="button" onClick={() => removeItem(i)}>
-    //                   Remove
-    //                 </button>
-    //               </td>
-    //             </tr>
-    //           ))}
-    //         </tbody>
-    //       </table>
-    //     )}
-
-    //     {/* Cart Summary */}
-    //     <div className={styles.cartSummary}>
-    //       <p>
-    //         {selectedItems.length} item(s) | Total: KES {total.toFixed(2)}
-    //       </p>
-    //     </div>
-
-    //     {/* Payment Method */}
-    //     <div className={styles.paymentMethods}>
-    //       <p>Select Payment Method</p>
-    //       <div className={styles.paymentButtons}>
-    //         <button type="button" onClick={() => setPaymentMethod("Cash")}>
-    //           Cash
-    //         </button>
-    //         <button type="button" onClick={() => setPaymentMethod("M-Pesa")}>
-    //           M-Pesa
-    //         </button>
-    //         <button type="button" onClick={() => setPaymentMethod("Credit")}>
-    //           Credit
-    //         </button>
-    //       </div>
-
-    //       {/* Customer Selector for Credit */}
-    //       {paymentMethod === "Credit" && (
-    //         <div className={styles.customerSelector}>
-    //           <label>Select Customer:</label>
-    //           <select
-    //             value={selectedCustomer}
-    //             onChange={(e) => setSelectedCustomer(e.target.value)}
-    //           >
-    //             <option value="">--Select Customer--</option>
-    //             {customers.map((c) => (
-    //               <option key={c.id} value={c.id}>
-    //                 {c.full_name} | Owes: KES {c.balance.toFixed(2)}
-    //               </option>
-    //             ))}
-    //           </select>
-    //         </div>
-    //       )}
-    //     </div>
-
-    //     {/* Confirm Sale */}
-    //     <button type="submit" disabled={loading} className={styles.confirmButton}>
-    //       {loading ? "Submitting..." : "Confirm Sale"}
-    //     </button>
-    //   </form>
-
-    //   {/* Messages */}
-    //   {message && <p className={styles.message}>{message}</p>}
-
-    //   {/* Low stock alerts */}
-    //   {lowStockAlert.length > 0 && (
-    //     <div className={styles.lowStockAlert}>
-    //       <h4>⚠ Low Stock Alert</h4>
-    //       <ul>
-    //         {lowStockAlert.map((item) => (
-    //           <li key={item.id}>
-    //             {item.name} — Remaining: {item.quantity}
-    //           </li>
-    //         ))}
-    //       </ul>
-    //     </div>
-    //   )}
-    // </section>
-
     <section className={styles.posLayout}>
-      {/* LEFT — Payment Panel */}
+      {/* LEFT: PAYMENT */}
       <aside className={styles.paymentPanel}>
-        <h3>Payment</h3>
+        <h3>Choose Payment</h3>
 
         <div className={styles.paymentButtons}>
-          <button type="button" onClick={() => setPaymentMethod("Cash")}>
-            Cash
-          </button>
-          <button type="button" onClick={() => setPaymentMethod("M-Pesa")}>
-            M-Pesa
-          </button>
-          <button type="button" onClick={() => setPaymentMethod("Credit")}>
-            Credit
-          </button>
+          {["Cash", "M-Pesa", "Credit"].map((m) => (
+            <button
+              key={m}
+              type="button"
+              className={paymentMethod === m ? styles.activePayment : undefined}
+              onClick={() => setPaymentMethod(m)}
+            >
+              {m}
+            </button>
+          ))}
         </div>
 
         {paymentMethod === "Credit" && (
           <div className={styles.customerSelector}>
-            <label>Select Customer</label>
+            <label>Customer</label>
             <select
               value={selectedCustomer}
               onChange={(e) => setSelectedCustomer(e.target.value)}
             >
-              <option value="">--Select--</option>
+              <option value="">Select customer</option>
               {customers.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.full_name} | Owes: KES {c.balance.toFixed(2)}
+                  {c.full_name} — KES {c.balance.toFixed(2)}
                 </option>
               ))}
             </select>
@@ -377,8 +224,7 @@ export default function CreateSale() {
         )}
 
         <div className={styles.cartSummary}>
-          {selectedItems.length} item(s)
-          <br />
+          <span>{selectedItems.length} items</span>
           <strong>KES {total.toFixed(2)}</strong>
         </div>
 
@@ -387,108 +233,112 @@ export default function CreateSale() {
           disabled={loading}
           className={styles.confirmButton}
         >
-          {loading ? "Submitting..." : "Confirm Sale"}
+          {loading ? "Processing…" : "Confirm Sale"}
         </button>
       </aside>
 
-      {/* RIGHT — Stock + Search */}
-      <div className={styles.stockPanel}>
-        <input
-          type="text"
-          placeholder="Search stock..."
-          value={searchTerm}
-          autoFocus
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className={styles.searchInput}
-        />
+      {/* RIGHT: CART */}
+      <form className={styles.cartPanel} onSubmit={handleSubmit}>
+        <div className={styles.searchBar}>
+          <input
+            autoFocus
+            type="text"
+            placeholder="Scan barcode or search item"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+          />
 
-        {/* scrollable table */}
-        <div className={styles.stockTableWrapper}>
-          <table className={styles["stock-table"]}>
+          {/* <button type="submit">
+            <FaSearch />
+          </button> */}
+
+          {searchTerm && (
+            <div className={styles.searchResults}>
+              <div className={styles.searchHeader}>
+                <span>SKU</span>
+                <span>Item</span>
+                <span>Price</span>
+                <span>Qty</span>
+              </div>
+
+              {filteredStock.slice(0, 6).map((s) => (
+                <div
+                  key={s.id}
+                  className={styles.searchRow}
+                  onClick={() => {
+                    addItem(s);
+                    setSearchTerm("");
+                  }}
+                >
+                  {" "}
+                  <span className={styles.resSku}>{s.sku || "—"}</span>
+  <span className={styles.resName}>{s.name}</span>
+  <span className={styles.resPrice}>
+    KES {(Number(s.selling_price ?? s.unit_price) || 0).toFixed(2)}
+  </span>
+  <span className={styles.resQuantity}>{s.quantity}</span>
+                </div>
+              ))}
+              {filteredStock.length === 0 && (
+                <div className={styles.noResult}>No items found</div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className={styles.cartTableWrapper}>
+          <table className={styles.cartTable}>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Qty</th>
-                <th>Add</th>
+                <th>#</th>
+                <th>SKU Number</th>
+                <th>Item Name</th>
+                <th>Item Category</th>
+                <th>Quantityy</th>
+                <th>Item Price</th>
+                <th>Total</th>
+                <th />
               </tr>
             </thead>
             <tbody>
-              {currentStock.map((s) => (
-                <tr key={s.id}>
-                  <td>{s.name}</td>
-                  <td>KES {s.unit_price.toFixed(2)}</td>
-                  <td>{s.quantity}</td>
-                  <td>
-                    <button
-                      onClick={() => addItem(s)}
-                      disabled={s.quantity === 0}
-                    >
-                      Add
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* pagination stays fixed at bottom */}
-        {totalPages > 1 && (
-          <div className={styles.pagination}>
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Prev
-            </button>
-
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </button>
-          </div>
-        )}
-      </div>
-      
-
-      {/* BOTTOM — Cart */}
-      <form onSubmit={handleSubmit} className={styles.cartPanel}>
-        <h3>Items in Sale</h3>
-
-        <div className={styles.cartScroll}>
-          <table className={styles["stock-table"]}>
-            <tbody>
-              {selectedItems.map((item, i) => (
-                <tr key={i}>
-                  <td>{item.name}</td>
+              {selectedItems.map((i, idx) => (
+                <tr key={idx}>
+                  <td>{idx + 1}</td>
+                  <td>{i.sku || "—"}</td>
+                  <td>{i.name}</td>
+                  <td>{i.category || "—"}</td>
                   <td>
                     <div className={styles.qtyControl}>
                       <button
                         type="button"
-                        onClick={() => updateQuantity(i, item.quantity - 1)}
-                        disabled={item.quantity === 1}
+                        onClick={() => updateQuantity(idx, i.quantity - 1)}
                       >
                         −
                       </button>
-                      <span>{item.quantity}</span>
+                      <span>{i.quantity}</span>
                       <button
                         type="button"
-                        onClick={() => updateQuantity(i, item.quantity + 1)}
+                        onClick={() => updateQuantity(idx, i.quantity + 1)}
                       >
                         +
                       </button>
                     </div>
                   </td>
-                  <td>KES {(item.unit_price * item.quantity).toFixed(2)}</td>
+                  <td>KES {(Number(i.selling_price) || 0).toFixed(2)}</td>
                   <td>
-                    <button type="button" onClick={() => removeItem(i)}>
+                    <strong>
+                      KES{" "}
+                      {((Number(i.selling_price) || 0) * i.quantity).toFixed(2)}
+                    </strong>
+                  </td>
+
+                  <td>
+                    <button
+                      type="button"
+                      className={styles.removeBtn}
+                      onClick={() => removeItem(idx)}
+                    >
                       ✕
                     </button>
                   </td>

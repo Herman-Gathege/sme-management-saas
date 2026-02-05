@@ -1,278 +1,233 @@
-/* Sales.module.css */
+/* ===============================
+   POS LAYOUT
+================================ */
 
-.sales-card {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-  margin-bottom: 2rem;
-}
-
-.sales-card h2 {
-  font-size: 1.6rem;
-  margin-bottom: 1rem;
-  color: #1f2937;
-}
-
-.card {
-  background: #fefefe;
+.posLayout {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1rem;
   padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-}
-
-.card h3 {
-  font-size: 1.2rem;
-  margin-bottom: 0.75rem;
-  color: #374151;
-}
-
-.searchInput {
-  width: 100%;
-  padding: 0.5rem 0.8rem;
-  margin-bottom: 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.95rem;
-}
-
-.stock-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-  color: #374151;
-}
-
-.stock-table th, .stock-table td {
-  padding: 0.6rem;
-  border-bottom: 1px solid #e5e7eb;
-  text-align: left;
-}
-
-.stock-table th {
   background: #f3f4f6;
+  overflow: hidden;
+}
+
+
+/* ===============================
+   PAYMENT PANEL
+================================ */
+
+.paymentPanel {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.paymentButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.paymentButtons button {
+  padding: 0.7rem;
   font-weight: 600;
-}
-
-.stock-table tr:hover {
-  background: #f9fafb;
-}
-
-.stock-table input[type="number"] {
-  width: 60px;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  text-align: center;
-}
-
-button {
-  background: #4f46e5;
-  color: #fff;
-  border: none;
-  padding: 0.3rem 0.7rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-button:hover {
-  background: #4338ca;
-}
-
-button:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-}
-
-.message {
-  margin-top: 1rem;
-  font-weight: 600;
+  border-radius: 6px;
+  background: #e5e7eb;
   color: #111;
 }
 
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 0.75rem;
+.activePayment {
+  background: #4f46e5;
+  color: white;
 }
+
+.customerSelector select {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+.cartSummary {
+  margin-top: auto;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.confirmButton {
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 8px;
+  background: #10b981;
+  color: white;
+}
+
+/* ===============================
+   CART PANEL
+================================ */
+
+.cartPanel {
+  flex: 1;
+  /* min-width: 520px; 🔥 POS-friendly minimum */
+  background: #fff;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* 🔥 allow dropdown to overflow */
+}
+
+
+.searchBar {
+  position: relative;
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  width: 100%;
+}
+
+.searchBar input {
+  width: 100%;
+  height: 50px;
+  padding: 0 18px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+/* SEARCH RESULTS — EXACT SAME WIDTH AS CART */
+.searchResults {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+
+  max-height: 260px;
+  overflow-y: auto;
+
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  z-index: 50;
+}
+
+
+
+/* .resQuantity{
+  margin-left: 10px;
+} */
+
+.searchRow,
+.searchHeader {
+  display: grid;
+  grid-template-columns:
+    minmax(90px, 140px)   /* SKU */
+    1fr                   /* NAME */
+    minmax(90px, 140px)   /* PRICE */
+    minmax(60px, 90px);   /* QTY */
+
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+
+.searchRow:hover {
+  background: #f9fafb;
+}
+
+/* SKU */
+.resSku {
+  font-size: 13px;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* NAME */
+.resName {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* PRICE */
+.resPrice {
+  text-align: right;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* QTY */
+.resQuantity {
+  text-align: right;
+  font-size: 13px;
+  color: #374151;
+}
+
+
+
+
+.itemName {
+  font-weight: 600;
+}
+
+.noResult {
+  padding: 10px;
+  text-align: center;
+  color: #777;
+}
+
+/* CART TABLE */
+
+.cartTableWrapper {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.cartTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.cartTable th,
+.cartTable td {
+  padding: 0.6rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cartTable th {
+  background: #f3f4f6;
+}
+
+/* QUANTITY */
 
 .qtyControl {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;            /* space between - qty + */
-  background: #f9fafb;
-  padding: 0.25rem 0.4rem;
-  border-radius: 6px;
+  gap: 0.5rem;
 }
 
 .qtyControl button {
   width: 28px;
   height: 28px;
-  padding: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.qtyValue {
-  min-width: 20px;
-  text-align: center;
-  font-weight: 600;
-  color: #111827;
-}
-
-/* Cart summary at bottom */
-.cartSummary {
-  margin: 1rem 0;
-  font-weight: 600;
-  font-size: 1rem;
-  background: #f3f4f6;
-  padding: 0.5rem 0.8rem;
-  border-radius: 6px;
-  text-align: center;
-}
-
-/* Payment method section */
-.paymentMethods {
-  margin: 1rem 0;
-}
-
-.paymentButtons {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.paymentButtons button {
-  flex: 1;
-  padding: 0.6rem 0;
-  font-weight: 600;
-  border-radius: 6px;
-}
-
-.customerSelector {
-  margin-top: 0.5rem;
-  background: #fef3c7;
-  padding: 0.5rem;
-  border-radius: 6px;
-  text-align: center;
-  font-size: 0.95rem;
-  color: #92400e;
-}
-
-/* Confirm Sale button larger for rush mode */
-.confirmButton {
-  width: 100%;
-  padding: 0.8rem;
-  font-size: 1.1rem;
-  margin-top: 1rem;
-  background: #10b981;
-}
-
-.confirmButton:hover {
-  background: #059669;
-}
-
-/* add customer form css */
-
-.customer-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.formRow {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.formGroup {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.formGroup input,
-.formGroup select,
-.formGroup textarea {
-  padding: 0.5rem;
   border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-/* ===============================
-   POS FULLSCREEN LAYOUT
-================================*/
-
-.posLayout {
-  height: 100vh;
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  grid-template-rows: 60% 40%;
-  gap: 1rem;
-  padding: 1rem;
-  background: #f3f4f6;
-  overflow: hidden;
-}
-
-/* LEFT */
-.paymentPanel {
-  grid-row: 1 / span 2;
-  background: white;
-  padding: 1rem;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-/* RIGHT TOP */
-.stockPanel {
-  background: white;
-  border-radius: 10px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.stockTableWrapper {
-  flex: 1;
-  overflow-y: auto;
-}
-
-/* BOTTOM CART */
-.cartPanel {
-  background: white;
-  border-radius: 10px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.cartScroll {
-  flex: 1;
-  overflow-y: auto;
-}
-
-/* bigger confirm button */
-.confirmButton {
-  margin-top: auto;
-  padding: 1rem;
-  font-size: 1.2rem;
   font-weight: 700;
-  background: #10b981;
+  background: #e5e7eb;
+  color: #111;
 }
 
-/* sticky POS feeling */
-.stock-table {
-  font-size: 0.9rem;
+.removeBtn {
+  background: none;
+  color: #dc2626;
+  font-size: 1.1rem;
 }

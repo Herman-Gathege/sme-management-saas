@@ -70,7 +70,10 @@ def create_sale():
             if stock.quantity < item["quantity"]:
                 return jsonify({"error": f"Insufficient stock for {stock.name}"}), 400
 
-            subtotal = float(stock.unit_price) * int(item["quantity"])
+            price = float(item["price"])   # 🔥 selling price from POS
+            qty = int(item["quantity"])
+
+            subtotal = price * qty
             total_amount += subtotal
 
             # Deduct stock
@@ -89,7 +92,7 @@ def create_sale():
                 SaleItem(
                     stock_id=stock.id,
                     quantity=int(item["quantity"]),
-                    unit_price=float(stock.unit_price),
+                    unit_price=price,
                     line_total=subtotal
                 )
             )

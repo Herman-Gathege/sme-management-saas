@@ -125,9 +125,15 @@
   border-bottom: 1px solid #e5e7eb;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   padding: 0 1.5rem;
 }
+
+/* .navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+} */
 
 /* Avatar */
 .avatarWrapper {
@@ -171,6 +177,27 @@
 .dropdown button:hover {
   background: #f1f5f9;
 }
+
+
+
+.left {
+  display: flex;
+  align-items: center;
+}
+
+.fullscreenBtn {
+  background: #111827;
+  color: white;
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  font-size: 1.1rem;
+  margin-right: 10px;
+}
+
+.fullscreenBtn:hover {
+  background: #000;
+}
+
 
 /* Content */
 .content {
