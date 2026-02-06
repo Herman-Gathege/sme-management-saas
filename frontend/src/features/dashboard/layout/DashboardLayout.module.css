@@ -318,3 +318,51 @@
   justify-content: center;
   margin-top: 1rem;
 }
+
+
+/* Header inside card */
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+/* Summary cards container */
+.summary-cards {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* Individual summary card */
+.summary-card {
+  background: #f3f4f6;
+  padding: 1rem;
+  border-radius: 8px;
+  min-width: 120px;
+  text-align: center;
+  font-weight: 500;
+  flex: 1 1 120px;
+}
+
+/* Filter buttons container */
+.filter-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+/* Table wrapper for horizontal scroll */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+/* No data row */
+.no-data {
+  text-align: center;
+  padding: 1rem 0;
+  color: #6b7280;
+}

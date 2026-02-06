@@ -33,6 +33,7 @@ import CreateSale from "../features/sales/CreateSale";
 import ProtectedRoute from "./ProtectedRoute";
 import StaffManagement from "../features/staff/StaffManagement";
 import AllCustomers from "../features/customers/AllCustomers";
+import Reports from "../features/reports/Reports";
 
 
 
@@ -68,6 +69,9 @@ export default function AppRoutes() {
         <Route path="customers/creditors" element={<OwnerCustomers type="creditor" />} />
         <Route path="customers/add" element={<CreateCustomer />} />
         <Route path="all/customers" element={<AllCustomers />} /> 
+
+        {/* Reports */}
+        <Route path="reports" element={<Reports />} />
 
         {/* Staff */}
         <Route path="staff/create" element={<CreateStaff />} />

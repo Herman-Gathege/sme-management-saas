@@ -198,7 +198,7 @@ export default function Sidebar() {
             </NavLink>
 
             {/* REPORTS */}
-            <NavLink to="/reports" className={linkClass}>
+            <NavLink to="/owner/reports" className={linkClass}>
               {!collapsed && <span>Reports</span>}
               <FiFileText className={styles.icon} />
             </NavLink>
