@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./Sales.module.css";
 import CreateCustomer from "../customers/CreateCustomer";
+import CustomerSelector from "./CustomerSelector";
+import PaymentSelector from "./PaymentSelector";
 
 export default function CreateSale() {
   const { user } = useAuth();
@@ -10,7 +12,8 @@ export default function CreateSale() {
   const [selectedItems, setSelectedItems] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("Cash");
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentError, setPaymentError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [message, setMessage] = useState("");
   const [lowStockAlert, setLowStockAlert] = useState([]);
@@ -18,6 +21,14 @@ export default function CreateSale() {
   const [showCustomerModal, setShowCustomerModal] = useState(false);
 
   const API_BASE = import.meta.env.VITE_API_URL;
+  const PAYMENT_METHODS = ["Cash", "M-Pesa", "Credit"];
+  const isConfirmDisabled =
+  loading ||
+  selectedItems.length === 0 ||
+  !paymentMethod ||
+  (paymentMethod === "Credit" && !selectedCustomer);
+
+
 
   /* =======================
      DATA FETCHING
@@ -158,12 +169,25 @@ export default function CreateSale() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (selectedItems.length === 0) return setMessage("Add at least one item");
-    if (paymentMethod === "Credit" && !selectedCustomer)
-      return setMessage("Select customer for credit sale");
+    setPaymentError("");
+    setMessage("");
+
+    if (!paymentMethod) {
+      setPaymentError("Please select a payment method to continue.");
+      return;
+    }
+
+    if (paymentMethod === "Credit" && !selectedCustomer) {
+      setPaymentError("Please select a customer for credit sales.");
+      return;
+    }
+
+    if (selectedItems.length === 0) {
+      setMessage("Add at least one item");
+      return;
+    }
 
     setLoading(true);
-    setMessage("");
     setLowStockAlert([]);
 
     try {
@@ -215,62 +239,59 @@ export default function CreateSale() {
     <section className={styles.posLayout}>
       {/* LEFT: PAYMENT */}
       <aside className={styles.paymentPanel}>
-        <h3>Choose Payment</h3>
+  <h3>Choose Payment</h3>
 
-        <div className={styles.paymentButtons}>
-          {["Cash", "M-Pesa", "Credit"].map((m) => (
-            <button
-              key={m}
-              type="button"
-              className={paymentMethod === m ? styles.activePayment : undefined}
-              onClick={() => setPaymentMethod(m)}
-            >
-              {m}
-            </button>
-          ))}
-        </div>
+  <PaymentSelector
+    value={paymentMethod}
+    methods={PAYMENT_METHODS}
+    styles={styles}
+    onChange={setPaymentMethod}
+    clearError={() => setPaymentError("")}
+  />
 
-        {paymentMethod === "Credit" && (
-          <div className={styles.customerSelector}>
-            <label>Customer</label>
+  {paymentError && (
+  <p className={styles.paymentError}>{paymentError}</p>
+)}
 
-            <select
-              value={selectedCustomer}
-              onChange={(e) => setSelectedCustomer(e.target.value)}
-            >
-              <option value="">Select customer</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                  {typeof c.balance === "number" &&
-                    ` — KES ${c.balance.toFixed(2)}`}
-                </option>
-              ))}
-            </select>
 
-            <button
-              type="button"
-              onClick={() => setShowCustomerModal(true)}
-              style={{ marginTop: "6px" }}
-            >
-              + Add Customer
-            </button>
-          </div>
-        )}
+  {paymentMethod === "Credit" && (
+    <CustomerSelector
+      customers={customers}
+      selectedCustomer={selectedCustomer}
+      setSelectedCustomer={setSelectedCustomer}
+      onAddCustomer={() => setShowCustomerModal(true)}
+      styles={styles}
+    />
+  )}
 
-        <div className={styles.cartSummary}>
-          <span>{selectedItems.length} items</span>
-          <strong>KES {total.toFixed(2)}</strong>
-        </div>
+  <div className={styles.cartSummary}>
+    <span>{selectedItems.length} items</span>
+    <strong>KES {total.toFixed(2)}</strong>
+  </div>
 
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className={styles.confirmButton}
-        >
-          {loading ? "Processing…" : "Confirm Sale"}
-        </button>
-      </aside>
+  {/* <button
+    onClick={handleSubmit}
+    disabled={
+      loading ||
+      !paymentMethod ||
+      (paymentMethod === "Credit" && !selectedCustomer)
+    }
+    className={styles.confirmButton}
+  >
+    {loading ? "Processing…" : "Confirm Sale"}
+  </button> */}
+
+  <button
+  type="button"
+  onClick={handleSubmit}
+  disabled={isConfirmDisabled}
+  className={styles.confirmButton}
+>
+  {loading ? "Processing…" : "Confirm Sale"}
+</button>
+
+</aside>
+
 
       {/* RIGHT: CART */}
       <form className={styles.cartPanel} onSubmit={handleSubmit}>

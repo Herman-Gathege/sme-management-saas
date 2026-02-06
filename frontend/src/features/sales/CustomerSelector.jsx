@@ -1,0 +1,32 @@
+export default function CustomerSelector({
+  customers,
+  selectedCustomer,
+  setSelectedCustomer,
+  onAddCustomer,
+  styles,
+}) {
+  return (
+    <div className={styles.customerSelector}>
+      <label>Customer</label>
+
+      <select
+        value={selectedCustomer}
+        onChange={(e) => setSelectedCustomer(e.target.value)}
+      >
+        <option value="">Select customer</option>
+
+        {customers.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.name}
+            {typeof c.balance === "number" &&
+              ` — KES ${c.balance.toFixed(2)}`}
+          </option>
+        ))}
+      </select>
+
+      <button type="button" onClick={onAddCustomer}>
+        + Add Customer
+      </button>
+    </div>
+  );
+}

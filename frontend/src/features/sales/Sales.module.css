@@ -132,6 +132,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   z-index: 50;
+  cursor: pointer;
 }
 
 
@@ -242,10 +243,28 @@
   font-weight: 700;
   background: #e5e7eb;
   color: #111;
+
+  display: flex;              /* ADD */
+  align-items: center;        /* ADD */
+  justify-content: center;    /* ADD */
+  padding: 0;                 /* prevents text offset */
+  line-height: 1;             /* prevents baseline shift */
 }
+
 
 .removeBtn {
   background: none;
   color: #dc2626;
   font-size: 1.1rem;
+}
+
+.activePayment {
+  background: #2563eb;
+  color: white;
+  border: 2px solid #1d4ed8;
+}
+
+.confirmButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
