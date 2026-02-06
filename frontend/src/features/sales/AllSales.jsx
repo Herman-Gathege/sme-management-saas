@@ -150,6 +150,7 @@ export default function AllSales() {
             <thead>
               <tr>
                 <th>Sale ID</th>
+                <th>Payment Method</th>
                 <th>Staff</th>
                 <th>Total Amount</th>
                 <th>Date</th>
@@ -163,6 +164,7 @@ export default function AllSales() {
                   // Main Sale Row
                   <tr key={sale.sale_id}>
                     <td>{sale.sale_id}</td>
+                    <td>{sale.payment_method || "—"}</td>
                     <td>{sale.staff || "—"}</td>
                     <td>KES {sale.total_amount.toFixed(2)}</td>
                     <td>

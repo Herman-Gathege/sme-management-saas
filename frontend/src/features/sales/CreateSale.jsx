@@ -77,8 +77,12 @@ export default function CreateSale() {
   useEffect(() => {
     if (paymentMethod === "Credit") {
       fetchCustomers();
+      setSelectedCustomer("");
     }
   }, [paymentMethod]);
+
+  
+
 
   const fetchCustomers = async () => {
     const token = localStorage.getItem("token");
@@ -171,6 +175,9 @@ export default function CreateSale() {
 
     setPaymentError("");
     setMessage("");
+
+    if (loading) return;
+
 
     if (!paymentMethod) {
       setPaymentError("Please select a payment method to continue.");

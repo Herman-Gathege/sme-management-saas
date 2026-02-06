@@ -1,4 +1,3 @@
-# backend/app/modules/sales/routes.py
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.extensions import db
@@ -165,6 +164,8 @@ def get_sales_for_owner():
             "total_amount": float(sale.total_amount),
             "created_at": sale.created_at.replace(tzinfo=timezone.utc).astimezone(tz).isoformat(),
             "items": sale_items,
+            "payment_method": sale.payment_method
+
         })
 
     return jsonify(result), 200
