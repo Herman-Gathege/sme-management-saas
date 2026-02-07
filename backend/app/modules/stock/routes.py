@@ -76,6 +76,7 @@ def add_stock():
             category=data.get("category"),
             quantity=data["quantity"],
             unit_price=data["unit_price"],
+            selling_price=data.get("selling_price", 0),
             min_stock_level=data.get("min_stock_level", 0),
         )
 
@@ -119,7 +120,7 @@ def update_stock(stock_id):
             return jsonify({"error": "Stock item not found"}), 404
 
         changes = {}
-        for field in ["name", "sku", "category", "quantity", "unit_price", "min_stock_level"]:
+        for field in ["name", "sku", "category", "quantity", "unit_price", "selling_price", "min_stock_level"]:
             old = getattr(stock, field)
             new = data.get(field, old)
             if old != new:
@@ -171,6 +172,8 @@ def delete_stock(stock_id):
                 "name": stock.name,
                 "quantity": stock.quantity,
                 "unit_price": stock.unit_price,
+                "sku": stock.sku,
+                "selling_price": stock.selling_price,
                 "category": stock.category,
             }),
         )

@@ -12,6 +12,7 @@ export default function AddStock() {
     category: "",
     quantity: "",
     unit_price: "",
+    selling_price: "",
     min_stock_level: "",
   });
 
@@ -46,6 +47,7 @@ export default function AddStock() {
           ...form,
           quantity: Number(form.quantity),
           unit_price: Number(form.unit_price),
+          selling_price: Number(form.selling_price || 0),
           min_stock_level: Number(form.min_stock_level || 0),
         }),
       });
@@ -105,6 +107,14 @@ export default function AddStock() {
           value={form.unit_price}
           onChange={handleChange}
           required
+        />
+          <input
+          type="number"
+          step="0.01"
+          name="selling_price"
+          placeholder="Selling price (optional)"
+          value={form.selling_price}
+          onChange={handleChange}
         />
 
         <input

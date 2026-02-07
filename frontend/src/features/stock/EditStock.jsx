@@ -13,6 +13,7 @@ export default function EditStock() {
     category: "",
     quantity: "",
     unit_price: "",
+    selling_price: "",
     min_stock_level: "",
   });
   const [loading, setLoading] = useState(true);
@@ -39,6 +40,7 @@ export default function EditStock() {
           category: item.category || "",
           quantity: item.quantity,
           unit_price: item.unit_price,
+          selling_price: item.selling_price,
           min_stock_level: item.min_stock_level,
         });
       } catch (err) {
@@ -140,6 +142,17 @@ export default function EditStock() {
           onChange={handleChange}
           required
         />
+          {/* Selling Price */}
+        <label htmlFor="selling_price">Selling Price</label>
+        <input
+          id="selling_price"
+          type="number"
+          step="0.01"
+          name="selling_price"
+          value={form.selling_price}
+          onChange={handleChange}
+          required
+        />  
 
         {/* Minimum Stock Level */}
         <label htmlFor="min_stock_level">Minimum Stock Level</label>

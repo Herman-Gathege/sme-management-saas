@@ -43,7 +43,7 @@ export default function TodaysCreditSales() {
         KES {totalCredit.toFixed(2)}
         {customersOwing > 0 && (
           <p style={{ fontSize: "0.85rem", marginTop: "0.1rem", color: "#d84a4a", marginLeft: "auto" }}>
-            {customersOwing} customer{customersOwing > 1 ? "s" : ""} owe you
+            {customersOwing} customer{customersOwing > 1 ? "s" : ""} owe(s) you
           </p>
         )}
       </div>
