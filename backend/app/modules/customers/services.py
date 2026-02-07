@@ -16,7 +16,7 @@ def get_debtors_summary(org_id):
     """
     Debtors = customers who owe us money
     Balance = sum of credit sales per customer - sum of payments
-    Only include those with balance > 0
+    Includes fully paid customers with balance 0
     """
     debtors = []
 
@@ -47,23 +47,19 @@ def get_debtors_summary(org_id):
 
         balance = float(total_sales - total_payments)
 
-        if balance > 0:  # Only include actual debtors
-            debtors.append({
-                "id": customer.id,
-                "full_name": f"{customer.name} ({customer.business_name})" if customer.business_name else customer.name,
-                "balance": balance,
-                "status": "OWED"
-            })
+        # Include all, not just balance > 0
+        debtors.append({
+            "id": customer.id,
+            "full_name": f"{customer.name} ({customer.business_name})" if customer.business_name else customer.name,
+            "balance": balance,
+            "status": "OWED" if balance > 0 else "PAID"  # mark status
+        })
 
     return debtors
 
 
-def get_creditors_summary(org_id):
-    """
-    Creditors = suppliers we owe money
-    Balance = credit purchases - payments made
-    """
 
+def get_creditors_summary(org_id):
     creditors = []
 
     suppliers = Supplier.query.filter_by(
@@ -72,7 +68,6 @@ def get_creditors_summary(org_id):
     ).all()
 
     for supplier in suppliers:
-        # Total credit purchases
         total_credit = db.session.query(
             db.func.coalesce(db.func.sum(SupplierPurchase.total_amount), 0)
         ).filter(
@@ -81,7 +76,6 @@ def get_creditors_summary(org_id):
             SupplierPurchase.payment_method == "credit"
         ).scalar()
 
-        # Total payments made
         total_paid = db.session.query(
             db.func.coalesce(db.func.sum(SupplierPayment.amount), 0)
         ).filter(
@@ -91,12 +85,11 @@ def get_creditors_summary(org_id):
 
         balance = float(total_credit - total_paid)
 
-        if balance > 0:
-            creditors.append({
-                "supplier_id": supplier.id,
-                "supplier_name": supplier.name,
-                "balance": balance,
-                "status": "OWED"
-            })
+        creditors.append({
+            "supplier_id": supplier.id,
+            "supplier_name": supplier.name,
+            "balance": balance,
+            "status": "OWED" if balance > 0 else "PAID"
+        })
 
     return creditors
