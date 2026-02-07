@@ -89,7 +89,7 @@ export default function OwnerCustomers() {
     if (!form.payment_method) return alert("Select a payment method");
 
     try {
-      const res = await fetch(`${API_BASE}/api/payments`, {
+      const res = await fetch(`${API_BASE}/api/customers/payments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

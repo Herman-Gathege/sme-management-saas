@@ -8,8 +8,8 @@ from app.utils.decorators import owner_or_staff_required
 payments_bp = Blueprint(
     "supplier_payments",
     __name__,
-    url_prefix="/api/payments"
-)
+    url_prefix="/api/suppliers/payments")
+
 
 
 def get_org_and_user_from_jwt():

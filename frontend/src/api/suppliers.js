@@ -3,7 +3,7 @@
 const API_BASE = import.meta.env.VITE_API_URL;
 const SUPPLIERS_API = `${API_BASE}/api/suppliers`;
 const PURCHASES_API = `${API_BASE}/api/supplier-purchases`;
-const PAYMENTS_API = `${API_BASE}/api/payments`;
+const PAYMENTS_API = `${API_BASE}/api/suppliers/payments`;
 
 const getToken = () => localStorage.getItem("token");
 

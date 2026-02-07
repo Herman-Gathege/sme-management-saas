@@ -10,7 +10,10 @@ from .modules.customers.routes import customers_bp
 from .modules.staff.routes import staff_bp
 from .modules.reports.routes import reports_bp
 from .auth.routes import auth_bp
-#from .modules.customers.payments_routes import payments_bp
+from app.modules.customers.payments_routes import customer_payments_bp
+from app.modules.suppliers.payments.routes import payments_bp as supplier_payments_bp
+
+
 
 # Import models so Flask-Migrate sees them
 from .models import payment, customer, user
@@ -60,8 +63,10 @@ def create_app():
     app.register_blueprint(stock_bp, url_prefix="/api/stock")
     app.register_blueprint(reports_bp, url_prefix="/api/reports")
     app.register_blueprint(customers_bp)
-    app.register_blueprint(payments_bp)
+    # app.register_blueprint(payments_bp)
     app.register_blueprint(suppliers_bp)
     app.register_blueprint(purchases_bp)
+    app.register_blueprint(customer_payments_bp)
+    app.register_blueprint(supplier_payments_bp)
 
     return app

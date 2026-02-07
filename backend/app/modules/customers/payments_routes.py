@@ -6,7 +6,11 @@ from app.models.payment import Payment
 from app.models.customer import Customer
 from app.models.user import User
 
-payments_bp = Blueprint("payments", __name__, url_prefix="/api/payments")
+customer_payments_bp = Blueprint(
+    "customer_payments",
+    __name__,
+    url_prefix="/api/customers/payments"
+)
 
 
 # -------------------------
@@ -23,7 +27,7 @@ def get_org_id_from_jwt():
 # -------------------------
 # CREATE PAYMENT
 # -------------------------
-@payments_bp.route("", methods=["POST"])
+@customer_payments_bp.route("", methods=["POST"])
 @jwt_required()
 def create_payment():
     """
@@ -54,7 +58,7 @@ def create_payment():
 
         # Validate method
         payment_method = data.get("payment_method", "").lower()
-        if payment_method not in ["cash", "mpesa", "bank"]:
+        if payment_method not in ["cash", "mpesa"]:
             return jsonify({"error": "Invalid payment method"}), 400
 
         notes = data.get("notes")
@@ -84,7 +88,7 @@ def create_payment():
 # -------------------------
 # GET PAYMENTS BY CUSTOMER
 # -------------------------
-@payments_bp.route("/customer/<int:customer_id>", methods=["GET"])
+@customer_payments_bp.route("/customer/<int:customer_id>", methods=["GET"])
 @jwt_required()
 def get_payments_for_customer(customer_id):
     org_id = get_org_id_from_jwt()
@@ -100,7 +104,7 @@ def get_payments_for_customer(customer_id):
 # -------------------------
 # GET ALL PAYMENTS FOR ORG (ADMIN/OWNER)
 # -------------------------
-@payments_bp.route("/all", methods=["GET"])
+@customer_payments_bp.route("/all", methods=["GET"])
 @jwt_required()
 def get_all_payments():
     user_id = get_jwt_identity()
