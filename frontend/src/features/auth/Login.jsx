@@ -1,6 +1,7 @@
+// src/features/auth/Login.jsx
 import { useState } from "react";
 import { loginUser } from "../../api/auth";
-import styles from "./AuthForm.module.css"; // CSS module for styling
+// import styles from "./AuthForm.module.css"; // CSS module for styling
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -33,17 +34,49 @@ export default function Login() {
     }
   };
 
+  // return (
+  //   <form className={styles.formContainer} onSubmit={handleSubmit}>
+  //     <h2 className={styles.formTitle}>Login</h2>
+
+  //     <input
+  //       type="email"
+  //       placeholder="Email"
+  //       value={email}
+  //       onChange={(e) => setEmail(e.target.value)}
+  //       className={styles.inputField}
+  //       required
+  //     />
+
+  //     <input
+  //       type="password"
+  //       placeholder="Password"
+  //       value={password}
+  //       onChange={(e) => setPassword(e.target.value)}
+  //       className={styles.inputField}
+  //       required
+  //     />
+
+  //     <button type="submit" className={styles.submitButton} disabled={loading}>
+  //       {loading ? "Logging in..." : "Login"}
+  //     </button>
+
+  //     {error && <p className={styles.errorText}>{error}</p>}
+  //   </form>
+  // );
+
   return (
-    <form className={styles.formContainer} onSubmit={handleSubmit}>
-      <h2 className={styles.formTitle}>Login</h2>
+  <div className="auth-page">
+    <form className="auth-card card form-stack" onSubmit={handleSubmit}>
+      <h2 className="text-center">Login</h2>
 
       <input
         type="email"
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className={styles.inputField}
+        className="input"
         required
+        autoComplete="email"
       />
 
       <input
@@ -51,15 +84,22 @@ export default function Login() {
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className={styles.inputField}
+        className="input"
         required
+        autoComplete="current-password"
       />
 
-      <button type="submit" className={styles.submitButton} disabled={loading}>
+      <button
+        type="submit"
+        className="btn btn-primary"
+        disabled={loading}
+      >
         {loading ? "Logging in..." : "Login"}
       </button>
 
-      {error && <p className={styles.errorText}>{error}</p>}
+      {error && <p className="text-error text-center">{error}</p>}
     </form>
-  );
+  </div>
+);
+
 }
