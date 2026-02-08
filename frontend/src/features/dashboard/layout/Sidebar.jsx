@@ -8,6 +8,7 @@ import {
   FiBox,
   FiUsers,
   FiFileText,
+  
 } from "react-icons/fi";
 
 export default function Sidebar() {
@@ -101,13 +102,12 @@ export default function Sidebar() {
 
   {/* Collapse button with < or > */}
   <button
-    type="button"
-    className="sidebar-collapse-btn"
-    title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-    onClick={() => setCollapsed((c) => !c)}
-  >
-    {collapsed ? ">" : "<"}
-  </button>
+          type="button"
+          className="sidebar-collapse-btn"
+          onClick={() => setCollapsed((c) => !c)}
+        >
+          <FiChevronDown className={collapsed ? "rotated" : ""} />
+        </button>
 </div>
 
 

@@ -1,57 +1,88 @@
-/* =============================
+/* =========================================
    CUSTOMERS MODULE
+   Normalized to match global design system
+   (safe: keeps same class names)
+========================================= */
+
+
+/* =============================
+   PAGE SHELL
+   Use same spacing rhythm as dashboard
 ============================= */
 
-/* Page shell */
 .customers-container {
   padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
 }
 
 .customers-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-md);
+  gap: var(--space-md);
+  flex-wrap: wrap;
 }
 
-/* Table wrapper for mobile scroll */
+
+
+
+/* =============================
+   TABLE WRAPPER
+============================= */
+
 .customers-table-wrapper {
   width: 100%;
   overflow-x: auto;
 }
 
-/* Table (inherits dashboard look) */
+
+/* =============================
+   TABLE
+============================= */
+
 .customers-table {
   width: 100%;
+  min-width: 900px; /* enables scroll on small screens */
   border-collapse: collapse;
   background: white;
-  border-radius: var(--radius);
+  border-radius: 16px;
   overflow: hidden;
 }
 
+
+/* header style = staff-table */
 .customers-table th {
-  background: #f1f5f9;
+  background: #f3f4f6;
+  font-weight: 600;
+  text-transform: uppercase;
   font-size: 13px;
-  text-align: left;
   padding: 12px;
-  color: #334155;
+  text-align: left;
+  color: #374151;
 }
 
+/* cell style = staff-table */
 .customers-table td {
   padding: 12px;
   font-size: 14px;
-  color: #475569;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #e5e7eb;
+  color: #374151;
 }
 
-/* Row hover (desktop only) */
+/* hover identical to dashboard */
 @media (hover: hover) {
   .customers-table tbody tr:hover {
-    background: #f8fafc;
+    background: #f9fafb;
   }
 }
 
-/* Status pills */
+
+/* =============================
+   STATUS PILLS (feature-specific)
+============================= */
+
 .status-pill {
   padding: 4px 10px;
   border-radius: 999px;
@@ -75,24 +106,50 @@
   color: #075985;
 }
 
-/* Action icons */
+
+/* =============================
+   ACTION BUTTONS
+   Now behaves EXACTLY like .btn-ghost
+============================= */
+
 .icon-btn {
-  background: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   border: none;
+  background: none;
   cursor: pointer;
-  color: #64748b;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #374151;
+  transition: background 0.15s ease;
 }
 
 .icon-btn:hover {
-  color: #0f172a;
+  background: #f3f4f6;
 }
 
-/* Nested payments */
+/* ensure icons align perfectly */
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+
+/* =============================
+   NESTED PAYMENTS TABLE
+   Only truly custom element
+============================= */
+
 .nested-table {
   width: 100%;
   margin-top: 8px;
-  background: #f8fafc;
-  border-radius: 8px;
+  background: #f9fafb;
+  border-radius: 10px;
   overflow: hidden;
 }
 
@@ -100,4 +157,30 @@
 .nested-table td {
   padding: 8px;
   font-size: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+
+/* =============================
+   PAYMENT FORM ALIGNMENT
+   Makes inline inputs match global system
+============================= */
+
+.paymentForm input,
+.paymentForm select {
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+.paymentForm button {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 8px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  cursor: pointer;
 }

@@ -141,177 +141,188 @@ export default function OwnerCustomers() {
       )}
 
       {!loading && customers.length > 0 && (
-        <table className="customers-table hidden-mobile">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Name</th>
-              <th>Company</th>
-              <th>
-                {isDebtors ? "Amount Owed (KES)" : "Amount Payable (KES)"}
-              </th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {customers.map((c) => {
-              const balance = Number(c.balance || 0);
-              const isOwed = isDebtors && balance > 0;
-              const [name, company] = c.full_name?.includes("(")
-                ? c.full_name.split(" (")
-                : [c.full_name, "-"];
-              const expanded = expandedRow === c.id;
+        <div className="customers-table-wrapper hidden-mobile">
+          <table className="customers-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Company</th>
+                <th>
+                  {isDebtors ? "Amount Owed (KES)" : "Amount Payable (KES)"}
+                </th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {customers.map((c) => {
+                const balance = Number(c.balance || 0);
+                const isOwed = isDebtors && balance > 0;
+                const [name, company] = c.full_name?.includes("(")
+                  ? c.full_name.split(" (")
+                  : [c.full_name, "-"];
+                const expanded = expandedRow === c.id;
 
-              const status =
-                balance === 0 && paymentsData[c.id]?.length
-                  ? "PAID"
-                  : isOwed
-                    ? "OWED"
-                    : "OK";
+                const status =
+                  balance === 0 && paymentsData[c.id]?.length
+                    ? "PAID"
+                    : isOwed
+                      ? "OWED"
+                      : "OK";
 
-              return (
-                <tr key={c.id}>
-                  <td>
-                    <button
-                      className="iconBtn"
-                      onClick={() => toggleRow(c.id)}
-                      title={expanded ? "Hide Payments" : "Show Payments"}
-                    >
-                      {expanded ? (
-                        <ChevronUp size={16} />
-                      ) : (
-                        <ChevronDown size={16} />
-                      )}
-                    </button>
-                  </td>
-                  <td>{name || "-"}</td>
-                  <td>{company ? company.replace(")", "") : "-"}</td>
-                  <td className="balance-cell">KES {balance.toFixed(2)}</td>
-                  <td>
-                    <span
-                      className={`status-pill ${
-                        status === "OWED"
-                          ? "status-owed"
-                          : status === "PAID"
-                            ? "status-paid"
-                            : "status-ok"
-                      }`}
-                    >
-                      {status}
-                    </span>
-                  </td>
-                  <td className="actions-cell">
-                    {/* <button className="iconBtn" title="Edit">
+                return (
+                  <tr key={c.id}>
+                    <td>
+                      <button
+                        className="icon-btn
+"
+                        onClick={() => toggleRow(c.id)}
+                        title={expanded ? "Hide Payments" : "Show Payments"}
+                      >
+                        {expanded ? (
+                          <ChevronUp size={16} />
+                        ) : (
+                          <ChevronDown size={16} />
+                        )}
+                      </button>
+                    </td>
+                    <td>{name || "-"}</td>
+                    <td>{company ? company.replace(")", "") : "-"}</td>
+                    <td className="balance-cell">KES {balance.toFixed(2)}</td>
+                    <td>
+                      <span
+                        className={`status-pill ${
+                          status === "OWED"
+                            ? "status-owed"
+                            : status === "PAID"
+                              ? "status-paid"
+                              : "status-ok"
+                        }`}
+                      >
+                        {status}
+                      </span>
+                    </td>
+                    <td className="actions-cell">
+                      {/* <button className="iconBtn" title="Edit">
                       <Pencil size={16} />
                     </button> */}
-                    <button className="iconBtn" title="Delete">
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
+                      <button className="icon-btn" title="Delete">
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
 
-            {/* Expanded Payments Row */}
-            {customers.map((c) => {
-              const expanded = expandedRow === c.id;
-              if (!expanded) return null;
-              const payments = paymentsData[c.id] || [];
-              const loadingPay = loadingPayments[c.id];
+              {/* Expanded Payments Row */}
+              {customers.map((c) => {
+                const expanded = expandedRow === c.id;
+                if (!expanded) return null;
+                const payments = paymentsData[c.id] || [];
+                const loadingPay = loadingPayments[c.id];
 
-              return (
-                <tr key={`payments-${c.id}`}>
-                  <td colSpan={6}>
-                    {loadingPay ? (
-                      <p>Loading payments...</p>
-                    ) : (
-                      <>
-                        <table
-                          className={`nestedTable`}
-                          style={{ marginTop: "0.5rem" }}
-                        >
-                          <thead>
-                            <tr>
-                              <th>Date</th>
-                              <th>Amount (KES)</th>
-                              <th>Method</th>
-                              <th>Notes</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {payments.length === 0 ? (
-                              <tr>
-                                <td colSpan={4}>No payments yet</td>
-                              </tr>
-                            ) : (
-                              payments.map((p) => (
-                                <tr key={p.id}>
-                                  <td>
-                                    {new Date(p.created_at).toLocaleString()}
-                                  </td>
-                                  <td>{p.amount.toFixed(2)}</td>
-                                  <td>{p.payment_method}</td>
-                                  <td>{p.notes || "-"}</td>
-                                </tr>
-                              ))
-                            )}
-                          </tbody>
-                        </table>
-
-                        {/* Inline Payment Form */}
-                        <div
-                          className="paymentForm"
-                          style={{
-                            marginTop: "0.5rem",
-                            display: "flex",
-                            gap: "0.5rem",
-                            alignItems: "center",
-                          }}
-                        >
-                          <input
-                            type="number"
-                            placeholder="Amount"
-                            value={paymentForm[c.id]?.amount || ""}
-                            onChange={(e) =>
-                              handlePaymentInput(c.id, "amount", e.target.value)
-                            }
-                          />
-                          <select
-                            value={paymentForm[c.id]?.payment_method || ""}
-                            onChange={(e) =>
-                              handlePaymentInput(
-                                c.id,
-                                "payment_method",
-                                e.target.value,
-                              )
-                            }
+                return (
+                  <tr key={`payments-${c.id}`}>
+                    <td colSpan={6}>
+                      {loadingPay ? (
+                        <p>Loading payments...</p>
+                      ) : (
+                        <>
+                          <table
+                            className={`nestedTable`}
+                            style={{ marginTop: "0.5rem" }}
                           >
-                            <option value="">Method</option>
-                            <option value="cash">Cash</option>
-                            <option value="mpesa">MPESA</option>
-                            <option value="bank">Bank</option>
-                          </select>
-                          <input
-                            type="text"
-                            placeholder="Notes"
-                            value={paymentForm[c.id]?.notes || ""}
-                            onChange={(e) =>
-                              handlePaymentInput(c.id, "notes", e.target.value)
-                            }
-                          />
-                          <button onClick={() => submitPayment(c.id)}>
-                            Add Payment
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                            <thead>
+                              <tr>
+                                <th>Date</th>
+                                <th>Amount (KES)</th>
+                                <th>Method</th>
+                                <th>Notes</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {payments.length === 0 ? (
+                                <tr>
+                                  <td colSpan={4}>No payments yet</td>
+                                </tr>
+                              ) : (
+                                payments.map((p) => (
+                                  <tr key={p.id}>
+                                    <td>
+                                      {new Date(p.created_at).toLocaleString()}
+                                    </td>
+                                    <td>{p.amount.toFixed(2)}</td>
+                                    <td>{p.payment_method}</td>
+                                    <td>{p.notes || "-"}</td>
+                                  </tr>
+                                ))
+                              )}
+                            </tbody>
+                          </table>
+
+                          {/* Inline Payment Form */}
+                          <div
+                            className="paymentForm"
+                            style={{
+                              marginTop: "0.5rem",
+                              display: "flex",
+                              gap: "0.5rem",
+                              alignItems: "center",
+                            }}
+                          >
+                            <input
+                              type="number"
+                              placeholder="Amount"
+                              value={paymentForm[c.id]?.amount || ""}
+                              onChange={(e) =>
+                                handlePaymentInput(
+                                  c.id,
+                                  "amount",
+                                  e.target.value,
+                                )
+                              }
+                            />
+                            <select
+                              value={paymentForm[c.id]?.payment_method || ""}
+                              onChange={(e) =>
+                                handlePaymentInput(
+                                  c.id,
+                                  "payment_method",
+                                  e.target.value,
+                                )
+                              }
+                            >
+                              <option value="">Method</option>
+                              <option value="cash">Cash</option>
+                              <option value="mpesa">MPESA</option>
+                              <option value="bank">Bank</option>
+                            </select>
+                            <input
+                              type="text"
+                              placeholder="Notes"
+                              value={paymentForm[c.id]?.notes || ""}
+                              onChange={(e) =>
+                                handlePaymentInput(
+                                  c.id,
+                                  "notes",
+                                  e.target.value,
+                                )
+                              }
+                            />
+                            <button onClick={() => submitPayment(c.id)}>
+                              Add Payment
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <div className="hidden-desktop flex flex-col gap-md">

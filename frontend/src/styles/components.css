@@ -28,10 +28,11 @@
   height: 52px;
   width: auto;
   border-radius: 10px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   border: none;
   cursor: pointer;
+  padding: 0 20px;
 }
 
 .btn-primary {

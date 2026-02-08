@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
+import { FiMaximize, FiMinimize } from "react-icons/fi";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -7,7 +8,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isFullscreen, setIsFullscreen] = useState(
-    !!document.fullscreenElement
+    !!document.fullscreenElement,
   );
 
   useEffect(() => {
@@ -16,12 +17,10 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    const handler = () =>
-      setIsFullscreen(!!document.fullscreenElement);
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
 
     document.addEventListener("fullscreenchange", handler);
-    return () =>
-      document.removeEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
   }, []);
 
   if (!user) return <header className="navbar" />;
@@ -53,11 +52,10 @@ export default function Navbar() {
       <button
         type="button"
         onClick={toggleFullscreen}
-        className="btn btn-ghost"
+        className="btn "
         title="Toggle Fullscreen"
       >
-        {isFullscreen ? "⤫" : "⛶"}
-
+        {isFullscreen ? <FiMinimize size={20} /> : <FiMaximize size={20} />}
       </button>
 
       {/* CENTER */}
@@ -68,10 +66,7 @@ export default function Navbar() {
 
       {/* RIGHT */}
       <div className="relative">
-        <div
-          className="avatar"
-          onClick={() => setOpen((o) => !o)}
-        >
+        <div className="avatar" onClick={() => setOpen((o) => !o)}>
           {user.full_name.charAt(0).toUpperCase()}
         </div>
 
