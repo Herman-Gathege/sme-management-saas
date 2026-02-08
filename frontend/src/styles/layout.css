@@ -69,7 +69,7 @@
 ============================= */
 
 .bottom-nav {
-  position: absolute;
+  position: sticky;
   bottom: 0;
   width: 100%;
   display: flex;

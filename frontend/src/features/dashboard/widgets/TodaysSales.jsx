@@ -1,6 +1,4 @@
-//frontend/src/features/dashboard/widgets/TodaysSales.jsx
 import { useEffect, useState } from "react";
-import widget from "./DashboardWidget.module.css";
 import { useNavigate } from "react-router-dom";
 
 export default function TodaysSales() {
@@ -26,30 +24,22 @@ export default function TodaysSales() {
   }, [API_BASE]);
 
   const today = new Date().toISOString().split("T")[0];
-
-  const todaysSales = sales.filter((sale) => {
-    const saleDate = sale.created_at.split("T")[0];
-    return saleDate === today;
-  });
-
-
-    const totalToday = todaysSales.reduce(
-    (sum, s) => sum + Number(s.total_amount || 0),
-    0
-  );
-
+  const totalToday = sales
+    .filter((s) => s.created_at.split("T")[0] === today)
+    .reduce((sum, s) => sum + Number(s.total_amount || 0), 0);
 
   return (
-    <div className={widget.widget}
-     onClick={() => navigate("/owner/sales")}
+    <div
+      className="card flex flex-col gap-sm cursor-pointer"
+      onClick={() => navigate("/owner/sales")}
     >
-      <h3 className={widget.title}>Today’s Sales</h3>
+      <h3 className="text-md text-bold">Today’s Sales</h3>
 
-      <div className={widget.content}>
+      <div className="text-xl text-bold">
         KES {totalToday.toFixed(2)}
       </div>
 
-      <div className={widget.footer}>View details →</div>
+      <span className="text-sm text-muted">View details →</span>
     </div>
   );
 }
