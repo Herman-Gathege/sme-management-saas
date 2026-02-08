@@ -1,5 +1,6 @@
+//frontend/src/features/reports/Reports.jsx
 import { useEffect, useState } from "react";
-import styles from "../dashboard/layout/DashboardLayout.module.css";
+// import styles from "../dashboard/layout/DashboardLayout.module.css";
 
 export default function Reports() {
   const [summary, setSummary] = useState(null);
@@ -66,21 +67,21 @@ export default function Reports() {
   };
 
   if (loading) return <p>Loading reports…</p>;
-  if (error) return <p className={styles.message}>{error}</p>;
+  if (error) return <p className="text-error">{error}</p>;
 
   return (
-    <section className={styles["stock-history-card"]}>
-      <div className={styles["table-header"]}>
+    <section className="card">
+      <div className="flex items-center justify-between mb-4">
         <h3>Sales Reports</h3>
-        <button className={styles.iconBtn} onClick={exportCSV}>
+        <button className="iconBtn" onClick={exportCSV}>
           Export CSV
         </button>
       </div>
 
       {summary && (
-        <div className={styles["summary-cards"]}>
+        <div className="grid-summary">
           {["cash", "mpesa", "credit", "total"].map((key) => (
-            <div key={key} className={styles["summary-card"]}>
+            <div key={key} className="stat-card">
               {key.charAt(0).toUpperCase() + key.slice(1)}
               <br />
               <span>KES {summary[key].toFixed(2)}</span>
@@ -90,23 +91,23 @@ export default function Reports() {
       )}
 
       {/* FILTER BUTTONS */}
-      <div className={styles["filter-buttons"]}>
+      <div className="flex gap-sm wrap">
         <button
-          className={styles.iconBtn}
+          className="iconBtn"
           onClick={() => setSelectedFilter("today")}
           disabled={selectedFilter === "today"}
         >
           Today
         </button>
         <button
-          className={styles.iconBtn}
+          className="iconBtn"
           onClick={() => setSelectedFilter("month")}
           disabled={selectedFilter === "month"}
         >
           This Month
         </button>
         <button
-          className={styles.iconBtn}
+          className="iconBtn"
           onClick={() => setSelectedFilter("all")}
           disabled={selectedFilter === "all"}
         >
@@ -114,8 +115,8 @@ export default function Reports() {
         </button>
       </div>
 
-      <div className={styles["table-wrapper"]}>
-        <table className={styles["stock-history-table"]}>
+      <div className="table-wrapper">
+        <table className="customers-table (">
           <thead>
             <tr>
               <th>Date</th>
@@ -136,7 +137,7 @@ export default function Reports() {
               ))
             ) : (
               <tr>
-                <td colSpan="4" className={styles["no-data"]}>
+                <td colSpan="4" className="text-muted">
                   No sales found
                 </td>
               </tr>
