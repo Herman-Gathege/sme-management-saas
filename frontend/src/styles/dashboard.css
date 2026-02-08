@@ -186,3 +186,13 @@
     display: block; /* You can style a hamburger button */
   }
 }
+
+
+.bg-light {
+  background: #f9fafb;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+}

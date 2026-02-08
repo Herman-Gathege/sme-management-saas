@@ -1,6 +1,8 @@
+//frontend/src/features/sales/AllSales.jsx
+
 import { useEffect, useState } from "react";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
-import styles from "../dashboard/layout/DashboardLayout.module.css";
+// import styles from "../dashboard/layout/DashboardLayout.module.css";
 
 export default function AllSales() {
   const [sales, setSales] = useState([]);
@@ -90,163 +92,331 @@ export default function AllSales() {
   if (loading) return <p>Loading sales...</p>;
   if (error) return <p className={styles.message}>{error}</p>;
 
+  // return (
+  //   <section className={styles["stock-history-card"]}>
+  //     <div
+  //       style={{
+  //         marginBottom: "1rem",
+  //         display: "flex",
+  //         gap: "1rem",
+  //         flexWrap: "wrap",
+  //         alignItems: "center",
+  //       }}
+  //     >
+  //       <h3 style={{ flexBasis: "100%" }}>Sales History</h3>
+
+  //       {/* Search Bar */}
+  //       <label style={{ fontWeight: "medium" }}>
+  //         Search:
+  //         <input
+  //           type="text"
+  //           placeholder="Search by staff or item..."
+  //           value={searchTerm}
+  //           onChange={(e) => setSearchTerm(e.target.value)}
+  //           style={{ padding: "0.4rem", flex: "1 1 200px" }}
+  //         />
+  //       </label>
+
+  //       {/* Compact Date Range */}
+  //       <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+  //         <label>
+  //           From:
+  //           <input
+  //             type="date"
+  //             value={dateRange.from}
+  //             onChange={(e) =>
+  //               setDateRange({ ...dateRange, from: e.target.value })
+  //             }
+  //             style={{ padding: "0.3rem", marginLeft: "0.2rem" }}
+  //           />
+  //         </label>
+  //         <label>
+  //           To:
+  //           <input
+  //             type="date"
+  //             value={dateRange.to}
+  //             onChange={(e) =>
+  //               setDateRange({ ...dateRange, to: e.target.value })
+  //             }
+  //             style={{ padding: "0.3rem", marginLeft: "0.2rem" }}
+  //           />
+  //         </label>
+  //       </div>
+  //     </div>
+
+  //     {paginatedSales.length === 0 ? (
+  //       <p>No sales found.</p>
+  //     ) : (
+  //       <>
+  //         <table className={styles["stock-history-table"]}>
+  //           <thead>
+  //             <tr>
+  //               <th>Sale ID</th>
+  //               <th>Payment Method</th>
+  //               <th>Staff</th>
+  //               <th>Total Amount</th>
+  //               <th>Date</th>
+  //               <th>Action</th>
+  //             </tr>
+  //           </thead>
+
+  //           <tbody>
+  //             {paginatedSales.map((sale) => {
+  //               const rows = [
+  //                 // Main Sale Row
+  //                 <tr key={sale.sale_id}>
+  //                   <td>{sale.sale_id}</td>
+  //                   <td>{sale.payment_method || "—"}</td>
+  //                   <td>{sale.staff || "—"}</td>
+  //                   <td>KES {sale.total_amount.toFixed(2)}</td>
+  //                   <td>
+  //                     {new Date(sale.created_at).toLocaleString("en-KE", {
+  //                       year: "numeric",
+  //                       month: "short",
+  //                       day: "numeric",
+  //                       hour: "2-digit",
+  //                       minute: "2-digit",
+  //                       second: "2-digit",
+  //                     })}
+  //                   </td>
+  //                   <td>
+  //                     <button
+  //                       className={styles.iconBtn}
+  //                       onClick={() => toggleSale(sale.sale_id)}
+  //                     >
+  //                       {expandedSale === sale.sale_id ? (
+  //                         <FiChevronUp size={20} title="Hide Sale" />
+  //                       ) : (
+  //                         <FiChevronDown size={20} title="View Sale" />
+  //                       )}
+  //                     </button>
+  //                   </td>
+  //                 </tr>,
+  //               ];
+
+  //               // Expanded Sale Row (if expanded)
+  //               if (expandedSale === sale.sale_id) {
+  //                 rows.push(
+  //                   <tr key={`expanded-${sale.sale_id}`}>
+  //                     <td colSpan={5}>
+  //                       <div className={styles.expandedSale}>
+  //                         {Array.isArray(sale.items) &&
+  //                         sale.items.length > 0 ? (
+  //                           <ul style={{ margin: 0, paddingLeft: "1rem" }}>
+  //                             {sale.items.map((item, idx) => (
+  //                               <li key={idx}>
+  //                                 {item.name} — {item.quantity} × KES{" "}
+  //                                 {item.unit_price.toFixed(2)} = KES{" "}
+  //                                 {item.line_total.toFixed(2)}
+  //                               </li>
+  //                             ))}
+  //                           </ul>
+  //                         ) : (
+  //                           <em>No items</em>
+  //                         )}
+  //                       </div>
+  //                     </td>
+  //                   </tr>,
+  //                 );
+  //               }
+
+  //               return rows;
+  //             })}
+  //           </tbody>
+  //         </table>
+
+  //         {/* Pagination Controls */}
+  //         {totalPages > 1 && (
+  //           <div className={styles.pagination}>
+  //             <button
+  //               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+  //               disabled={currentPage === 1}
+  //             >
+  //               Prev
+  //             </button>
+  //             <span>
+  //               Page {currentPage} of {totalPages}
+  //             </span>
+  //             <button
+  //               onClick={() =>
+  //                 setCurrentPage((p) => Math.min(p + 1, totalPages))
+  //               }
+  //               disabled={currentPage === totalPages}
+  //             >
+  //               Next
+  //             </button>
+  //           </div>
+  //         )}
+  //       </>
+  //     )}
+  //   </section>
+  // );
+
   return (
-    <section className={styles["stock-history-card"]}>
-      <div
-        style={{
-          marginBottom: "1rem",
-          display: "flex",
-          gap: "1rem",
-          flexWrap: "wrap",
-          alignItems: "center",
-        }}
-      >
-        <h3 style={{ flexBasis: "100%" }}>Sales History</h3>
+  <section className="card flex flex-col gap-md">
 
-        {/* Search Bar */}
-        <label style={{ fontWeight: "medium" }}>
-          Search:
-          <input
-            type="text"
-            placeholder="Search by staff or item..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ padding: "0.4rem", flex: "1 1 200px" }}
-          />
-        </label>
+    {/* Header + filters */}
+    <div className="flex flex-col gap-sm">
 
-        {/* Compact Date Range */}
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-          <label>
-            From:
-            <input
-              type="date"
-              value={dateRange.from}
-              onChange={(e) =>
-                setDateRange({ ...dateRange, from: e.target.value })
-              }
-              style={{ padding: "0.3rem", marginLeft: "0.2rem" }}
-            />
-          </label>
-          <label>
-            To:
-            <input
-              type="date"
-              value={dateRange.to}
-              onChange={(e) =>
-                setDateRange({ ...dateRange, to: e.target.value })
-              }
-              style={{ padding: "0.3rem", marginLeft: "0.2rem" }}
-            />
-          </label>
-        </div>
+      <h3 className="text-lg text-bold">Sales History</h3>
+
+      <div className="flex gap-sm wrap">
+        <input
+          className="input"
+          type="text"
+          placeholder="Search by staff or item..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+
+        <input
+          className="input"
+          type="date"
+          value={dateRange.from}
+          onChange={(e) =>
+            setDateRange({ ...dateRange, from: e.target.value })
+          }
+        />
+
+        <input
+          className="input"
+          type="date"
+          value={dateRange.to}
+          onChange={(e) =>
+            setDateRange({ ...dateRange, to: e.target.value })
+          }
+        />
       </div>
+    </div>
 
-      {paginatedSales.length === 0 ? (
-        <p>No sales found.</p>
-      ) : (
-        <>
-          <table className={styles["stock-history-table"]}>
+
+    {paginatedSales.length === 0 ? (
+      <p className="text-muted">No sales found.</p>
+    ) : (
+      <>
+        {/* ================= DESKTOP TABLE ================= */}
+        <div className="table-wrapper hidden-mobile">
+          <table className="customers-table">
             <thead>
               <tr>
-                <th>Sale ID</th>
-                <th>Payment Method</th>
+                <th>ID</th>
+                <th>Method</th>
                 <th>Staff</th>
-                <th>Total Amount</th>
+                <th>Total</th>
                 <th>Date</th>
-                <th>Action</th>
+                <th />
               </tr>
             </thead>
 
             <tbody>
-              {paginatedSales.map((sale) => {
-                const rows = [
-                  // Main Sale Row
-                  <tr key={sale.sale_id}>
-                    <td>{sale.sale_id}</td>
-                    <td>{sale.payment_method || "—"}</td>
-                    <td>{sale.staff || "—"}</td>
-                    <td>KES {sale.total_amount.toFixed(2)}</td>
-                    <td>
-                      {new Date(sale.created_at).toLocaleString("en-KE", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                      })}
-                    </td>
-                    <td>
-                      <button
-                        className={styles.iconBtn}
-                        onClick={() => toggleSale(sale.sale_id)}
-                      >
-                        {expandedSale === sale.sale_id ? (
-                          <FiChevronUp size={20} title="Hide Sale" />
-                        ) : (
-                          <FiChevronDown size={20} title="View Sale" />
-                        )}
-                      </button>
-                    </td>
-                  </tr>,
-                ];
+  {paginatedSales.map((sale) => {
+    const rows = [
+      // ===== Main row =====
+      <tr key={sale.sale_id}>
+        <td>{sale.sale_id}</td>
+        <td>{sale.payment_method || "—"}</td>
+        <td>{sale.staff || "—"}</td>
+        <td>KES {sale.total_amount.toFixed(2)}</td>
+        <td>{new Date(sale.created_at).toLocaleString()}</td>
 
-                // Expanded Sale Row (if expanded)
-                if (expandedSale === sale.sale_id) {
-                  rows.push(
-                    <tr key={`expanded-${sale.sale_id}`}>
-                      <td colSpan={5}>
-                        <div className={styles.expandedSale}>
-                          {Array.isArray(sale.items) &&
-                          sale.items.length > 0 ? (
-                            <ul style={{ margin: 0, paddingLeft: "1rem" }}>
-                              {sale.items.map((item, idx) => (
-                                <li key={idx}>
-                                  {item.name} — {item.quantity} × KES{" "}
-                                  {item.unit_price.toFixed(2)} = KES{" "}
-                                  {item.line_total.toFixed(2)}
-                                </li>
-                              ))}
-                            </ul>
-                          ) : (
-                            <em>No items</em>
-                          )}
-                        </div>
-                      </td>
-                    </tr>,
-                  );
-                }
+        <td>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => toggleSale(sale.sale_id)}
+          >
+            {expandedSale === sale.sale_id ? "Hide" : "View"}
+          </button>
+        </td>
+      </tr>,
+    ];
 
-                return rows;
-              })}
-            </tbody>
-          </table>
+    // ===== Expanded dropdown row =====
+    if (expandedSale === sale.sale_id) {
+      rows.push(
+        <tr key={`expanded-${sale.sale_id}`}>
+          <td colSpan={6}>
+            <div className="card bg-light flex flex-col gap-xs">
 
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className={styles.pagination}>
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                disabled={currentPage === 1}
-              >
-                Prev
-              </button>
-              <span>
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={() =>
-                  setCurrentPage((p) => Math.min(p + 1, totalPages))
-                }
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
+              {Array.isArray(sale.items) && sale.items.length > 0 ? (
+                <ul className="text-sm">
+                  {sale.items.map((item, idx) => (
+                    <li key={idx}>
+                      {item.name} — {item.quantity} × KES{" "}
+                      {item.unit_price.toFixed(2)} ={" "}
+                      <strong>KES {item.line_total.toFixed(2)}</strong>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <span className="text-muted">No items</span>
+              )}
+
             </div>
-          )}
-        </>
-      )}
-    </section>
-  );
+          </td>
+        </tr>
+      );
+    }
+
+    return rows;
+  })}
+</tbody>
+
+          </table>
+        </div>
+
+
+        {/* ================= MOBILE CARDS ================= */}
+        <div className="hidden-desktop flex flex-col gap-sm">
+          {paginatedSales.map((sale) => (
+            <div key={sale.sale_id} className="card flex flex-col gap-xs">
+              <div className="flex justify-between">
+                <span className="text-bold">#{sale.sale_id}</span>
+                <span>KES {sale.total_amount.toFixed(2)}</span>
+              </div>
+
+              <div className="text-sm">
+                Staff: {sale.staff}
+              </div>
+
+              <div className="text-sm">
+                Method: {sale.payment_method}
+              </div>
+
+              <div className="text-xs text-muted">
+                {new Date(sale.created_at).toLocaleString()}
+              </div>
+            </div>
+          ))}
+        </div>
+
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex gap-sm justify-center mt-md">
+            <button
+              className="btn btn-secondary"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            >
+              Prev
+            </button>
+
+            <span className="text-sm">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              className="btn btn-secondary"
+              onClick={() =>
+                setCurrentPage((p) => Math.min(p + 1, totalPages))
+              }
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </>
+    )}
+  </section>
+);
+
 }

@@ -1,3 +1,5 @@
+//frontend/src/features/sales/CreateSale.jsx
+
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./Sales.module.css";
@@ -51,28 +53,7 @@ export default function CreateSale() {
     fetchStock();
   }, [API_BASE]);
 
-  // useEffect(() => {
-  //   if (paymentMethod === "Credit") {
-  //     fetchDebtors();
-  //   }
-  // }, [paymentMethod]);
-
-  // const fetchDebtors = async () => {
-  //   const token = localStorage.getItem("token");
-
-  //   try {
-  //     const res = await fetch(`${API_BASE}/api/customers/debtors`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
-
-  //     const data = await res.json();
-  //     if (!res.ok) throw new Error(data.error || "Failed to fetch debtors");
-
-  //     setCustomers(Array.isArray(data) ? data : []);
-  //   } catch (err) {
-  //     setMessage(err.message);
-  //   }
-  // };
+ 
 
   useEffect(() => {
     if (paymentMethod === "Credit") {

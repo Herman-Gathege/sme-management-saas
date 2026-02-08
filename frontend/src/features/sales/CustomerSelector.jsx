@@ -1,3 +1,4 @@
+//frontend/src/features/sales/CustomerSelector.jsx
 export default function CustomerSelector({
   customers,
   selectedCustomer,

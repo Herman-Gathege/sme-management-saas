@@ -1,4 +1,4 @@
-// import styles from "./Sales.module.css";
+//frontend/src/features/sales/PaymentSelector.jsx
 
 export default function PaymentSelector({
   value,
