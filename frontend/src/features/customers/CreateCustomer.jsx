@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import styles from "../sales/Sales.module.css";
+// import styles from "../sales/Sales.module.css";
 
 export default function CreateCustomer({ onSuccess, onClose }) {
   const { user } = useAuth();
@@ -71,11 +71,12 @@ export default function CreateCustomer({ onSuccess, onClose }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.customerForm}>
-      <h3>Add Customer</h3>
+    <form onSubmit={handleSubmit} className="card form-stack">
+      <h3 className="text-md text-bold">Add Customer</h3>
       {message && <p>{message}</p>}
 
       <input
+        className="input"
         placeholder="Name"
         value={form.name}
         onChange={(e) => handleChange("name", e.target.value)}
@@ -83,30 +84,36 @@ export default function CreateCustomer({ onSuccess, onClose }) {
       />
 
       <input
+        className="input"
         placeholder="Phone"
         value={form.phone}
         onChange={(e) => handleChange("phone", e.target.value)}
       />
 
       <input
+        className="input"
         placeholder="Email"
         value={form.email}
         onChange={(e) => handleChange("email", e.target.value)}
       />
 
       <input
+        className="input"
         placeholder="Business Name"
         value={form.business_name}
         onChange={(e) => handleChange("business_name", e.target.value)}
       />
 
       <textarea
+        className="input" rows="3"
         placeholder="Notes"
         value={form.notes}
         onChange={(e) => handleChange("notes", e.target.value)}
       />
 
-      <button disabled={loading}>
+      <button 
+      className="btn btn-primary"
+      disabled={loading}>
         {loading ? "Saving..." : "Save Customer"}
       </button>
     </form>

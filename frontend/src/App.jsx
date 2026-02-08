@@ -5,6 +5,8 @@ import "./styles/layout.css";
 import "./styles/components.css";
 import "./styles/utilities.css";
 import "./styles/dashboard.css";
+import "./styles/customers.css";
+
 
 
 function App() {
