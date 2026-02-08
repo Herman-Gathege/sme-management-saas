@@ -1,6 +1,6 @@
 // frontend/src/features/staff/StaffForm.jsx
 import { useState, useEffect } from "react";
-import styles from "./StaffForm.module.css";
+// import styles from "./StaffForm.module.css";
 
 export default function StaffForm({ initialData = {}, onSubmit, onClose, submitLabel }) {
   const [formData, setFormData] = useState({
@@ -27,8 +27,9 @@ export default function StaffForm({ initialData = {}, onSubmit, onClose, submitL
   };
 
   return (
-    <form className={styles.staffForm} onSubmit={handleSubmit}>
+    <form className="form-stack" onSubmit={handleSubmit}>
       <input
+        className="input"
         name="full_name"
         placeholder="Full Name"
         value={formData.full_name}
@@ -36,6 +37,7 @@ export default function StaffForm({ initialData = {}, onSubmit, onClose, submitL
         required
       />
       <input
+        className="input"
         name="email"
         placeholder="Email"
         value={formData.email}
@@ -43,17 +45,18 @@ export default function StaffForm({ initialData = {}, onSubmit, onClose, submitL
         required
       />
       <input
+        className="input"
         name="phone"
         placeholder="Phone"
         value={formData.phone}
         onChange={handleChange}
         required
       />
-      <div className={styles.formActions}>
-        <button type="submit" className={styles.primaryBtn}>
+      <div className="flex gap-sm">
+        <button type="submit" className="btn btn-primary">
           {submitLabel}
         </button>
-        <button type="button" onClick={onClose} className={styles.secondaryBtn}>
+        <button type="button" onClick={onClose} className="btn">
           Close
         </button>
       </div>

@@ -130,6 +130,15 @@
   background: #f3f4f6;
 }
 
+/* Ensure icons inside ghost buttons always render */
+.btn-ghost svg {
+  width: 18px;
+  height: 18px;
+  color: inherit;
+  display: block;
+}
+
+
 
 /* =============================
    AVATAR
@@ -184,3 +193,67 @@
   background: #f3f4f6;
 }
 
+/* =============================
+   MODAL
+============================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 520px;
+  padding: 20px;
+}
+
+
+
+/* =============================
+   TABLE
+============================= */
+
+.staff-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.staff-table th,
+.staff-table td {
+  padding: 12px;
+  font-size: 14px;
+  text-align: left;
+}
+
+.staff-table th {
+  background: #f3f4f6;
+  font-weight: 600;
+  text-transform: uppercase;
+}

@@ -8,7 +8,6 @@ import {
   reactivateStaff as apiReactivateStaff,
   resetStaffPassword as apiResetPassword,
 } from "../../api/staff";
-import styles from "./StaffManagement.module.css";
 import { FiEdit, FiLock, FiUnlock, FiRefreshCw } from "react-icons/fi";
 
 export default function StaffManagement() {
@@ -16,10 +15,15 @@ export default function StaffManagement() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [editingStaff, setEditingStaff] = useState(null);
+
   const token = localStorage.getItem("token");
 
+  /* =====================
+     DATA FETCHING
+  ====================== */
   const fetchStaff = async () => {
     setLoading(true);
+    setMessage("");
     try {
       const res = await apiListStaff(token);
       setStaffList(res.staff || []);
@@ -34,6 +38,9 @@ export default function StaffManagement() {
     fetchStaff();
   }, []);
 
+  /* =====================
+     ACTION HANDLERS
+  ====================== */
   const handleDeactivate = async (id) => {
     try {
       await apiDeactivateStaff(id, token);
@@ -61,52 +68,137 @@ export default function StaffManagement() {
     }
   };
 
-  const handleEditClick = (staff) => {
-    setEditingStaff(staff);
-  };
+  /* =====================
+     MODAL CONTROLS
+  ====================== */
+  const handleEditClick = (staff) => setEditingStaff(staff);
+  const closeEditModal = () => setEditingStaff(null);
 
-  const clearEditingStaff = () => {
-    setEditingStaff(null);
-  };
-
+  /* =====================
+     RENDER
+  ====================== */
   return (
-    <div className={styles.dashboardPage}>
-      <header className={styles.pageHeader}>
-        <h2>Staff Management</h2>
+    <div className="flex flex-col gap-lg">
+      {/* Header */}
+      <header className="flex justify-between items-start flex-wrap gap-md">
+        <div>
+          <h2 className="text-xl text-bold">Staff Management</h2>
+          <p className="text-sm text-muted">
+            Create, edit, and manage staff access
+          </p>
+        </div>
+
+        {/* CreateStaff handles its own modal */}
         <CreateStaff onCreated={fetchStaff} />
       </header>
 
-      {message && <p className={styles.message}>{message}</p>}
+      {/* Message */}
+      {message && <div className="card text-sm text-error">{message}</div>}
 
-      <section className={styles.card}>
-        <h3>Staff List</h3>
+      {/* Staff List */}
+      <section className="card">
+        <h3 className="mb-md">Staff List</h3>
+
         {loading ? (
-          <p>Loading...</p>
+          <p className="text-sm text-muted">Loading...</p>
         ) : staffList.length === 0 ? (
-          <p>No staff available.</p>
+          <p className="text-sm text-muted">No staff available.</p>
         ) : (
-          <table className={styles.staffTable}>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* DESKTOP TABLE */}
+            <div className="hidden-mobile w-full overflow-x-auto">
+              <table className="staff-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th className="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {staffList.map((s) => (
+                    <tr key={s.id}>
+                      <td>{s.full_name}</td>
+                      <td>{s.email}</td>
+                      <td>{s.phone}</td>
+                      <td>
+                        <span
+                          className={s.is_active ? "text-success" : "text-muted"}
+                        >
+                          {s.is_active ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="flex justify-end gap-sm">
+                          <button
+                            onClick={() => handleEditClick(s)}
+                            className="btn-ghost"
+                            title="Edit staff"
+                          >
+                            <FiEdit />
+                          </button>
+
+                          {s.is_active ? (
+                            <>
+                              <button
+                                onClick={() => handleDeactivate(s.id)}
+                                className="btn-ghost text-error"
+                                title="Deactivate staff"
+                              >
+                                <FiLock />
+                              </button>
+
+                              <button
+                                onClick={() => handleResetPassword(s.id)}
+                                className="btn-ghost"
+                                title="Reset password"
+                              >
+                                <FiRefreshCw />
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              onClick={() => handleReactivate(s.id)}
+                              className="btn-ghost text-success"
+                              title="Reactivate staff"
+                            >
+                              <FiUnlock />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* MOBILE CARDS */}
+            <div className="hidden-desktop flex flex-col gap-md">
               {staffList.map((s) => (
-                <tr key={s.id}>
-                  <td>{s.full_name}</td>
-                  <td>{s.email}</td>
-                  <td>{s.phone}</td>
-                  <td>{s.is_active ? "Active" : "Inactive"}</td>
-                  <td className={styles.actionsCell}>
-                    {/* Edit */}
+                <div key={s.id} className="card">
+                  <div className="flex justify-between items-start mb-sm">
+                    <div>
+                      <p className="text-bold">{s.full_name}</p>
+                      <p className="text-sm text-muted">{s.email}</p>
+                      <p className="text-sm text-muted">{s.phone}</p>
+                    </div>
+
+                    <span
+                      className={`text-sm ${
+                        s.is_active ? "text-success" : "text-muted"
+                      }`}
+                    >
+                      {s.is_active ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+
+                  <div className="flex gap-sm justify-end">
                     <button
                       onClick={() => handleEditClick(s)}
-                      className={styles.iconBtn}
+                      className="btn-ghost"
                       title="Edit staff"
                     >
                       <FiEdit />
@@ -114,39 +206,36 @@ export default function StaffManagement() {
 
                     {s.is_active ? (
                       <>
-                        {/* Deactivate */}
                         <button
                           onClick={() => handleDeactivate(s.id)}
-                          className={`${styles.iconBtn} ${styles.danger}`}
+                          className="btn-ghost text-error"
                           title="Deactivate staff"
                         >
                           <FiLock />
                         </button>
 
-                        {/* Reset Password */}
                         <button
                           onClick={() => handleResetPassword(s.id)}
-                          className={styles.iconBtn}
+                          className="btn-ghost"
                           title="Reset password"
                         >
                           <FiRefreshCw />
                         </button>
                       </>
                     ) : (
-                      /* Reactivate */
                       <button
                         onClick={() => handleReactivate(s.id)}
-                        className={`${styles.iconBtn} ${styles.success}`}
+                        className="btn-ghost text-success"
                         title="Reactivate staff"
                       >
                         <FiUnlock />
                       </button>
                     )}
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
       </section>
 
@@ -155,7 +244,7 @@ export default function StaffManagement() {
         <EditStaff
           staff={editingStaff}
           onUpdated={fetchStaff}
-          onClose={clearEditingStaff}
+          onClose={closeEditModal}
         />
       )}
     </div>

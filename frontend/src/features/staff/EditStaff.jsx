@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import StaffForm from "./StaffForm";
 import { updateStaff as apiUpdateStaff } from "../../api/staff";
-import styles from "./StaffForm.module.css";
+// import styles from "./StaffForm.module.css";
 
 export default function EditStaff({ staff, onUpdated, onClose }) {
   const [modalOpen, setModalOpen] = useState(false);
@@ -35,12 +35,12 @@ export default function EditStaff({ staff, onUpdated, onClose }) {
 
   return (
     <div>
-      {message && <p className={styles.message}>{message}</p>}
+      {message && <p className="message">{message}</p>}
 
       {modalOpen && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <h3>Edit Staff</h3>
+        <div className="modal-overlay">
+          <div className="modal card">
+            <h3 className="mb-md">Edit Staff</h3>
             <StaffForm
               key={formKey}           // important: force remount to reset inputs
               initialData={staff}     // pass selected staff data
