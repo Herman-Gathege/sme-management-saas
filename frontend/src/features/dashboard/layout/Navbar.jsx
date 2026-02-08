@@ -1,24 +1,20 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
-import styles from "./DashboardLayout.module.css";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
 
-  // hooks FIRST
   const [open, setOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isFullscreen, setIsFullscreen] = useState(
     !!document.fullscreenElement
   );
 
-  // update clock
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // track fullscreen changes (esc, f11, button)
   useEffect(() => {
     const handler = () =>
       setIsFullscreen(!!document.fullscreenElement);
@@ -28,8 +24,7 @@ export default function Navbar() {
       document.removeEventListener("fullscreenchange", handler);
   }, []);
 
-  // user not loaded
-  if (!user) return <header className={styles.navbar} />;
+  if (!user) return <header className="navbar" />;
 
   const formattedTime = currentTime.toLocaleTimeString([], {
     hour: "2-digit",
@@ -53,37 +48,38 @@ export default function Navbar() {
   };
 
   return (
-    <header className={styles.navbar}>
+    <header className="navbar flex justify-between items-center p-md">
       {/* LEFT */}
-      <div className={styles.left}>
-        <button
-          type="button"
-          onClick={toggleFullscreen}
-          className={styles.fullscreenBtn}
-          title="Toggle Fullscreen"
-        >
-          {isFullscreen ? "⤫" : "⛶"}
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={toggleFullscreen}
+        className="btn btn-ghost"
+        title="Toggle Fullscreen"
+      >
+        {isFullscreen ? "⤫" : "⛶"}
+
+      </button>
 
       {/* CENTER */}
-      <div className={styles.timeWrapper}>
-        <span className={styles.date}>{formattedDate}</span>
-        <span className={styles.time}>{formattedTime}</span>
+      <div className="flex flex-col items-center text-sm">
+        <span className="text-muted">{formattedDate}</span>
+        <span className="text-bold">{formattedTime}</span>
       </div>
 
       {/* RIGHT */}
-      <div className={styles.avatarWrapper}>
+      <div className="relative">
         <div
-          className={styles.avatar}
-          onClick={() => setOpen(!open)}
+          className="avatar"
+          onClick={() => setOpen((o) => !o)}
         >
           {user.full_name.charAt(0).toUpperCase()}
         </div>
 
         {open && (
-          <div className={styles.dropdown}>
-            <button onClick={logout}>Logout</button>
+          <div className="dropdown">
+            <button className="dropdown-item" onClick={logout}>
+              Logout
+            </button>
           </div>
         )}
       </div>

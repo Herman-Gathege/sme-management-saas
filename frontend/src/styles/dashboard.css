@@ -1,0 +1,186 @@
+/* =============================
+   SIDEBAR SHELL
+============================= */
+
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.25s ease;
+  position: sticky;
+}
+
+.sidebar-collapsed {
+  width: 72px;
+}
+
+/* =============================
+   SIDEBAR HEADER
+============================= */
+
+.sidebar-header {
+  position: relative; /* needed for absolute button */
+  height: 64px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* logo on left */
+  border-bottom: 1px solid #e5e7eb;
+  overflow: visible; /* prevent clipping */
+}
+
+.sidebar-logo {
+  white-space: nowrap;
+}
+
+/* ----------------------------
+   COLLAPSE BUTTON
+---------------------------- */
+.sidebar-collapse-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: transparent;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: absolute;
+  top: 12px;
+  right: -12px;
+  z-index: 50;
+
+  font-size: 20px;
+  font-weight: bold;
+  color: #184da3;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.sidebar-collapse-btn:hover {
+  background: #f3f4f6;
+}
+
+
+.collapse-icon {
+  margin-left: 0; /* override the old rule */
+  font-size: 22px;
+  color: #184da3;
+  transition: transform 0.2s ease;
+}
+
+
+/* Rotate when collapsed */
+.collapse-icon.rotated {
+  transform: rotate(180deg);
+}
+
+
+
+/* Center button when collapsed */
+.sidebar-collapsed .sidebar-header,
+.sidebar-header.collapsed-header {
+  justify-content: center; /* center collapse button */
+  padding: 0; /* optional, remove extra spacing */
+}
+
+/* =============================
+   SIDEBAR LINKS
+============================= */
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #374151;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.sidebar-link:hover {
+  background: #f3f4f6;
+}
+
+.sidebar-link.active {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Icons */
+.sidebar-link svg {
+  font-size: 18px;
+}
+
+/* =============================
+   SIDEBAR SUBMENU
+============================= */
+
+.sidebar-submenu {
+  display: flex;
+  flex-direction: column;
+  margin-left: 34px;
+  gap: 4px;
+}
+
+.sidebar-submenu .sidebar-link {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+/* =============================
+   CHEVRONS
+============================= */
+
+.sidebar-link .chevron {
+  margin-left: auto;
+  transition: transform 0.2s ease;
+}
+
+.rotated {
+  transform: rotate(180deg);
+}
+
+/* =============================
+   COLLAPSED SIDEBAR
+============================= */
+
+.sidebar-collapsed {
+  width: 72px;
+}
+
+.sidebar-collapsed .sidebar-logo,
+.sidebar-collapsed .sidebar-submenu,
+.sidebar-collapsed .sidebar-link span,
+.sidebar-collapsed .chevron {
+  display: none !important;
+}
+
+.sidebar-collapsed .sidebar-link {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+
+/* Hide sidebar on smaller screens */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  /* Optional: if you want to show a mobile toggle button */
+  .mobile-sidebar-toggle {
+    display: block; /* You can style a hamburger button */
+  }
+}
