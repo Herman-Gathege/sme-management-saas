@@ -17,21 +17,32 @@ export function AuthProvider({ children }) {
     window.location.href = "/login";
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+  const handleApiError = (error) => {
+  // Check if the error means the token is expired or missing
+  if (error.message === "Unauthorized" || error.message === "No token") {
+    logout();
+  } else {
+    console.error(error);
+  }
+};
 
-    getMe()
-      .then((res) => {
-        setUser(res.user);
-        setOrganization(res.organization);
-      })
-      .catch(logout)
-      .finally(() => setLoading(false));
-  }, []);
+
+  useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    setLoading(false);
+    return;
+  }
+
+  getMe()
+    .then((res) => {
+      setUser(res.user);
+      setOrganization(res.organization);
+    })
+    .catch(handleApiError)
+    .finally(() => setLoading(false));
+}, []);
+
 
   return (
     <AuthContext.Provider

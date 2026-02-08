@@ -14,7 +14,7 @@ export default function DashboardContent({ roleLabel }) {
   return (
     <div className="p-6">
       <div className="text-lg font-bold mb-md">
-        Welcome, <span>{user.full_name}</span> 👋
+        Welcome, <span className="company-blue text-bold">{user.full_name}</span> 👋
       </div>
 
       <div className="grid grid-cols-1 grid-cols-3 gap-md">

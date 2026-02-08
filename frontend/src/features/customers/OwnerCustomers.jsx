@@ -135,7 +135,7 @@ export default function OwnerCustomers() {
 
   /* ================= RENDER ================= */
   return (
-    <div className="customers-container">
+    <div className="customers-container bg-white p-lg rounded-lg shadow-sm">
       <div className="customers-header">
         <h2 className="text-lg text-bold">
           {isDebtors ? "Debtors" : "Creditors"}
@@ -155,7 +155,7 @@ export default function OwnerCustomers() {
       </p>
 
       {!loading && customers.length > 0 && (
-        <div className="customers-table-wrapper hidden-mobile">
+        <div className="customers-table-wrapper hidden-mobile ">
           <table className="customers-table">
             <thead>
               <tr>
