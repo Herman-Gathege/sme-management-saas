@@ -2,7 +2,7 @@
 
 
 /* =============================
-   FORM ELEMENTS
+   FORM ELEMENT#298cce
 ============================= */
 
 .input {
@@ -26,7 +26,7 @@
 
 .btn {
   height: 52px;
-  width: 100%;
+  width: auto;
   border-radius: 10px;
   font-size: 16px;
   font-weight: 600;
@@ -35,6 +35,11 @@
 }
 
 .btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-secondary {
   background: var(--primary);
   color: white;
 }

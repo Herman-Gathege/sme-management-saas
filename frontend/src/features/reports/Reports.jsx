@@ -70,81 +70,122 @@ export default function Reports() {
   if (error) return <p className="text-error">{error}</p>;
 
   return (
-    <section className="card">
-      <div className="flex items-center justify-between mb-4">
-        <h3>Sales Reports</h3>
-        <button className="iconBtn" onClick={exportCSV}>
-          Export CSV
-        </button>
-      </div>
+  <section className="card flex flex-col gap-md">
 
-      {summary && (
-        <div className="grid-summary">
-          {["cash", "mpesa", "credit", "total"].map((key) => (
-            <div key={key} className="stat-card">
+    {/* Header */}
+    <div className="flex justify-between items-center">
+      <h3 className="text-lg text-bold">Sales Reports</h3>
+
+      <button className="btn btn-secondary" onClick={exportCSV}>
+        Export CSV
+      </button>
+    </div>
+
+
+    {/* Summary cards */}
+    {summary && (
+      <div className="grid-summary">
+        {["cash", "mpesa", "credit", "total"].map((key) => (
+          <div key={key} className="stat-card">
+            <span className="text-sm text-muted">
               {key.charAt(0).toUpperCase() + key.slice(1)}
-              <br />
-              <span>KES {summary[key].toFixed(2)}</span>
-            </div>
-          ))}
-        </div>
+            </span>
+            <span className="text-lg text-bold">
+              KES {summary[key].toFixed(2)}
+            </span>
+          </div>
+        ))}
+      </div>
+    )}
+
+
+    {/* Filters */}
+    <div className="flex gap-sm wrap">
+      <button
+        className="btn btn-secondary"
+        onClick={() => setSelectedFilter("today")}
+      >
+        Today
+      </button>
+
+      <button
+        className="btn btn-secondary"
+        onClick={() => setSelectedFilter("month")}
+      >
+        This Month
+      </button>
+
+      <button
+        className="btn btn-secondary"
+        onClick={() => setSelectedFilter("all")}
+      >
+        All Time
+      </button>
+    </div>
+
+
+    {/* Desktop table */}
+    <div className="table-wrapper hidden-mobile">
+      <table className="customers-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Method</th>
+            <th>Amount</th>
+            <th>ID</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {sales.length > 0 ? (
+            sales.map((s) => (
+              <tr key={s.sale_id}>
+                <td>{new Date(s.created_at).toLocaleString()}</td>
+                <td>{s.payment_method.toUpperCase()}</td>
+                <td>KES {s.total_amount.toFixed(2)}</td>
+                <td>{s.sale_id}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="4" className="text-muted">
+                No sales found
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+
+
+    {/* Mobile cards */}
+    <div className="hidden-desktop flex flex-col gap-sm">
+      {sales.length === 0 && (
+        <p className="text-muted">No sales found</p>
       )}
 
-      {/* FILTER BUTTONS */}
-      <div className="flex gap-sm wrap">
-        <button
-          className="iconBtn"
-          onClick={() => setSelectedFilter("today")}
-          disabled={selectedFilter === "today"}
-        >
-          Today
-        </button>
-        <button
-          className="iconBtn"
-          onClick={() => setSelectedFilter("month")}
-          disabled={selectedFilter === "month"}
-        >
-          This Month
-        </button>
-        <button
-          className="iconBtn"
-          onClick={() => setSelectedFilter("all")}
-          disabled={selectedFilter === "all"}
-        >
-          All Time
-        </button>
-      </div>
+      {sales.map((s) => (
+        <div key={s.sale_id} className="card flex flex-col gap-xs">
+          <div className="text-sm">
+            <strong>Date:</strong> {new Date(s.created_at).toLocaleString()}
+          </div>
 
-      <div className="table-wrapper">
-        <table className="customers-table (">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Payment Method</th>
-              <th>Amount (KES)</th>
-              <th>Sale ID</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sales.length > 0 ? (
-              sales.map((s) => (
-                <tr key={s.sale_id}>
-                  <td>{new Date(s.created_at).toLocaleString()}</td>
-                  <td>{s.payment_method.toUpperCase()}</td>
-                  <td>{s.total_amount.toFixed(2)}</td>
-                  <td>{s.sale_id}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="4" className="text-muted">
-                  No sales found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  );
+          <div className="text-sm">
+            <strong>Method:</strong> {s.payment_method.toUpperCase()}
+          </div>
+
+          <div className="text-sm text-bold">
+            KES {s.total_amount.toFixed(2)}
+          </div>
+
+          <div className="text-xs text-muted">
+            ID: {s.sale_id}
+          </div>
+        </div>
+      ))}
+    </div>
+
+  </section>
+);
+
 }
