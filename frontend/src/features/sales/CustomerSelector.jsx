@@ -4,10 +4,9 @@ export default function CustomerSelector({
   selectedCustomer,
   setSelectedCustomer,
   onAddCustomer,
-  styles,
 }) {
   return (
-    <div className={styles.customerSelector}>
+    <div className="customer-selector">
       <label>Customer</label>
 
       <select

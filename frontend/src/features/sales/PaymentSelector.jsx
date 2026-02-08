@@ -5,15 +5,14 @@ export default function PaymentSelector({
   onChange,
   clearError,
   methods,
-  styles,
 }) {
   return (
-    <div className={styles.paymentButtons}>
+    <div className="payment-buttons">
       {methods.map((m) => (
         <button
           key={m}
           type="button"
-          className={value === m ? styles.activePayment : undefined}
+          className={value === m ? "active" : ""}
           onClick={() => {
             onChange(m);
             clearError?.();
@@ -25,3 +24,4 @@ export default function PaymentSelector({
     </div>
   );
 }
+

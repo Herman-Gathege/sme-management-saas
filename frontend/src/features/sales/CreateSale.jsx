@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import styles from "./Sales.module.css";
+// import styles from "./Sales.module.css";
 import CreateCustomer from "../customers/CreateCustomer";
 import CustomerSelector from "./CustomerSelector";
 import PaymentSelector from "./PaymentSelector";
@@ -224,212 +224,168 @@ export default function CreateSale() {
   ======================= */
 
   return (
-    <section className={styles.posLayout}>
-      {/* LEFT: PAYMENT */}
-      <aside className={styles.paymentPanel}>
-  <h3>Choose Payment</h3>
+    <section className="pos-layout">
+  {/* LEFT: PAYMENT */}
+  <aside className="payment-panel">
+    <h3>Choose Payment</h3>
 
-  <PaymentSelector
-    value={paymentMethod}
-    methods={PAYMENT_METHODS}
-    styles={styles}
-    onChange={setPaymentMethod}
-    clearError={() => setPaymentError("")}
-  />
-
-  {paymentError && (
-  <p className={styles.paymentError}>{paymentError}</p>
-)}
-
-
-  {paymentMethod === "Credit" && (
-    <CustomerSelector
-      customers={customers}
-      selectedCustomer={selectedCustomer}
-      setSelectedCustomer={setSelectedCustomer}
-      onAddCustomer={() => setShowCustomerModal(true)}
-      styles={styles}
+    <PaymentSelector
+      value={paymentMethod}
+      methods={PAYMENT_METHODS}
+      onChange={setPaymentMethod}
+      clearError={() => setPaymentError("")}
     />
-  )}
 
-  <div className={styles.cartSummary}>
-    <span>{selectedItems.length} items</span>
-    <strong>KES {total.toFixed(2)}</strong>
-  </div>
+    {paymentError && <p className="payment-error">{paymentError}</p>}
 
-  {/* <button
-    onClick={handleSubmit}
-    disabled={
-      loading ||
-      !paymentMethod ||
-      (paymentMethod === "Credit" && !selectedCustomer)
-    }
-    className={styles.confirmButton}
-  >
-    {loading ? "Processing…" : "Confirm Sale"}
-  </button> */}
+    {paymentMethod === "Credit" && (
+      <CustomerSelector
+        customers={customers}
+        selectedCustomer={selectedCustomer}
+        setSelectedCustomer={setSelectedCustomer}
+        onAddCustomer={() => setShowCustomerModal(true)}
+      />
+    )}
 
-  <button
-  type="button"
-  onClick={handleSubmit}
-  disabled={isConfirmDisabled}
-  className={styles.confirmButton}
->
-  {loading ? "Processing…" : "Confirm Sale"}
-</button>
+    <div className="cart-summary">
+      <span>{selectedItems.length} items</span>
+      <strong>KES {total.toFixed(2)}</strong>
+    </div>
 
-</aside>
+    <button
+      type="button"
+      onClick={handleSubmit}
+      disabled={isConfirmDisabled}
+      className="btn primary-btn"
+    >
+      {loading ? "Processing…" : "Confirm Sale"}
+    </button>
+  </aside>
 
+  {/* RIGHT: CART */}
+  <form className="cart-panel" onSubmit={handleSubmit}>
+    <div className="search-bar">
+      <input
+        autoFocus
+        type="text"
+        placeholder="Scan barcode or search item"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        onKeyDown={handleSearchKeyDown}
+      />
 
-      {/* RIGHT: CART */}
-      <form className={styles.cartPanel} onSubmit={handleSubmit}>
-        <div className={styles.searchBar}>
-          <input
-            autoFocus
-            type="text"
-            placeholder="Scan barcode or search item"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={handleSearchKeyDown}
-          />
+      {searchTerm && (
+        <div className="search-results">
+          <div className="search-header">
+            <span>SKU</span>
+            <span>Item</span>
+            <span>Price</span>
+            <span>Qty</span>
+          </div>
 
-          {/* <button type="submit">
-            <FaSearch />
-          </button> */}
-
-          {searchTerm && (
-            <div className={styles.searchResults}>
-              <div className={styles.searchHeader}>
-                <span>SKU</span>
-                <span>Item</span>
-                <span>Price</span>
-                <span>Qty</span>
-              </div>
-
-              {filteredStock.slice(0, 6).map((s) => (
-                <div
-                  key={s.id}
-                  className={styles.searchRow}
-                  onClick={() => {
-                    addItem(s);
-                    setSearchTerm("");
-                  }}
-                >
-                  {" "}
-                  <span className={styles.resSku}>{s.sku || "—"}</span>
-                  <span className={styles.resName}>{s.name}</span>
-                  <span className={styles.resPrice}>
-                    KES{" "}
-                    {(Number(s.selling_price ?? s.unit_price) || 0).toFixed(2)}
-                  </span>
-                  <span className={styles.resQuantity}>{s.quantity}</span>
-                </div>
-              ))}
-              {filteredStock.length === 0 && (
-                <div className={styles.noResult}>No items found</div>
-              )}
+          {filteredStock.slice(0, 6).map((s) => (
+            <div
+              key={s.id}
+              className="search-row"
+              onClick={() => {
+                addItem(s);
+                setSearchTerm("");
+              }}
+            >
+              <span>{s.sku || "—"}</span>
+              <span>{s.name}</span>
+              <span>
+                KES{" "}
+                {(Number(s.selling_price ?? s.unit_price) || 0).toFixed(2)}
+              </span>
+              <span>{s.quantity}</span>
             </div>
+          ))}
+
+          {filteredStock.length === 0 && (
+            <div className="no-result">No items found</div>
           )}
         </div>
-
-        <div className={styles.cartTableWrapper}>
-          <table className={styles.cartTable}>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>SKU Number</th>
-                <th>Item Name</th>
-                <th>Item Category</th>
-                <th>Quantityy</th>
-                <th>Item Price</th>
-                <th>Total</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {selectedItems.map((i, idx) => (
-                <tr key={idx}>
-                  <td>{idx + 1}</td>
-                  <td>{i.sku || "—"}</td>
-                  <td>{i.name}</td>
-                  <td>{i.category || "—"}</td>
-                  <td>
-                    <div className={styles.qtyControl}>
-                      <button
-                        type="button"
-                        onClick={() => updateQuantity(idx, i.quantity - 1)}
-                      >
-                        −
-                      </button>
-                      <span>{i.quantity}</span>
-                      <button
-                        type="button"
-                        onClick={() => updateQuantity(idx, i.quantity + 1)}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </td>
-                  <td>KES {(Number(i.selling_price) || 0).toFixed(2)}</td>
-                  <td>
-                    <strong>
-                      KES{" "}
-                      {((Number(i.selling_price) || 0) * i.quantity).toFixed(2)}
-                    </strong>
-                  </td>
-
-                  <td>
-                    <button
-                      type="button"
-                      className={styles.removeBtn}
-                      onClick={() => removeItem(idx)}
-                    >
-                      ✕
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </form>
-      {/* {showCustomerModal && (
-        <div className={styles.modalBackdrop}>
-          <div className={styles.modal}>
-            <CreateCustomer
-              onClose={() => setShowCustomerModal(false)}
-              onSuccess={(newCustomer) => {
-                fetchDebtors(); // 🔥 refresh list
-                setSelectedCustomer(newCustomer.id); // auto select
-              }}
-            />
-          </div>
-        </div>
-      )} */}
-
-      {showCustomerModal && (
-        <div className={styles.modalBackdrop}>
-          <div className={styles.modal}>
-            {/* Close button */}
-            <button
-              type="button"
-              className={styles.modalCloseBtn}
-              onClick={() => setShowCustomerModal(false)}
-            >
-              ✕
-            </button>
-
-            <CreateCustomer
-              onClose={() => setShowCustomerModal(false)}
-              onSuccess={(newCustomer) => {
-                fetchCustomers(); // refresh list
-                setSelectedCustomer(newCustomer.id); // auto select
-                setShowCustomerModal(false); // close after success
-              }}
-            />
-          </div>
-        </div>
       )}
-    </section>
+    </div>
+
+    <div className="cart-table-wrapper">
+      <table className="cart-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>SKU</th>
+            <th>Item</th>
+            <th>Category</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Total</th>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          {selectedItems.map((i, idx) => (
+            <tr key={idx}>
+              <td>{idx + 1}</td>
+              <td>{i.sku || "—"}</td>
+              <td>{i.name}</td>
+              <td>{i.category || "—"}</td>
+              <td>
+                <div className="qty-control">
+                  <button type="button" onClick={() => updateQuantity(idx, i.quantity - 1)}>
+                    −
+                  </button>
+                  <span>{i.quantity}</span>
+                  <button type="button" onClick={() => updateQuantity(idx, i.quantity + 1)}>
+                    +
+                  </button>
+                </div>
+              </td>
+              <td>KES {(Number(i.selling_price) || 0).toFixed(2)}</td>
+              <td>
+                <strong>
+                  KES {(i.selling_price * i.quantity).toFixed(2)}
+                </strong>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  className="remove-btn"
+                  onClick={() => removeItem(idx)}
+                >
+                  ✕
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </form>
+
+  {showCustomerModal && (
+    <div className="modal-backdrop">
+      <div className="modal">
+        <button
+          type="button"
+          className="modal-close-btn"
+          onClick={() => setShowCustomerModal(false)}
+        >
+          ✕
+        </button>
+
+        <CreateCustomer
+          onClose={() => setShowCustomerModal(false)}
+          onSuccess={(newCustomer) => {
+            fetchCustomers();
+            setSelectedCustomer(newCustomer.id);
+            setShowCustomerModal(false);
+          }}
+        />
+      </div>
+    </div>
+  )}
+</section>
+
   );
 }
