@@ -75,7 +75,8 @@ export default function Sidebar() {
     isActive ? `${styles.link} ${styles.active}` : styles.link;
 
   return (
-    <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}>
+    <aside className={`sidebar hidden-mobile ${collapsed ? "collapsed" : ""}`}>
+
       {/* Header */}
       <div className={styles.header}>
         {!collapsed && <h2 className={styles.logo}>{organization?.name || "SmartShop"}</h2>}

@@ -2,18 +2,35 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
-import styles from "./DashboardLayout.module.css";
+import BottomNav from "../../../components/BottomNav";
+
+// import styles from "./DashboardLayout.module.css";
 
 export default function DashboardLayout() {
+  // return (
+  //   <div className={styles.layout}>
+  //     <Sidebar />
+
+  //     <div className={styles.main}>
+  //       <Navbar />
+  //       <div className={styles.content}>
+  //         <Outlet />
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
+
   return (
-    <div className={styles.layout}>
+    <div className="dashboard-layout">
       <Sidebar />
 
-      <div className={styles.main}>
+      <div className="dashboard-main">
         <Navbar />
-        <div className={styles.content}>
+        <main className="dashboard-content">
           <Outlet />
-        </div>
+        </main>
+
+        <BottomNav />
       </div>
     </div>
   );

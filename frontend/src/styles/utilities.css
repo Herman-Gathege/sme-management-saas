@@ -106,8 +106,9 @@
 }
 
 /* visible on mobile, hidden on desktop */
+/* visible on mobile, hidden on desktop */
 .hidden-desktop {
-  display: block;
+  display: inherit;
 }
 
 @media (min-width: 1024px) {
@@ -115,3 +116,5 @@
     display: none;
   }
 }
+
+
