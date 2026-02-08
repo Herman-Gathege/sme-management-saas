@@ -3,7 +3,6 @@ import { Outlet } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import StaffLayout from "./layout/StaffLayout";
-import styles from "../dashboard/layout/DashboardLayout.module.css";
 
 
 // -----------------------------
@@ -14,15 +13,15 @@ export function StaffSales() {
   const { user } = useAuth();
   return (
     <>
-      <header className={styles.header}>
-        <h2>Welcome, <span>{user.full_name}</span> 👋</h2>
+      <header className="mb-md">
+        <h2 className="text-lg text-bold">Welcome, <span>{user.full_name}</span> 👋</h2>
         {/* <p>Organization: {organization?.name}</p>
         <p>Role: Staff</p> */}
       </header>
 
-      <section className={styles.card}>
-        <h3>Sales</h3>
-        <p>Sales functionality will appear here.</p>
+      <section className="card">
+        <h3 className="text-md text-bold mb-sm">Sales</h3>
+        <p className="text-muted">Sales functionality will appear here.</p>
       </section>
     </>
   );
@@ -31,13 +30,17 @@ export function StaffSales() {
 export function StaffProfile() {
   const { user } = useAuth();
   return (
-    <section className={styles.card}>
-      <h3>My Profile</h3>
-      <div className={styles.profileRow}>
-        <strong>Name:</strong> {user.full_name}
+    <section className="card flex flex-col gap-sm">
+      <h3 className="text-md text-bold">My Profile</h3>
+
+      <div className="flex justify-between">
+        <strong>Name:</strong>
+        <span>{user.full_name}</span>
       </div>
-      <div className={styles.profileRow}>
-        <strong>Email:</strong> {user.email}
+
+      <div className="flex justify-between">
+        <strong>Email:</strong>
+        <span>{user.email}</span>
       </div>
     </section>
   );
@@ -90,27 +93,50 @@ export function StaffPassword() {
   };
 
   return (
-    <section className={styles.card}>
-      <h3>Change Password</h3>
-      <form onSubmit={handlePasswordChange} className={styles.form}>
+    <section className="card">
+      <h3 className="text-md text-bold mb-md">Change Password</h3>
+
+      <form
+        onSubmit={handlePasswordChange}
+        className="flex flex-col gap-md"
+      >
         <input
+          className="input"
           type="password"
           placeholder="New password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           required
         />
+
         <input
+          className="input"
           type="password"
           placeholder="Confirm password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
         />
-        <button type="submit" disabled={loading}>
+
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={loading}
+        >
           {loading ? "Updating..." : "Update Password"}
         </button>
-        {message && <p className={styles.message}>{message}</p>}
+
+        {message && (
+          <p
+            className={`text-sm ${
+              message.includes("success")
+                ? "text-success"
+                : "text-error"
+            }`}
+          >
+            {message}
+          </p>
+        )}
       </form>
     </section>
   );

@@ -1,17 +1,18 @@
 // frontend/src/features/dashboard/layout/StaffLayout.jsx
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
-import styles from "./DashboardLayout.module.css";
+import StaffBottomNav from "../../../components/StaffBottomNav";
 
 export default function StaffLayout({ children }) {
   return (
-    <div className={styles.layout}>
+    <div className="dashboard-layout">
       <Sidebar />
-      <div className={styles.main}>
+      <div className="dashboard-main">
         <Navbar />
-        <div className={styles.content}>
+        <div className="dashboard-content">
           {children}
         </div>
+        <StaffBottomNav />
       </div>
     </div>
   );

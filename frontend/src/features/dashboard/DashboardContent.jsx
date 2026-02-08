@@ -1,6 +1,5 @@
 // frontend/src/features/dashboard/DashboardContent.jsx
 import { useAuth } from "../../context/AuthContext";
-// import styles from "./Dashboard.module.css";
 import TodaysSales from "../dashboard/widgets/TodaysSales";
 import StockAlerts from "../dashboard/widgets/StockAlerts";
 import TodaysCreditSales from "./widgets/TodaysCreditSales";
