@@ -33,12 +33,12 @@ export default function TodaysCreditSales() {
 
   return (
     <div
-      className="card flex flex-col gap-sm cursor-pointer"
+      className="card-w flex flex-col gap-sm cursor-pointer "
       onClick={() => navigate("/owner/customers/debtors")}
     >
       <h3 className="text-md text-bold">Credit Sales</h3>
 
-      <div className="text-xl text-bold">
+      <div className="text-xl text-bold company-blue">
         KES {totalCredit.toFixed(2)}
       </div>
 

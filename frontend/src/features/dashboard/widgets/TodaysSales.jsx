@@ -23,19 +23,24 @@ export default function TodaysSales() {
     fetchSales();
   }, [API_BASE]);
 
-  const today = new Date().toISOString().split("T")[0];
+const today = new Date().toLocaleDateString("en-CA");
   const totalToday = sales
-    .filter((s) => s.created_at.split("T")[0] === today)
-    .reduce((sum, s) => sum + Number(s.total_amount || 0), 0);
+  .filter((s) => {
+    if (!s.created_at) return false;
+    return s.created_at.slice(0, 10) === today;
+  })
+  .reduce((sum, s) => sum + Number(s.total_amount || 0), 0);
+
+
 
   return (
     <div
-      className="card flex flex-col gap-sm cursor-pointer"
+      className="card-w flex flex-col gap-sm cursor-pointer"
       onClick={() => navigate("/owner/sales")}
     >
       <h3 className="text-md text-bold">Today’s Sales</h3>
 
-      <div className="text-xl text-bold">
+      <div className="text-xl text-bold company-blue">
         KES {totalToday.toFixed(2)}
       </div>
 

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 
 import { useLocation } from "react-router-dom";
 import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { FiInfo } from "react-icons/fi";
 
 export default function OwnerCustomers() {
   const location = useLocation();
@@ -147,6 +148,11 @@ export default function OwnerCustomers() {
       {!loading && customers.length === 0 && (
         <p>No {isDebtors ? "debtors" : "creditors"} found.</p>
       )}
+
+      <p className="hint flex items-center gap-sm">
+        <FiInfo />
+        Any amount with a negative (-) before the number indicates an overpayment during debt settlement.<br/> This amount will be used to settle future debts.
+      </p>
 
       {!loading && customers.length > 0 && (
         <div className="customers-table-wrapper hidden-mobile">

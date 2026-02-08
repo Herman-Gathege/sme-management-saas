@@ -95,7 +95,7 @@ export default function Sidebar() {
       {/* ================= HEADER ================= */}
 <div className="sidebar-header">
   {!collapsed && (
-    <h2 className="sidebar-logo text-lg font-bold">
+    <h2 className="sidebar-logo text-lg font-bold company-blue">
       {organization?.name || "SmartShop"}
     </h2>
   )}
@@ -103,7 +103,7 @@ export default function Sidebar() {
   {/* Collapse button with < or > */}
   <button
           type="button"
-          className="sidebar-collapse-btn"
+          className="sidebar-collapse-btn mr-sm"
           onClick={() => setCollapsed((c) => !c)}
         >
           <FiChevronDown className={collapsed ? "rotated" : ""} />

@@ -8,7 +8,7 @@ import {
   reactivateStaff as apiReactivateStaff,
   resetStaffPassword as apiResetPassword,
 } from "../../api/staff";
-import { FiEdit, FiLock, FiUnlock, FiRefreshCw } from "react-icons/fi";
+import { FiEdit, FiLock, FiUnlock, FiRefreshCw, FiInfo } from "react-icons/fi";
 
 export default function StaffManagement() {
   const [staffList, setStaffList] = useState([]);
@@ -83,7 +83,9 @@ export default function StaffManagement() {
       <header className="flex justify-between items-start flex-wrap gap-md">
         <div>
           <h2 className="text-xl text-bold">Staff Management</h2>
-          <p className="text-sm text-muted">
+          <p className="hint">
+            <FiInfo />
+            
             Create, edit, and manage staff access
           </p>
         </div>

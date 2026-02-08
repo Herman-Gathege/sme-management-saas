@@ -41,9 +41,20 @@
 }
 
 .btn-secondary {
-  background: var(--primary);
-  color: white;
+  background: white;
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+  transition: all 0.2s ease;
 }
+
+.btn-secondary:hover {
+  background: #eff6ff; /* very light blue */
+}
+
+.btn-secondary:active {
+  transform: translateY(1px);
+}
+
 
 .btn-primary:disabled {
   opacity: 0.6;
@@ -59,6 +70,31 @@
   padding: 24px;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.card-w {
+  background: #b3cfe557;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  cursor: pointer;
+}
+
+.stat-card-r {
+  background: #b3cfe557;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-w:hover {
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+
 }
 
 
@@ -257,4 +293,93 @@
   background: #f3f4f6;
   font-weight: 600;
   text-transform: uppercase;
+}
+
+
+.hint {
+  background: #eef6ff;
+  border-left: 4px solid var(--primary);
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1e3b8ac4;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* bulb size */
+.hint svg {
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.company-blue {
+  color: var(--primary);
+}
+
+/* Expanded dropdown card */
+.expanded-card {
+  background-color: #f9f9f9; /* soft light background */
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+/* List inside expanded card */
+.expanded-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Each item row */
+.expanded-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 0.9rem;
+}
+
+/* Last item no border */
+.expanded-list-item:last-child {
+  border-bottom: none;
+}
+
+/* Name styling */
+.item-name {
+  flex: 2;
+  font-weight: 500;
+}
+
+/* Quantity */
+.item-qty {
+  flex: 1;
+  text-align: center;
+  color: #555;
+}
+
+/* Unit price */
+.item-price {
+  flex: 1;
+  text-align: right;
+  color: #333;
+}
+
+/* Line total */
+.item-total {
+  flex: 1;
+  text-align: right;
+  color: #111;
+  font-weight: 600;
 }

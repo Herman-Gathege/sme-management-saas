@@ -29,7 +29,7 @@ export default function StockAlerts() {
   
   return (
     <div
-      className="card flex flex-col gap-sm cursor-pointer"
+      className="card-w flex flex-col gap-sm cursor-pointer"
       onClick={() => navigate("/owner/stock")}
     >
       <h3 className="text-md text-bold">Stock Alerts</h3>
