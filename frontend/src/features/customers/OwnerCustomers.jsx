@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+// import MobileCardList from "../../components/ui/MobileCardList";
+
 // import styles from "./Customers.module.css";
 
 export default function OwnerCustomers() {
@@ -21,11 +23,7 @@ export default function OwnerCustomers() {
 
   const isDebtors = location.pathname.includes("debtors");
   const isAll = location.pathname.includes("all");
-  const roleEndpoint = isAll
-    ? ""
-    : isDebtors
-    ? "debtors"
-    : "creditors";
+  const roleEndpoint = isAll ? "" : isDebtors ? "debtors" : "creditors";
 
   // Fetch customers
   useEffect(() => {
@@ -67,7 +65,7 @@ export default function OwnerCustomers() {
     try {
       const res = await fetch(
         `${API_BASE}/api/customers/payments/customer/${customerId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load payments");
@@ -117,8 +115,8 @@ export default function OwnerCustomers() {
         prev.map((c) =>
           c.id === customerId
             ? { ...c, balance: (c.balance || 0) - parseFloat(form.amount) }
-            : c
-        )
+            : c,
+        ),
       );
 
       // Clear form
@@ -131,7 +129,9 @@ export default function OwnerCustomers() {
   return (
     <div className="customers-container">
       <div className="customers-header">
-        <h2 className="text-lg text-bold">{isDebtors ? "Debtors" : "Creditors"}</h2>
+        <h2 className="text-lg text-bold">
+          {isDebtors ? "Debtors" : "Creditors"}
+        </h2>
       </div>
 
       {loading && <p>Loading...</p>}
@@ -141,13 +141,15 @@ export default function OwnerCustomers() {
       )}
 
       {!loading && customers.length > 0 && (
-        <table className="customers-table">
+        <table className="customers-table hidden-mobile">
           <thead>
             <tr>
               <th></th>
               <th>Name</th>
               <th>Company</th>
-              <th>{isDebtors ? "Amount Owed (KES)" : "Amount Payable (KES)"}</th>
+              <th>
+                {isDebtors ? "Amount Owed (KES)" : "Amount Payable (KES)"}
+              </th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -165,8 +167,8 @@ export default function OwnerCustomers() {
                 balance === 0 && paymentsData[c.id]?.length
                   ? "PAID"
                   : isOwed
-                  ? "OWED"
-                  : "OK";
+                    ? "OWED"
+                    : "OK";
 
               return (
                 <tr key={c.id}>
@@ -176,7 +178,11 @@ export default function OwnerCustomers() {
                       onClick={() => toggleRow(c.id)}
                       title={expanded ? "Hide Payments" : "Show Payments"}
                     >
-                      {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      {expanded ? (
+                        <ChevronUp size={16} />
+                      ) : (
+                        <ChevronDown size={16} />
+                      )}
                     </button>
                   </td>
                   <td>{name || "-"}</td>
@@ -188,8 +194,8 @@ export default function OwnerCustomers() {
                         status === "OWED"
                           ? "status-owed"
                           : status === "PAID"
-                          ? "status-paid"
-                          : "status-ok"
+                            ? "status-paid"
+                            : "status-ok"
                       }`}
                     >
                       {status}
@@ -241,7 +247,9 @@ export default function OwnerCustomers() {
                             ) : (
                               payments.map((p) => (
                                 <tr key={p.id}>
-                                  <td>{new Date(p.created_at).toLocaleString()}</td>
+                                  <td>
+                                    {new Date(p.created_at).toLocaleString()}
+                                  </td>
                                   <td>{p.amount.toFixed(2)}</td>
                                   <td>{p.payment_method}</td>
                                   <td>{p.notes || "-"}</td>
@@ -272,7 +280,11 @@ export default function OwnerCustomers() {
                           <select
                             value={paymentForm[c.id]?.payment_method || ""}
                             onChange={(e) =>
-                              handlePaymentInput(c.id, "payment_method", e.target.value)
+                              handlePaymentInput(
+                                c.id,
+                                "payment_method",
+                                e.target.value,
+                              )
                             }
                           >
                             <option value="">Method</option>
@@ -288,7 +300,9 @@ export default function OwnerCustomers() {
                               handlePaymentInput(c.id, "notes", e.target.value)
                             }
                           />
-                          <button onClick={() => submitPayment(c.id)}>Add Payment</button>
+                          <button onClick={() => submitPayment(c.id)}>
+                            Add Payment
+                          </button>
                         </div>
                       </>
                     )}
@@ -299,6 +313,84 @@ export default function OwnerCustomers() {
           </tbody>
         </table>
       )}
+
+      <div className="hidden-desktop flex flex-col gap-md">
+        {customers.map((c) => {
+          const balance = Number(c.balance || 0);
+          const isOwed = isDebtors && balance > 0;
+          const expanded = expandedRow === c.id;
+
+          const status =
+            balance === 0 && paymentsData[c.id]?.length
+              ? "PAID"
+              : isOwed
+                ? "OWED"
+                : "OK";
+
+          return (
+            <div key={c.id} className="card flex flex-col gap-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-bold">{c.full_name}</span>
+                <span
+                  className={`status-pill ${
+                    status === "OWED"
+                      ? "status-owed"
+                      : status === "PAID"
+                        ? "status-paid"
+                        : "status-ok"
+                  }`}
+                >
+                  {status}
+                </span>
+              </div>
+
+              <div className="text-sm">
+                <strong>Balance:</strong> KES {balance.toFixed(2)}
+              </div>
+
+              <div className="flex gap-sm mt-sm">
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => toggleRow(c.id)}
+                >
+                  {expanded ? "Hide Payments" : "View Payments"}
+                </button>
+
+                <button className="btn btn-danger">Delete</button>
+              </div>
+
+              {/* Expanded payments (mobile) */}
+              {expanded && (
+                <div className="flex flex-col gap-sm mt-sm">
+                  {loadingPayments[c.id] ? (
+                    <p>Loading payments…</p>
+                  ) : (paymentsData[c.id] || []).length === 0 ? (
+                    <p className="text-muted">No payments yet</p>
+                  ) : (
+                    paymentsData[c.id].map((p) => (
+                      <div key={p.id} className="card p-sm">
+                        <div className="text-sm">
+                          <strong>Date:</strong>{" "}
+                          {new Date(p.created_at).toLocaleString()}
+                        </div>
+                        <div className="text-sm">
+                          <strong>Amount:</strong> KES {p.amount.toFixed(2)}
+                        </div>
+                        <div className="text-sm">
+                          <strong>Method:</strong> {p.payment_method}
+                        </div>
+                        <div className="text-sm">
+                          <strong>Notes:</strong> {p.notes || "-"}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
