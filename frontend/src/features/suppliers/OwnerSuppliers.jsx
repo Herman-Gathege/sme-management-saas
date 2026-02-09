@@ -1,12 +1,22 @@
 // frontend/src/features/suppliers/OwnerSuppliers.jsx
 import { useEffect, useState } from "react";
-import { listSuppliers, createSupplier, deactivateSupplier } from "../../api/suppliers";
-import './SupplierModule.css';
+import {
+  listSuppliers,
+  createSupplier,
+  deactivateSupplier,
+} from "../../api/suppliers";
+// import './SupplierModule.css';
 
 export default function OwnerSuppliers() {
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [newSupplier, setNewSupplier] = useState({ name: "", phone: "", email: "", address: "", notes: "" });
+  const [newSupplier, setNewSupplier] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    address: "",
+    notes: "",
+  });
 
   const fetchSuppliers = async () => {
     try {
@@ -29,7 +39,13 @@ export default function OwnerSuppliers() {
     if (!newSupplier.name) return alert("Supplier name required");
     try {
       await createSupplier(newSupplier);
-      setNewSupplier({ name: "", phone: "", email: "", address: "", notes: "" });
+      setNewSupplier({
+        name: "",
+        phone: "",
+        email: "",
+        address: "",
+        notes: "",
+      });
       fetchSuppliers();
     } catch (err) {
       alert(err.message);
@@ -37,46 +53,142 @@ export default function OwnerSuppliers() {
   };
 
   return (
-    <div className="ownersuppliers-container">
+    <section className="card">
       <h2>Suppliers</h2>
 
-      <div className="ownersuppliers-form">
-        <input placeholder="Name" value={newSupplier.name} onChange={e => setNewSupplier({...newSupplier, name: e.target.value})} />
-        <input placeholder="Phone" value={newSupplier.phone} onChange={e => setNewSupplier({...newSupplier, phone: e.target.value})} />
-        <input placeholder="Email" value={newSupplier.email} onChange={e => setNewSupplier({...newSupplier, email: e.target.value})} />
-        <input placeholder="Address" value={newSupplier.address} onChange={e => setNewSupplier({...newSupplier, address: e.target.value})} />
-        <input placeholder="Notes" value={newSupplier.notes} onChange={e => setNewSupplier({...newSupplier, notes: e.target.value})} />
-        <button className="btn-add-supplier" onClick={handleCreate}>Add Supplier</button>
-      </div>
+      <form className="form-stack">
+        <input
+          className="input"
+          placeholder="Name"
+          value={newSupplier.name}
+          onChange={(e) =>
+            setNewSupplier({ ...newSupplier, name: e.target.value })
+          }
+        />
+        <input
+          className="input"
+          placeholder="Phone"
+          value={newSupplier.phone}
+          onChange={(e) =>
+            setNewSupplier({ ...newSupplier, phone: e.target.value })
+          }
+        />
+        <input
+          className="input"
+          placeholder="Email"
+          value={newSupplier.email}
+          onChange={(e) =>
+            setNewSupplier({ ...newSupplier, email: e.target.value })
+          }
+        />
+        <input
+          className="input"
+          placeholder="Address"
+          value={newSupplier.address}
+          onChange={(e) =>
+            setNewSupplier({ ...newSupplier, address: e.target.value })
+          }
+        />
+        <input
+          className="input"
+          placeholder="Notes"
+          value={newSupplier.notes}
+          onChange={(e) =>
+            setNewSupplier({ ...newSupplier, notes: e.target.value })
+          }
+        />
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={handleCreate}
+        >
+          Add Supplier
+        </button>
+      </form>
 
-      {loading ? <p>Loading...</p> : (
-        <table className="ownersuppliers-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>Address</th>
-              <th>Notes</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {suppliers.map(s => (
-              <tr key={s.id}>
-                <td>{s.name}</td>
-                <td>{s.phone}</td>
-                <td>{s.email}</td>
-                <td>{s.address}</td>
-                <td>{s.notes}</td>
-                <td>
-                  <button className="btn-deactivate" onClick={() => deactivateSupplier(s.id).then(fetchSuppliers)}>Deactivate</button>
-                </td>
-              </tr>
+      {loading ? (
+        <p>Loading...</p>
+      ) : suppliers.length === 0 ? (
+        <p>No suppliers found.</p>
+      ) : (
+        <>
+          {/* ========== DESKTOP TABLE ========== */}
+          <div className="customers-table-wrapper stock-table-wrapper hidden-on-mobile">
+            <table className="customers-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Address</th>
+                  <th>Notes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {suppliers.map((s) => (
+                  <tr key={s.id}>
+                    <td>{s.name}</td>
+                    <td>{s.phone}</td>
+                    <td>{s.email}</td>
+                    <td>{s.address}</td>
+                    <td>{s.notes}</td>
+                    <td>
+                      <button
+                        className="icon-btn"
+                        onClick={() =>
+                          deactivateSupplier(s.id).then(fetchSuppliers)
+                        }
+                      >
+                        Deactivate
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ========== MOBILE CARDS ========== */}
+          <div className="stock-cards hidden-on-desktop">
+            {suppliers.map((s) => (
+              <div key={s.id} className="card supplier-card">
+                <div>
+                  <strong>{s.name}</strong>
+                </div>
+
+                <div>
+                  <div>
+                    <span>Phone:</span> {s.phone}
+                  </div>
+                  <div>
+                    <span>Email:</span> {s.email}
+                  </div>
+                  <div>
+                    <span>Address:</span> {s.address}
+                  </div>
+                  {s.notes && (
+                    <div>
+                      <span>Notes:</span> {s.notes}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() =>
+                      deactivateSupplier(s.id).then(fetchSuppliers)
+                    }
+                  >
+                    Deactivate
+                  </button>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        </>
       )}
-    </div>
+    </section>
   );
 }

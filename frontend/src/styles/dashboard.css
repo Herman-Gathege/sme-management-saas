@@ -243,3 +243,34 @@
   margin-top: 12px;
 }
 
+/* =============================
+   SUPPLIER CARDS (MOBILE)
+============================= */
+
+.supplier-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.supplier-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.supplier-card strong {
+  font-size: 15px;
+}
+
+.supplier-card span {
+  color: var(--text-muted, #6b7280);
+  font-weight: 500;
+}
+
+.supplier-card > div:last-child {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
