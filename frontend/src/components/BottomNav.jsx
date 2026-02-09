@@ -20,6 +20,11 @@ export default function BottomNav() {
         <span>Sales</span>
       </NavLink>
 
+      <NavLink to="/owner/suppliers" className="bottom-nav-item">
+        <FiUsers />
+        <span>Suppliers</span>
+      </NavLink>
+
       <NavLink to="/owner/stock" className="bottom-nav-item">
         <FiBox />
         <span>Stock</span>

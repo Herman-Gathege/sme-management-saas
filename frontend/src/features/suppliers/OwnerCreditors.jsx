@@ -1,12 +1,16 @@
 // frontend/src/features/suppliers/OwnerCreditors.jsx
-import { useEffect, useState } from "react";
+// import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { listPayments, createPayment } from "../../api/suppliers";
-import "./SupplierModule.css";
+import { ChevronDown, ChevronUp } from "lucide-react";
+
+// import "./SupplierModule.css";
 
 export default function OwnerCreditors() {
   const [creditors, setCreditors] = useState([]);
   const [payments, setPayments] = useState([]);
   const [expandedSupplierId, setExpandedSupplierId] = useState(null);
+  const [expanded, setExpanded] = useState({});
   const [showPaymentFormFor, setShowPaymentFormFor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -48,7 +52,7 @@ export default function OwnerCreditors() {
   useEffect(() => {
     setLoading(true);
     Promise.all([fetchCreditors(), fetchPayments()]).finally(() =>
-      setLoading(false)
+      setLoading(false),
     );
   }, []);
 
@@ -85,19 +89,24 @@ export default function OwnerCreditors() {
 
   const toggleExpand = (supplierId) => {
     setExpandedSupplierId(
-      expandedSupplierId === supplierId ? null : supplierId
+      expandedSupplierId === supplierId ? null : supplierId,
     );
+    setExpanded((prev) => ({
+      ...prev,
+      [supplierId]: !prev[supplierId],
+    }));
   };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="error-text">{error}</p>;
 
   return (
-
-    <div className="ownersuppliers-container">
+    <section className="card flex flex-col gap-lg">
       <h2>Suppliers you Owe Money</h2>
 
-      <table className="creditors-table">
+      <div className="customers-table-wrapper stock-table-wrapper hidden-on-mobile">
+        <table className="customers-table">
+
         <thead>
           <tr>
             <th></th>
@@ -110,33 +119,38 @@ export default function OwnerCreditors() {
         <tbody>
           {creditors.map((c) => {
             const supplierPayments = payments.filter(
-              (p) => p.supplier_id === c.supplier_id
+              (p) => p.supplier_id === c.supplier_id,
             );
 
             return (
-              <>
-                <tr key={c.supplier_id} className="creditors-row">
-                  <td
-                    className="expand-toggle"
-                    onClick={() => toggleExpand(c.supplier_id)}
-                  >
-                    {expandedSupplierId === c.supplier_id ? "▼" : "▶"}
+              <React.Fragment key={c.supplier_id}>
+                <tr key={c.supplier_id}>
+                  <td>
+                    <button
+                      className="icon-btn"
+                      onClick={() => toggleExpand(c.supplier_id)}
+                    >
+                      {expanded[c.supplier_id] ? (
+                        <ChevronUp size={16} />
+                      ) : (
+                        <ChevronDown size={16} />
+                      )}
+                    </button>
                   </td>
+
                   <td>{c.supplier_name}</td>
                   <td>{c.total_credit.toFixed(2)}</td>
                   <td>{c.total_paid.toFixed(2)}</td>
-                  <td className="balance-cell">
-                    {c.balance_due.toFixed(2)}
-                  </td>
+                  <td>{c.balance_due.toFixed(2)}</td>
                 </tr>
 
                 {expandedSupplierId === c.supplier_id && (
-                  <tr className="expanded-row">
+                  <tr>
                     <td colSpan="5">
-                      <div className="payments-section">
-                        <h4>All Payments</h4>
+                      <div className="card subtle mt-sm">
+                        <h4 className="mb-sm">Payments</h4>
 
-                        <table className="payments-subtable">
+                        <table className="items-table">
                           <thead>
                             <tr>
                               <th>Supplier</th>
@@ -159,9 +173,7 @@ export default function OwnerCreditors() {
                                   <td>{p.payment_method}</td>
                                   <td>{p.notes}</td>
                                   <td>
-                                    {new Date(
-                                      p.created_at
-                                    ).toLocaleString()}
+                                    {new Date(p.created_at).toLocaleString()}
                                   </td>
                                 </tr>
                               ))
@@ -171,13 +183,14 @@ export default function OwnerCreditors() {
 
                         {showPaymentFormFor === c.supplier_id ? (
                           <form
-                            className="inline-payment-form"
+                            className="flex gap-sm flex-wrap mt-sm"
                             onSubmit={(e) => {
                               e.preventDefault();
                               handleAddPayment(c.supplier_id);
                             }}
                           >
                             <input
+                            className="input"
                               type="number"
                               placeholder="Amount"
                               value={newPayment.amount}
@@ -191,6 +204,7 @@ export default function OwnerCreditors() {
                             />
 
                             <select
+                            className="input"
                               value={newPayment.payment_method}
                               onChange={(e) =>
                                 setNewPayment({
@@ -205,6 +219,7 @@ export default function OwnerCreditors() {
                             </select>
 
                             <input
+                            className="input"
                               placeholder="Notes"
                               value={newPayment.notes}
                               onChange={(e) =>
@@ -215,14 +230,12 @@ export default function OwnerCreditors() {
                               }
                             />
 
-                            <button type="submit">Save Payment</button>
+                            <button className="btn btn-primary btn-sm" type="submit">Save Payment</button>
                           </form>
                         ) : (
                           <button
-                            className="btn-add-payment"
-                            onClick={() =>
-                              setShowPaymentFormFor(c.supplier_id)
-                            }
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => setShowPaymentFormFor(c.supplier_id)}
                           >
                             + Add Payment
                           </button>
@@ -231,11 +244,135 @@ export default function OwnerCreditors() {
                     </td>
                   </tr>
                 )}
-              </>
+              </React.Fragment>
             );
           })}
         </tbody>
       </table>
-    </div>
+      </div>
+
+
+      {/* Mobile cards with expandable items */}
+      <div className="stock-cards hidden-desktop">
+        {creditors.map((c) => {
+          const supplierPayments = payments.filter(
+            (p) => p.supplier_id === c.supplier_id,
+          );
+
+          return (
+            <div key={c.supplier_id} className="card flex flex-col gap-sm">
+              <div className="flex justify-between items-center">
+                <strong className="text-md">{c.supplier_name}</strong>
+                <button
+                  className="icon-btn"
+                  onClick={() => toggleExpand(c.supplier_id)}
+                >
+                  {expanded[c.supplier_id] ? (
+                    <ChevronUp size={18} />
+                  ) : (
+                    <ChevronDown size={18} />
+                  )}
+                </button>
+              </div>
+
+              <div className="text-sm">
+                <span className="text-muted">Total Credit:</span>{" "}
+                {c.total_credit.toFixed(2)}
+              </div>
+                            <div className="text-sm">
+                <span className="text-muted">Total Paid:</span>{" "}
+                {c.total_paid.toFixed(2)}
+              </div>
+                              <div className="text-sm">
+                <span className="text-muted">Balance:</span>{" "}
+                <strong>{c.balance_due.toFixed(2)}</strong>
+              </div>
+
+              {expandedSupplierId === c.supplier_id && (
+                <div className="mt-sm flex flex-col gap-sm">
+                  <strong>Payments</strong>
+
+                  {supplierPayments.length === 0 ? (
+                    <div className="muted-text">No payments found</div>
+                  ) : (
+                    supplierPayments.map((p) => (
+                      <div key={p.id} className="card subtle">
+                        <div>Amount: {p.amount}</div>
+                        <div>Method: {p.payment_method}</div>
+                        <div>{p.notes}</div>
+                        <div className="muted-text">
+                          {new Date(p.created_at).toLocaleString()}
+                        </div>
+                      </div>
+                    ))
+                  )}
+
+                  {showPaymentFormFor === c.supplier_id ? (
+                    <form
+                      className="flex flex-col gap-sm"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleAddPayment(c.supplier_id);
+                      }}
+                    >
+                      <input
+                        className="input"
+                        type="number"
+                        placeholder="Amount"
+                        value={newPayment.amount}
+                        onChange={(e) =>
+                          setNewPayment({
+                            ...newPayment,
+                            amount: e.target.value,
+                          })
+                        }
+                      />
+
+                      <select
+                        className="input"
+                        value={newPayment.payment_method}
+                        onChange={(e) =>
+                          setNewPayment({
+                            ...newPayment,
+                            payment_method: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="cash">Cash</option>
+                        <option value="mpesa">Mpesa</option>
+                        <option value="bank">Bank</option>
+                      </select>
+
+                      <input
+                        className="input"
+                        placeholder="Notes"
+                        value={newPayment.notes}
+                        onChange={(e) =>
+                          setNewPayment({
+                            ...newPayment,
+                            notes: e.target.value,
+                          })
+                        }
+                      />
+
+                      <button className="btn btn-primary btn-sm">
+                        Save Payment
+                      </button>
+                    </form>
+                  ) : (
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => setShowPaymentFormFor(c.supplier_id)}
+                    >
+                      + Add Payment
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }

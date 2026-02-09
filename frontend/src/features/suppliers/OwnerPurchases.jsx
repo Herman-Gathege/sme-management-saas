@@ -214,8 +214,8 @@ export default function OwnerSupplierPurchases() {
               </div>
 
               {newPurchase.items.length > 0 && (
-  <div className="cart-table-wrapper">
-    <table className="staff-table">
+              <div className="cart-table-wrapper">
+                <table className="staff-table">
 
                   <thead>
                     <tr>

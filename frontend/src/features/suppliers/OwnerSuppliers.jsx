@@ -58,7 +58,7 @@ export default function OwnerSuppliers() {
   return (
     <section className="card">
       <div className="flex-between">
-        <h2>Suppliers</h2>
+        <h2 className="mb-md">Suppliers</h2>
         <button className="btn btn-primary mb-md" onClick={() => setShowModal(true)}>
           + Add Supplier
         </button>
