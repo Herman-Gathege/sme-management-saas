@@ -197,3 +197,49 @@
   padding: 4px 8px;
   font-size: 0.8rem;
 }
+
+/* Stock responsive layout */
+.stock-cards {
+  display: grid;
+  gap: 16px;
+}
+
+/* Hide cards on desktop */
+@media (min-width: 768px) {
+  .stock-cards {
+    display: none;
+  }
+}
+
+/* Hide table on mobile */
+@media (max-width: 767px) {
+  .stock-table-wrapper {
+    display: none;
+  }
+}
+
+/* Card internals */
+.stock-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stock-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.stock-card-body span {
+  color: #6b7280;
+}
+
+.stock-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+

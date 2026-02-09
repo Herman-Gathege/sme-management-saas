@@ -1,7 +1,7 @@
 //frontend/src/features/stock/EditStock.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import styles from "../dashboard/layout/DashboardLayout.module.css";
+// import styles from "../dashboard/layout/DashboardLayout.module.css";
 
 export default function EditStock() {
   const { id } = useParams();
@@ -90,16 +90,17 @@ export default function EditStock() {
   };
 
   if (loading) return <p>Loading stock item...</p>;
-  if (error) return <p className={styles.message}>{error}</p>;
+  if (error) return <p className="message">{error}</p>;
 
   return (
-    <section className={styles.card}>
+    <section className="card">
       <h3>Edit Stock Item</h3>
 
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={handleSubmit} className="form-stack">
         {/* Name */}
         <label htmlFor="name">Item Name</label>
         <input
+          className="input"
           id="name"
           name="name"
           value={form.name}
@@ -109,11 +110,12 @@ export default function EditStock() {
 
         {/* SKU */}
         <label htmlFor="sku">SKU</label>
-        <input id="sku" name="sku" value={form.sku} onChange={handleChange} />
+        <input id="sku" name="sku" value={form.sku} onChange={handleChange} className="input"/>
 
         {/* Category */}
         <label htmlFor="category">Category</label>
         <input
+          className="input"
           id="category"
           name="category"
           value={form.category}
@@ -123,6 +125,8 @@ export default function EditStock() {
         {/* Quantity */}
         <label htmlFor="quantity">Quantity</label>
         <input
+                  className="input"
+
           id="quantity"
           type="number"
           name="quantity"
@@ -134,6 +138,8 @@ export default function EditStock() {
         {/* Unit Price */}
         <label htmlFor="unit_price">Unit Price</label>
         <input
+                  className="input"
+
           id="unit_price"
           type="number"
           step="0.01"
@@ -145,6 +151,8 @@ export default function EditStock() {
           {/* Selling Price */}
         <label htmlFor="selling_price">Selling Price</label>
         <input
+                    className="input"
+
           id="selling_price"
           type="number"
           step="0.01"
@@ -157,6 +165,8 @@ export default function EditStock() {
         {/* Minimum Stock Level */}
         <label htmlFor="min_stock_level">Minimum Stock Level</label>
         <input
+                  className="input"
+
           id="min_stock_level"
           type="number"
           name="min_stock_level"
@@ -164,7 +174,7 @@ export default function EditStock() {
           onChange={handleChange}
         />
 
-        <button type="submit" disabled={saving}>
+        <button type="submit" disabled={saving} className="btn btn-primary">
           {saving ? "Saving..." : "Update Stock"}
         </button>
       </form>

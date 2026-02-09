@@ -1,7 +1,7 @@
 //frontend/src/features/stock/AddStock.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "../dashboard/layout/DashboardLayout.module.css";
+// import styles from "../dashboard/layout/DashboardLayout.module.css";
 
 export default function AddStock() {
   const navigate = useNavigate();
@@ -64,11 +64,12 @@ export default function AddStock() {
   };
 
   return (
-    <section className={styles.card}>
+    <section className="card">
       <h3>Add Stock Item</h3>
 
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={handleSubmit} className="form-stack">
         <input
+        className="input"
           name="name"
           placeholder="Item name"
           value={form.name}
@@ -77,6 +78,7 @@ export default function AddStock() {
         />
 
         <input
+        className="input"
           name="sku"
           placeholder="SKU (optional)"
           value={form.sku}
@@ -84,6 +86,7 @@ export default function AddStock() {
         />
 
         <input
+        className="input"
           name="category"
           placeholder="Category"
           value={form.category}
@@ -91,6 +94,7 @@ export default function AddStock() {
         />
 
         <input
+        className="input"
           type="number"
           name="quantity"
           placeholder="Quantity"
@@ -100,6 +104,7 @@ export default function AddStock() {
         />
 
         <input
+        className="input"
           type="number"
           step="0.01"
           name="unit_price"
@@ -109,6 +114,7 @@ export default function AddStock() {
           required
         />
           <input
+          className="input"
           type="number"
           step="0.01"
           name="selling_price"
@@ -118,6 +124,7 @@ export default function AddStock() {
         />
 
         <input
+        className="input"
           type="number"
           name="min_stock_level"
           placeholder="Minimum stock level"
@@ -125,11 +132,11 @@ export default function AddStock() {
           onChange={handleChange}
         />
 
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading} className="btn btn-primary">
           {loading ? "Saving..." : "Add Stock"}
         </button>
 
-        {error && <p className={styles.message}>{error}</p>}
+        {error && <p className="text-error">{error}</p>}
       </form>
     </section>
   );
