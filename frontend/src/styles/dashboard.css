@@ -13,11 +13,25 @@
   flex-direction: column;
   transition: width 0.25s ease;
   position: sticky;
+  padding: 1rem;
 }
 
 .sidebar-collapsed {
   width: 72px;
 }
+
+/* .sidebar {
+  width: 220px;
+  background: #ffffff;
+  color: #1f2937;
+  padding: 1rem;
+  flex-shrink: 0;
+  border-right: 1px solid #e5e7eb;
+}
+
+.collapsed {
+  width: 72px;
+} */
 
 /* =============================
    SIDEBAR HEADER

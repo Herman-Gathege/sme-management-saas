@@ -95,7 +95,7 @@ export default function OwnerCreditors() {
   return (
 
     <div className="ownersuppliers-container">
-      <h2>Suppliers your Owe Money</h2>
+      <h2>Suppliers you Owe Money</h2>
 
       <table className="creditors-table">
         <thead>

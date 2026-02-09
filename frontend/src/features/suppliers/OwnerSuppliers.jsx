@@ -10,6 +10,8 @@ import {
 export default function OwnerSuppliers() {
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+
   const [newSupplier, setNewSupplier] = useState({
     name: "",
     phone: "",
@@ -46,6 +48,7 @@ export default function OwnerSuppliers() {
         address: "",
         notes: "",
       });
+      setShowModal(false);
       fetchSuppliers();
     } catch (err) {
       alert(err.message);
@@ -54,9 +57,14 @@ export default function OwnerSuppliers() {
 
   return (
     <section className="card">
-      <h2>Suppliers</h2>
+      <div className="flex-between">
+        <h2>Suppliers</h2>
+        <button className="btn btn-primary mb-md" onClick={() => setShowModal(true)}>
+          + Add Supplier
+        </button>
+      </div>
 
-      <form className="form-stack">
+      {/* <form className="form-stack">
         <input
           className="input"
           placeholder="Name"
@@ -104,7 +112,81 @@ export default function OwnerSuppliers() {
         >
           Add Supplier
         </button>
-      </form>
+      </form> */}
+
+      {/* ========== MODAL ========== */}
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div
+            className="modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3>Add Supplier</h3>
+
+            <form className="form-stack">
+              <input
+                className="input"
+                placeholder="Name"
+                value={newSupplier.name}
+                onChange={(e) =>
+                  setNewSupplier({ ...newSupplier, name: e.target.value })
+                }
+              />
+              <input
+                className="input"
+                placeholder="Phone"
+                value={newSupplier.phone}
+                onChange={(e) =>
+                  setNewSupplier({ ...newSupplier, phone: e.target.value })
+                }
+              />
+              <input
+                className="input"
+                placeholder="Email"
+                value={newSupplier.email}
+                onChange={(e) =>
+                  setNewSupplier({ ...newSupplier, email: e.target.value })
+                }
+              />
+              <input
+                className="input"
+                placeholder="Address"
+                value={newSupplier.address}
+                onChange={(e) =>
+                  setNewSupplier({ ...newSupplier, address: e.target.value })
+                }
+              />
+              <input
+                className="input"
+                placeholder="Notes"
+                value={newSupplier.notes}
+                onChange={(e) =>
+                  setNewSupplier({ ...newSupplier, notes: e.target.value })
+                }
+              />
+
+              <div className="modal-actions">
+                
+                <button
+                  type="button"
+                  className="btn btn-primary mr-sm"
+                  onClick={handleCreate}
+                >
+                  Save Supplier
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <p>Loading...</p>
