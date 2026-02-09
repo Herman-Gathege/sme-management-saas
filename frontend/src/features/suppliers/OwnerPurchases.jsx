@@ -157,9 +157,9 @@ export default function OwnerSupplierPurchases() {
 
   // ---------------- Render ----------------
   return (
-    <section className="card">
+    <section className="card flex flex-col gap-lg">
       {/* ---------- Header ---------- */}
-      <div className="flex-between mb-md">
+      <div className="flex justify-between items-center mb-md">
         <h2>Purchases</h2>
         <button className="btn btn-primary" onClick={() => setShowModal(true)}>
           + Add New Purchase
@@ -173,8 +173,9 @@ export default function OwnerSupplierPurchases() {
             <h3>New Purchase</h3>
 
             <div className="purchase-form">
-              <div className="purchase-controls">
+              <div className="flex gap-md flex-wrap mb-md">
                 <select
+                  className="input"
                   value={newPurchase.supplier_id}
                   onChange={(e) =>
                     setNewPurchase({
@@ -192,6 +193,7 @@ export default function OwnerSupplierPurchases() {
                 </select>
 
                 <select
+                className="input"
                   value={newPurchase.payment_method}
                   onChange={(e) =>
                     setNewPurchase({
@@ -206,13 +208,15 @@ export default function OwnerSupplierPurchases() {
                   <option value="bank">Bank</option>
                 </select>
 
-                <button className="btn-small" onClick={addItem}>
+                <button className="btn btn-secondary btn-sm" onClick={addItem}>
                   + Add Item
                 </button>
               </div>
 
               {newPurchase.items.length > 0 && (
-                <table className="form-table">
+  <div className="cart-table-wrapper">
+    <table className="staff-table">
+
                   <thead>
                     <tr>
                       <th>Name</th>
@@ -316,7 +320,7 @@ export default function OwnerSupplierPurchases() {
                         </td>
                         <td>
                           <button
-                            className="btn-small remove-btn"
+                            className="btn btn-secondary btn-sm"
                             onClick={() => removeItem(index)}
                           >
                             ×
@@ -326,6 +330,7 @@ export default function OwnerSupplierPurchases() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               )}
 
               <div className="mt-sm">
@@ -348,7 +353,7 @@ export default function OwnerSupplierPurchases() {
 
       {/* Desktop table */}
       <div className="customers-table-wrapper stock-table-wrapper hidden-on-mobile">
-        <table className="payments-table">
+        <table className="customers-table">
           <thead>
             <tr>
               <th></th>
@@ -401,7 +406,7 @@ export default function OwnerSupplierPurchases() {
                     {expanded[p.purchase.id] && (
                       <tr>
                         <td colSpan="6">
-                          <table className="items-table">
+                          <table className="expanded-card">
                             <thead>
                               <tr>
                                 <th>Name</th>
@@ -435,60 +440,72 @@ export default function OwnerSupplierPurchases() {
       </div>
 
       {/* Mobile cards with expandable items */}
-      <div className="stock-cards hidden-on-desktop">
-        {purchases.map((p) => {
-          const supplier =
-            suppliers.find((s) => s.id === p.purchase.supplier_id)?.name ||
-            "N/A";
+<div className="stock-cards hidden-desktop">
+  {purchases.map((p) => {
+    const supplier =
+      suppliers.find((s) => s.id === p.purchase.supplier_id)?.name || "N/A";
 
-          return (
-            <div key={p.purchase.id} className="card">
-              <div className="flex-between">
-                <strong>{supplier}</strong>
-                <button
-                  className="icon-btn"
-                  onClick={() => toggleExpand(p.purchase.id)}
-                >
-                  {expanded[p.purchase.id] ? (
-                    <ChevronUp size={16} />
-                  ) : (
-                    <ChevronDown size={16} />
-                  )}
-                </button>
-              </div>
+    return (
+      <div key={p.purchase.id} className="card flex flex-col gap-sm">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <strong className="text-md">{supplier}</strong>
 
-              <div>Total: {p.purchase.total_amount.toFixed(2)}</div>
-              <div>Payment: {p.purchase.payment_method}</div>
-              <div>Items: {p.items.length}</div>
-              <div>{new Date(p.purchase.created_at).toLocaleString()}</div>
+          <button
+            className="icon-btn"
+            onClick={() => toggleExpand(p.purchase.id)}
+          >
+            {expanded[p.purchase.id] ? (
+              <ChevronUp size={18} />
+            ) : (
+              <ChevronDown size={18} />
+            )}
+          </button>
+        </div>
 
-              {/* Expandable items */}
-              {expanded[p.purchase.id] && (
-                <table className="items-table mt-sm">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Qty</th>
-                      <th>Unit Price</th>
-                      <th>Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {p.items.map((i, idx) => (
-                      <tr key={idx}>
-                        <td>{i.name}</td>
-                        <td>{i.quantity}</td>
-                        <td>{i.unit_price.toFixed(2)}</td>
-                        <td>{(i.quantity * i.unit_price).toFixed(2)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          );
-        })}
+        {/* Summary */}
+        <div className="text-sm">
+          <span className="text-muted">Total:</span>{" "}
+          <strong>{p.purchase.total_amount.toFixed(2)}</strong>
+        </div>
+
+        <div className="text-sm">
+          <span className="text-muted">Payment:</span>{" "}
+          {p.purchase.payment_method}
+        </div>
+
+        <div className="text-sm">
+          <span className="text-muted">Items:</span> {p.items.length}
+        </div>
+
+        <div className="text-sm text-muted">
+          {new Date(p.purchase.created_at).toLocaleString()}
+        </div>
+
+        {/* Expandable items */}
+        {expanded[p.purchase.id] && (
+          <div className="expanded-card mt-sm">
+            <ul className="expanded-list">
+              {p.items.map((i, idx) => (
+                <li key={idx} className="expanded-list-item">
+                  <span className="item-name">{i.name}</span>
+                  <span className="item-qty ">{i.quantity}</span>
+                  <span className="item-price mr-sm">
+                    {i.unit_price.toFixed(2)}
+                  </span>
+                  <span className="item-total">
+                    {(i.quantity * i.unit_price).toFixed(2)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
+    );
+  })}
+</div>
+
     </section>
   );
 }
