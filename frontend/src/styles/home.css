@@ -1,0 +1,71 @@
+/* =============================
+   HOME PAGE
+============================= */
+
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+
+/* ---------- HERO ---------- */
+.home-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  padding: 64px 24px;
+  align-items: center;
+}
+
+.home-hero-content h1 {
+  font-size: 36px;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+
+.home-hero-image img {
+  width: 100%;
+  border-radius: 16px;
+}
+
+/* ---------- TRUST ---------- */
+.home-trust {
+  background: white;
+  padding: 24px;
+  font-size: 15px;
+}
+
+/* ---------- FEATURES ---------- */
+.home-features {
+  padding: 0 24px;
+}
+
+.home-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+/* ---------- STEPS ---------- */
+.home-steps {
+  padding: 0 24px;
+}
+
+.home-step-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+/* ---------- CTA ---------- */
+.home-cta {
+  background: #eff6ff;
+  padding: 64px 24px;
+}
+
+/* ---------- FOOTER ---------- */
+.home-footer {
+  padding: 32px 16px;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+}
