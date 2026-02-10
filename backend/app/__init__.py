@@ -45,14 +45,14 @@ def create_app():
     def expired_token_callback(jwt_header, jwt_payload):
         return {"error": "Token expired"}, 401
 
+    
     CORS(
         app,
         supports_credentials=True,
-        origins=[
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
-            "https://smart-duka-nu.vercel.app"
-        ],
+        resources={
+            r"/api/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173", "https://smart-duka-nu.vercel.app"]},
+            r"/auth/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173", "https://smart-duka-nu.vercel.app"]}
+        },
         allow_headers=["Content-Type", "Authorization"],
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     )
