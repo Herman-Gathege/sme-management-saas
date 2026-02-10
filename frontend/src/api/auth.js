@@ -1,6 +1,6 @@
 // /home/annewaithaka/personalprojects/sme-management-saas/frontend/src/api/auth.js
 
-const API = "http://127.0.0.1:5000/auth";
+const API = "https://smart-duka-backend.onrender.com/auth";
 
 export const loginUser = async (data) => {
   const res = await fetch(`${API}/login`, {

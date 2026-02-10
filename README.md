@@ -79,6 +79,12 @@ backend/
 uv run python manage.py db init
 uv run python manage.py db migrate -m "Initial auth + organization schema"
 uv run python manage.py db upgrade
+
+when models change i can do below
+
+flask db migrate -m "<message>"
+flask db upgrade
+
 ```
 
 6. Start the backend server:
