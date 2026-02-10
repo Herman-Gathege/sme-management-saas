@@ -4,16 +4,16 @@ import {
   FiBox,
   FiUsers,
   FiFileText,
-    FiHome,
+  FiHome,
 } from "react-icons/fi";
 
 export default function BottomNav() {
   return (
     <nav className="bottom-nav hidden-desktop">
-<NavLink to="/owner/dashboard" end className="bottom-nav-item">
-                            <FiHome  />
-<span>Home</span>
-            </NavLink>
+      <NavLink to="/owner/dashboard" end className="bottom-nav-item">
+        <FiHome />
+        <span>Home</span>
+      </NavLink>
 
       <NavLink to="/owner/sales" className="bottom-nav-item">
         <FiBarChart2 />
@@ -33,6 +33,11 @@ export default function BottomNav() {
       <NavLink to="/owner/customers/debtors" className="bottom-nav-item">
         <FiUsers />
         <span>Customers</span>
+      </NavLink>
+
+      <NavLink to="/owner/staff" className="bottom-nav-item">
+        <FiUsers />
+        <span>Staff</span>
       </NavLink>
 
       <NavLink to="/owner/reports" className="bottom-nav-item">
