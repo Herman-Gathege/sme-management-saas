@@ -71,18 +71,28 @@
 ============================= */
 
 .bottom-nav {
-  position: sticky;
+  position: fixed;
   bottom: 0;
+  left: 0;
   width: 100%;
+
   display: flex;
-  flex-direction: row;            /* horizontal layout */
   justify-content: space-around;
   align-items: center;
+
   background: #ffffff;
-  border-top: 1px solid #e5e7eb;
+  /* border-top: 1px solid #e5e7eb; */
   padding: 0.5rem 0;
-  z-index: 20;
+  box-shadow:0 -6px 20px rgba(0,0,0,.06);
+  border-top:none;
+
+  z-index: 1000; /* higher than content */
 }
+
+.nav-more{
+  display:none;
+}
+
 
 /* Each nav item */
 .bottom-nav-item {
@@ -94,9 +104,16 @@
   font-size: 0.7rem;
   color: #6b7280;
   text-decoration: none;
-  min-width: 60px;                /* comfy tap target */
+  /* min-width: 60px;  */
+  flex: 1; /* evenly distribute */
+  min-width:70px;
+  padding:0.4rem 0;               /* comfy tap target */
   transition: color 0.2s ease, transform 0.1s ease;
 }
+
+
+
+
 
 /* Icons */
 .bottom-nav-item svg {
@@ -107,7 +124,12 @@
 .bottom-nav-item.active {
   color: var(--primary);
   font-weight: 600;
+  color:var(--primary);
+  background:rgba(59,130,246,.08);
+  border-radius:12px;
 }
+
+
 
 /* Tap feedback */
 .bottom-nav-item:active {

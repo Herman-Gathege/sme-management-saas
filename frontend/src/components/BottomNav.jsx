@@ -1,49 +1,51 @@
 import { NavLink } from "react-router-dom";
 import {
+  FiHome,
   FiBarChart2,
   FiBox,
   FiUsers,
-  FiFileText,
-  // FiHome,
+  FiFileText
 } from "react-icons/fi";
 
 export default function BottomNav() {
+
+  const linkClass = ({ isActive }) =>
+    `bottom-nav-item ${isActive ? "active" : ""}`;
+
   return (
     <nav className="bottom-nav hidden-desktop">
-      {/* <NavLink to="/owner/dashboard" end className="bottom-nav-item">
+
+      <NavLink to="/owner/dashboard" end className={linkClass}>
         <FiHome />
         <span>Home</span>
-      </NavLink> */}
+      </NavLink>
 
-      <NavLink to="/owner/sales" className="bottom-nav-item">
+      <NavLink to="/owner/sales" className={linkClass}>
         <FiBarChart2 />
         <span>Sales</span>
       </NavLink>
 
-      <NavLink to="/owner/suppliers" className="bottom-nav-item">
-        <FiUsers />
-        <span>Suppliers</span>
-      </NavLink>
-
-      <NavLink to="/owner/stock" className="bottom-nav-item">
+      <NavLink to="/owner/stock" className={linkClass}>
         <FiBox />
         <span>Stock</span>
       </NavLink>
 
-      <NavLink to="/owner/customers/debtors" className="bottom-nav-item">
+      <NavLink to="/owner/customers/debtors" className={linkClass}>
         <FiUsers />
         <span>Customers</span>
       </NavLink>
 
-      <NavLink to="/owner/staff" className="bottom-nav-item">
-        <FiUsers />
-        <span>Staff</span>
-      </NavLink>
-
-      <NavLink to="/owner/reports" className="bottom-nav-item">
+      <NavLink to="/owner/Reports" className={linkClass}>
         <FiFileText />
         <span>Reports</span>
       </NavLink>
+
+      {/* Open sidebar
+      <button className="bottom-nav-item nav-more">
+        <FiMenu />
+        <span>More</span>
+      </button> */}
+
     </nav>
   );
 }
