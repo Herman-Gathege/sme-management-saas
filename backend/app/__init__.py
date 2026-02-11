@@ -58,6 +58,8 @@ def create_app():
 
 
 
+
+
     # Register blueprints
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(staff_bp, url_prefix="/api/staff")

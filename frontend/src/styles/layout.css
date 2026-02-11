@@ -84,6 +84,10 @@
   z-index: 20;
 }
 
+.bottom-nav a { 
+  text-decoration: none;
+}
+
 /* Each nav item */
 .bottom-nav-item {
   display: flex;
