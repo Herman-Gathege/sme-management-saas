@@ -1,18 +1,11 @@
 const API_BASE = import.meta.env.VITE_API_URL;
 
-let accessToken = null;
-
-// allow AuthContext to update token
-export const setAccessToken = (token) => {
-  accessToken = token;
-};
-
 export async function apiFetch(url, options = {}) {
+  // always include cookies
   let res = await fetch(`${API_BASE}${url}`, {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
       ...(options.headers || {}),
     },
     ...options,
@@ -26,14 +19,12 @@ export async function apiFetch(url, options = {}) {
     });
 
     if (refreshRes.ok) {
-      const data = await refreshRes.json();
-      accessToken = data.access_token;
-
+      // backend sets new access cookie automatically
+      // retry original request
       res = await fetch(`${API_BASE}${url}`, {
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
           ...(options.headers || {}),
         },
         ...options,
