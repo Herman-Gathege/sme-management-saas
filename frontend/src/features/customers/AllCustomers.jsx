@@ -1,8 +1,7 @@
 //frontend/src/features/customers/AllCustomers.jsx
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-// import styles from "./Customers.module.css"; // optional for messages
-// import dashboardStyles from "../../features/dashboard/layout/DashboardLayout.module.css"; // reuse table/card styles
+import { apiFetch } from "../../api/client";
 import { useNavigate } from "react-router-dom";
 
 export default function AllCustomers() {
@@ -13,29 +12,26 @@ export default function AllCustomers() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
-  const API_BASE = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    const fetchCustomers = async () => {
-      const token = localStorage.getItem("token");
-      try {
-        const res = await fetch(`${API_BASE}/api/customers`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  const fetchCustomers = async () => {
+    try {
+      const res = await apiFetch("/api/customers");
+      const data = await res.json();
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to fetch customers");
+      if (!res.ok) throw new Error(data.error || "Failed to fetch customers");
 
-        setCustomers(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setMessage(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+      setCustomers(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setMessage(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchCustomers();
-  }, [API_BASE]);
+  fetchCustomers();
+}, []);
+
 
   return (
     <section className="dashboard-content">

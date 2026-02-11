@@ -1,8 +1,7 @@
 // frontend/src/features/customers/CreateCustomer.jsx
-
+import { apiFetch } from "../../api/client";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-// import styles from "../sales/Sales.module.css";
 
 export default function CreateCustomer({ onSuccess, onClose }) {
   const { user } = useAuth();
@@ -19,7 +18,6 @@ export default function CreateCustomer({ onSuccess, onClose }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const API_BASE = import.meta.env.VITE_API_URL;
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -31,14 +29,8 @@ export default function CreateCustomer({ onSuccess, onClose }) {
     setMessage("");
 
     try {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(`${API_BASE}/api/customers`, {
+      const res = await apiFetch("/api/customers", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({
           ...form,
           organization_id: user.organization_id,
@@ -47,6 +39,7 @@ export default function CreateCustomer({ onSuccess, onClose }) {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+
 
       // ✅ return created customer
       onSuccess?.(data);

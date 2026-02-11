@@ -1,8 +1,7 @@
 // frontend/src/features/stock/StockList.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-// import styles from "../dashboard/layout/DashboardLayout.module.css";
-
+import { apiFetch } from "../../api/client";
 import { FiEdit, FiTrash2, FiPlus } from "react-icons/fi";
 
 export default function StockList() {
@@ -10,19 +9,16 @@ export default function StockList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const API_BASE = import.meta.env.VITE_API_URL;
-  const API_URL = `${API_BASE}/api/stock`;
+ 
 
   // Fetch stock items
   useEffect(() => {
     const fetchStock = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("No auth token found");
+        
 
-        const res = await fetch(API_URL, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await apiFetch("/api/stock" );
+
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to load stock");
@@ -36,18 +32,17 @@ export default function StockList() {
     };
 
     fetchStock();
-  }, [API_URL]);
+  }, []);
 
   // Delete stock item
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
 
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/${id}`, {
+      const res = await apiFetch(`/api/stock/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
       });
+
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to delete stock");

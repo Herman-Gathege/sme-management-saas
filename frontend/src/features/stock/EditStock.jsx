@@ -1,7 +1,7 @@
 //frontend/src/features/stock/EditStock.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-// import styles from "../dashboard/layout/DashboardLayout.module.css";
+import { apiFetch } from "../../api/client";
 
 export default function EditStock() {
   const { id } = useParams();
@@ -19,16 +19,12 @@ export default function EditStock() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const API_BASE = import.meta.env.VITE_API_URL;
 
 
   useEffect(() => {
     const fetchStockItem = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await fetch(`${API_BASE}/api/stock/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await apiFetch(`/api/stock/${id}`);
 
         if (!res.ok) throw new Error("Failed to load stock");
 
@@ -51,7 +47,7 @@ export default function EditStock() {
     };
 
     fetchStockItem();
-  }, [id, API_BASE]);
+  }, [id]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -63,13 +59,8 @@ export default function EditStock() {
     setError("");
 
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API_BASE}/api/stock/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await apiFetch(`/api/stock/${id}`, {
+        method: "PATCH",        
         body: JSON.stringify({
           ...form,
           quantity: Number(form.quantity),

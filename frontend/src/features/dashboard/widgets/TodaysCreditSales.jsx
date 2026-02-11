@@ -1,27 +1,27 @@
+//frontend/src/features/dashboard/widgets/TodaysCreditSales.jsx
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../../../api/client";
+
 
 export default function TodaysCreditSales() {
   const [debtors, setDebtors] = useState([]);
-  const API_BASE = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDebtors = async () => {
-      const token = localStorage.getItem("token");
       try {
-        const res = await fetch(`${API_BASE}/api/customers/debtors`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await apiFetch("/api/customers/debtors");
         const data = await res.json();
-        if (res.ok && Array.isArray(data)) setDebtors(data);
+        if (Array.isArray(data)) setDebtors(data);
       } catch (err) {
         console.error(err);
       }
     };
 
     fetchDebtors();
-  }, [API_BASE]);
+  }, []);
 
   const totalCredit = debtors
     .filter((c) => Number(c.balance) > 0)

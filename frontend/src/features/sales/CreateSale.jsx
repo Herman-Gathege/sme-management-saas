@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-// import styles from "./Sales.module.css";
 import CreateCustomer from "../customers/CreateCustomer";
 import CustomerSelector from "./CustomerSelector";
 import PaymentSelector from "./PaymentSelector";
+import { apiFetch } from "../../api/client";
+
 
 export default function CreateSale() {
   const { user } = useAuth();
@@ -22,7 +23,6 @@ export default function CreateSale() {
   const [loading, setLoading] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
 
-  const API_BASE = import.meta.env.VITE_API_URL;
   const PAYMENT_METHODS = ["Cash", "M-Pesa", "Credit"];
   const isConfirmDisabled =
   loading ||
@@ -37,21 +37,22 @@ export default function CreateSale() {
   ======================= */
 
   useEffect(() => {
-    const fetchStock = async () => {
-      const token = localStorage.getItem("token");
-      try {
-        const res = await fetch(`${API_BASE}/api/stock/staff`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to fetch stock");
-        setStockItems(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setMessage(err.message);
-      }
-    };
-    fetchStock();
-  }, [API_BASE]);
+  const fetchStock = async () => {
+    try {
+      const res = await apiFetch("/api/stock/staff");
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Failed to fetch stock");
+
+      setStockItems(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setMessage(err.message);
+    }
+  };
+
+  fetchStock();
+}, []);
+
 
  
 
@@ -66,21 +67,18 @@ export default function CreateSale() {
 
 
   const fetchCustomers = async () => {
-    const token = localStorage.getItem("token");
+  try {
+    const res = await apiFetch("/api/customers");
+    const data = await res.json();
 
-    try {
-      const res = await fetch(`${API_BASE}/api/customers`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    if (!res.ok) throw new Error(data.error || "Failed to fetch customers");
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to fetch customers");
+    setCustomers(Array.isArray(data) ? data : []);
+  } catch (err) {
+    setMessage(err.message);
+  }
+};
 
-      setCustomers(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setMessage(err.message);
-    }
-  };
 
   /* =======================
      SEARCH
@@ -179,7 +177,6 @@ export default function CreateSale() {
     setLowStockAlert([]);
 
     try {
-      const token = localStorage.getItem("token");
 
       const payload = {
         items: selectedItems.map((i) => ({
@@ -193,14 +190,11 @@ export default function CreateSale() {
         }),
       };
 
-      const res = await fetch(`${API_BASE}/api/sales`, {
+      const res = await apiFetch("/api/sales", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(payload),
       });
+
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Sale failed");

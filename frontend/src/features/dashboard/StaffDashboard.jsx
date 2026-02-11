@@ -3,6 +3,8 @@ import { Outlet } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import StaffLayout from "./layout/StaffLayout";
+import { apiFetch } from "../../api/client";
+
 
 
 // -----------------------------
@@ -53,7 +55,6 @@ export function StaffPassword() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const API_BASE = import.meta.env.VITE_API_URL;
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
@@ -68,16 +69,12 @@ export function StaffPassword() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
 
-      const res = await fetch(`${API_BASE}/api/staff/${user.id}/password`, {
+      const res = await apiFetch(`/api/staff/${user.id}/password`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ new_password: newPassword }),
       });
+
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Password update failed");

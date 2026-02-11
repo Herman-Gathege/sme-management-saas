@@ -1,5 +1,4 @@
-///home/annewaithaka/personalprojects/sme-management-saas/frontend/src/context/AuthContext.jsx
-
+//frontend/src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { getMe } from "../api/auth";
 
@@ -10,44 +9,31 @@ export function AuthProvider({ children }) {
   const [organization, setOrganization] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const logout = () => {
-    localStorage.removeItem("token");
+  const logout = async () => {
+    await fetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+
     setUser(null);
     setOrganization(null);
     window.location.href = "/login";
   };
 
-  const handleApiError = (error) => {
-  // Check if the error means the token is expired or missing
-  if (error.message === "Unauthorized" || error.message === "No token") {
-    logout();
-  } else {
-    console.error(error);
-  }
-};
-
-
   useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    setLoading(false);
-    return;
-  }
-
-  getMe()
-    .then((res) => {
-      setUser(res.user);
-      setOrganization(res.organization);
-    })
-    .catch(handleApiError)
-    .finally(() => setLoading(false));
-}, []);
-
+    getMe()
+      .then((res) => {
+        setUser(res.user);
+        setOrganization(res.organization);
+      })
+      .catch(() => {
+        // not logged in — just ignore
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
-    <AuthContext.Provider
-      value={{ user, organization, loading, logout }}
-    >
+    <AuthContext.Provider value={{ user, organization, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );

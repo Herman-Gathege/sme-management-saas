@@ -1,18 +1,17 @@
+//frontend/src/features/dashboard/widgets/TodaysSales.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../../../api/client";
+
 
 export default function TodaysSales() {
   const [sales, setSales] = useState([]);
-  const API_BASE = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchSales = async () => {
-      const token = localStorage.getItem("token");
       try {
-        const res = await fetch(`${API_BASE}/api/sales/owner`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await apiFetch("/api/sales/owner");
         const data = await res.json();
         if (res.ok && Array.isArray(data)) setSales(data);
       } catch (err) {
@@ -21,7 +20,8 @@ export default function TodaysSales() {
     };
 
     fetchSales();
-  }, [API_BASE]);
+  }, []);
+
 
 const today = new Date().toLocaleDateString("en-CA");
   const totalToday = sales

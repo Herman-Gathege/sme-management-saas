@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { listPayments, createPayment } from "../../api/suppliers";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-// import "./SupplierModule.css";
+import { apiFetch } from "../../api/client";
 
 export default function OwnerCreditors() {
   const [creditors, setCreditors] = useState([]);
@@ -22,15 +22,13 @@ export default function OwnerCreditors() {
     notes: "",
   });
 
-  const API_BASE = import.meta.env.VITE_API_URL;
-  const token = localStorage.getItem("token");
+  
 
   // ---------------- Fetch Creditors ----------------
   const fetchCreditors = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/suppliers/creditors`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await apiFetch("/api/suppliers/creditors");
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to fetch creditors");
       setCreditors(Array.isArray(data) ? data : []);

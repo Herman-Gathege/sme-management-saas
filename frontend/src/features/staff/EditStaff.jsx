@@ -2,13 +2,11 @@
 import { useState, useEffect } from "react";
 import StaffForm from "./StaffForm";
 import { updateStaff as apiUpdateStaff } from "../../api/staff";
-// import styles from "./StaffForm.module.css";
 
 export default function EditStaff({ staff, onUpdated, onClose }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [formKey, setFormKey] = useState(0); // force form remount
-  const token = localStorage.getItem("token");
 
   // Open modal automatically when staff prop changes
   useEffect(() => {
@@ -23,7 +21,7 @@ export default function EditStaff({ staff, onUpdated, onClose }) {
   const handleSubmit = async (formData) => {
     setMessage("");
     try {
-      const res = await apiUpdateStaff(staff.id, formData, token);
+      const res = await apiUpdateStaff(staff.id, formData);
       setMessage(`Staff ${res.staff.full_name} updated successfully`);
       setModalOpen(false);
       if (onUpdated) onUpdated(); // refresh parent list

@@ -1,6 +1,7 @@
 //frontend/src/features/reports/Reports.jsx
 import { useEffect, useState } from "react";
-// import styles from "../dashboard/layout/DashboardLayout.module.css";
+import { apiFetch } from "../../api/client";
+
 
 export default function Reports() {
   const [summary, setSummary] = useState(null);
@@ -12,7 +13,6 @@ export default function Reports() {
   const itemsPerPage = 10; // adjust as needed
 
 
-  const API_BASE = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     fetchReports(selectedFilter);
@@ -27,12 +27,9 @@ export default function Reports() {
     else if (filter === "month") query = "?range=month";
 
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API_BASE}/api/reports/sales${query}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      const res = await apiFetch(`/api/reports/sales${query}`);
       const data = await res.json();
+
       if (!res.ok) throw new Error(data.error || "Failed to load reports");
 
       setSummary(data.summary);
@@ -43,6 +40,7 @@ export default function Reports() {
       setLoading(false);
     }
   };
+
 
   const exportCSV = () => {
     if (sales.length === 0) return alert("No sales to export");

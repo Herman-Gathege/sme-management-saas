@@ -16,7 +16,6 @@ export default function StaffManagement() {
   const [message, setMessage] = useState("");
   const [editingStaff, setEditingStaff] = useState(null);
 
-  const token = localStorage.getItem("token");
 
   /* =====================
      DATA FETCHING
@@ -25,7 +24,7 @@ export default function StaffManagement() {
     setLoading(true);
     setMessage("");
     try {
-      const res = await apiListStaff(token);
+      const res = await apiListStaff();
       setStaffList(res.staff || []);
     } catch (err) {
       setMessage(err.message || "Failed to fetch staff");
@@ -43,7 +42,7 @@ export default function StaffManagement() {
   ====================== */
   const handleDeactivate = async (id) => {
     try {
-      await apiDeactivateStaff(id, token);
+      await apiDeactivateStaff(id);
       fetchStaff();
     } catch (err) {
       setMessage(err.message);
@@ -52,7 +51,7 @@ export default function StaffManagement() {
 
   const handleReactivate = async (id) => {
     try {
-      await apiReactivateStaff(id, token);
+      await apiReactivateStaff(id);
       fetchStaff();
     } catch (err) {
       setMessage(err.message);
@@ -61,7 +60,7 @@ export default function StaffManagement() {
 
   const handleResetPassword = async (id) => {
     try {
-      const res = await apiResetPassword(id, token);
+      const res = await apiResetPassword(id);
       alert(`Temporary password: ${res.temporary_password}`);
     } catch (err) {
       setMessage(err.message);

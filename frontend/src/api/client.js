@@ -1,36 +1,36 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+//frontend/src/api/client.js
 
-async function apiFetch(endpoint, options = {}) {
-  const token = localStorage.getItem("token");
+const API_BASE = import.meta.env.VITE_API_URL;
 
-  const headers = {
-    "Content-Type": "application/json",
-    ...(options.headers || {}),
-  };
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
+// central fetch wrapper
+export async function apiFetch(url, options = {}) {
+  let res = await fetch(`${API_BASE}${url}`, {
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
     ...options,
-    headers,
   });
 
-  // Handle 401 globally
+  // 🔥 if access expired → try silent refresh
   if (res.status === 401) {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Unauthorized");
+    await fetch(`${API_BASE}/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    // retry original request
+    res = await fetch(`${API_BASE}${url}`, {
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      },
+      ...options,
+    });
   }
 
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data?.error || "Request failed");
-  }
-
-  return data;
+  return res;
 }
-
-export default apiFetch;

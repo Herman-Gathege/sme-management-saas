@@ -1,7 +1,7 @@
 //frontend/src/features/stock/AddStock.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import styles from "../dashboard/layout/DashboardLayout.module.css";
+import { apiFetch } from "../../api/client";
 
 export default function AddStock() {
   const navigate = useNavigate();
@@ -19,7 +19,6 @@ export default function AddStock() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const API_BASE = import.meta.env.VITE_API_URL;
 
 
   const handleChange = (e) => {
@@ -35,14 +34,9 @@ export default function AddStock() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
 
-      const res = await fetch(`${API_BASE}/api/stock`, {
+      const res = await apiFetch("/api/stock", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({
           ...form,
           quantity: Number(form.quantity),
@@ -51,6 +45,7 @@ export default function AddStock() {
           min_stock_level: Number(form.min_stock_level || 0),
         }),
       });
+
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to add stock");

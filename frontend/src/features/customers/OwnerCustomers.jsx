@@ -1,7 +1,7 @@
 // frontend/src/features/customers/OwnerCustomers.jsx
 // import { useEffect, useState } from "react";
 import React, { useEffect, useState } from "react";
-
+import { apiFetch } from "../../api/client";
 import { useLocation } from "react-router-dom";
 import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { FiInfo } from "react-icons/fi";
@@ -18,40 +18,40 @@ export default function OwnerCustomers() {
   const [loadingPayments, setLoadingPayments] = useState({});
   const [paymentForm, setPaymentForm] = useState({});
 
-  const API_BASE = import.meta.env.VITE_API_URL;
-  const token = localStorage.getItem("token");
+  
 
   const isDebtors = location.pathname.includes("debtors");
   const isAll = location.pathname.includes("all");
   const roleEndpoint = isAll ? "" : isDebtors ? "debtors" : "creditors";
 
   /* ================= FETCH CUSTOMERS ================= */
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const url = roleEndpoint
-          ? `${API_BASE}/api/customers/${roleEndpoint}`
-          : `${API_BASE}/api/customers`;
 
-        const res = await fetch(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+useEffect(() => {
+  const fetchCustomers = async () => {
+    setLoading(true);
+    setError("");
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to load customers");
+    try {
+      const url = roleEndpoint
+        ? `/api/customers/${roleEndpoint}`
+        : "/api/customers";
 
-        setCustomers(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const res = await apiFetch(url);
+      const data = await res.json();
 
-    fetchCustomers();
-  }, [API_BASE, roleEndpoint, token]);
+      if (!res.ok) throw new Error(data.error || "Failed to load customers");
+
+      setCustomers(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchCustomers();
+}, [roleEndpoint]);
+
 
   /* ================= ROW TOGGLE ================= */
   const toggleRow = (customerId) => {
@@ -66,10 +66,10 @@ export default function OwnerCustomers() {
   const fetchPayments = async (customerId) => {
     setLoadingPayments((prev) => ({ ...prev, [customerId]: true }));
     try {
-      const res = await fetch(
-        `${API_BASE}/api/customers/payments/customer/${customerId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+      const res = await apiFetch(
+        `/api/customers/payments/customer/${customerId}`
       );
+
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load payments");
@@ -100,12 +100,8 @@ export default function OwnerCustomers() {
       return alert("Select a payment method");
 
     try {
-      const res = await fetch(`${API_BASE}/api/customers/payments`, {
+      const res = await apiFetch(`/api/customers/payments`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({
           customer_id: customerId,
           amount: parseFloat(form.amount),
@@ -113,6 +109,7 @@ export default function OwnerCustomers() {
           notes: form.notes || "",
         }),
       });
+
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to record payment");

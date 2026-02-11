@@ -1,24 +1,21 @@
 // frontend/src/features/stock/StockHistory.jsx
 import { useEffect, useState } from "react";
-// import styles from "../dashboard/layout/DashboardLayout.module.css";
+import { apiFetch } from "../../api/client";
+
 
 export default function StockHistory() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const API_BASE = import.meta.env.VITE_API_URL;
 
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("No auth token found");
 
-        const res = await fetch(`${API_BASE}/api/stock/history`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await apiFetch("/api/stock/history");
+
 
         if (!res.ok) throw new Error("Failed to fetch stock history");
 

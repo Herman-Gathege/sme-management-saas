@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
-// import styles from "../dashboard/layout/DashboardLayout.module.css";
+import { apiFetch } from "../../api/client";
 
 export default function AllSales() {
   const [sales, setSales] = useState([]);
@@ -14,17 +14,11 @@ export default function AllSales() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const API_BASE = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchSales = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("No auth token found");
-
-        const res = await fetch(`${API_BASE}/api/sales/owner`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await apiFetch("/api/sales/owner");
 
         const contentType = res.headers.get("content-type");
         let data;
@@ -48,7 +42,8 @@ export default function AllSales() {
     };
 
     fetchSales();
-  }, [API_BASE]);
+  }, []);
+
 
   const toggleSale = (saleId) => {
     setExpandedSale(expandedSale === saleId ? null : saleId);

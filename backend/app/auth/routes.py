@@ -1,12 +1,17 @@
-# /home/annewaithaka/personalprojects/sme-management-saas/backend/app/auth/routes.py
+# /backend/app/auth/routes.py
 
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import (
     create_access_token,
+    create_refresh_token,
+    set_access_cookies,
+    set_refresh_cookies,
     jwt_required,
     get_jwt_identity,
-    get_jwt
+    get_jwt,
+    unset_jwt_cookies
 )
+
 
 from ..extensions import db
 from ..models.organization import Organization
@@ -59,20 +64,24 @@ def login():
     if not user or not user.check_password(data.get("password")):
         return jsonify({"error": "Invalid credentials"}), 401
 
-    # 🔥 IDENTITY IS USER ID ONLY
-
-    # Login
     access_token = create_access_token(
-        identity=str(user.id),   # 👈 MUST be string or int
+        identity=str(user.id),
         additional_claims={
             "organization_id": user.organization_id,
             "role": user.role
         }
     )
 
-    return jsonify({
-        "access_token": access_token
-    })
+    refresh_token = create_refresh_token(identity=str(user.id))
+
+    response = jsonify({"message": "Login successful"})
+
+    # 🍪 cookies set here (important)
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
+
+    return response
+
 
 
 # -------------------------
@@ -106,4 +115,29 @@ def me():
         }
     }
 
+
+    # -------------------------
+# Refresh Access Token
+# -------------------------
+@auth_bp.route("/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh():
+    user_id = get_jwt_identity()
+
+    access_token = create_access_token(identity=user_id)
+
+    response = jsonify({"message": "Token refreshed"})
+    set_access_cookies(response, access_token)
+
+    return response
+
+
+# -------------------------
+# Logout
+# -------------------------
+@auth_bp.route("/logout", methods=["POST"])
+def logout():
+    response = jsonify({"message": "Logged out"})
+    unset_jwt_cookies(response)
+    return response
 

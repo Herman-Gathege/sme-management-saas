@@ -45,7 +45,7 @@ def get_auth_context():
 # GET ALL STOCK
 # -------------------------
 @stock_bp.route("/", methods=["GET"], strict_slashes=False)
-@cross_origin()
+# @cross_origin()
 @jwt_required()
 @owner_required
 def get_stock():
@@ -61,7 +61,7 @@ def get_stock():
 # ADD STOCK
 # -------------------------
 @stock_bp.route("/", methods=["POST"], strict_slashes=False)
-@cross_origin()
+# @cross_origin()
 @jwt_required()
 @owner_required
 def add_stock():
@@ -107,7 +107,7 @@ def add_stock():
 # UPDATE STOCK
 # -------------------------
 @stock_bp.route("/<int:stock_id>", methods=["PATCH"], strict_slashes=False)
-@cross_origin()
+# @cross_origin()
 @jwt_required()
 @owner_required
 def update_stock(stock_id):
@@ -147,7 +147,7 @@ def update_stock(stock_id):
 # DELETE STOCK
 # -------------------------
 @stock_bp.route("/<int:stock_id>", methods=["DELETE"], strict_slashes=False)
-@cross_origin()
+# @cross_origin()
 @jwt_required()
 @owner_required
 def delete_stock(stock_id):
@@ -191,7 +191,7 @@ def delete_stock(stock_id):
 # STOCK HISTORY
 # -------------------------
 @stock_bp.route("/history", methods=["GET"], strict_slashes=False)
-@cross_origin()
+# @cross_origin()
 @jwt_required()
 @owner_required
 def stock_history():
@@ -236,7 +236,7 @@ def stock_history():
 # GET SINGLE STOCK ITEM
 # -------------------------
 @stock_bp.route("/<int:stock_id>", methods=["GET"], strict_slashes=False)
-@cross_origin()
+# @cross_origin()
 @jwt_required()
 @owner_required
 def get_single_stock(stock_id):
@@ -252,7 +252,7 @@ def get_single_stock(stock_id):
 
 
 @stock_bp.route("/staff", methods=["GET", "OPTIONS"], strict_slashes=False)
-@cross_origin(origins="*", headers=["Content-Type", "Authorization"], supports_credentials=True)
+# @cross_origin()
 @jwt_required()
 def get_stock_for_staff():
     if request.method == "OPTIONS":
@@ -275,7 +275,7 @@ def get_stock_for_staff():
 # STOCK ALERTS (LOW / OUT)
 # -------------------------
 @stock_bp.route("/alerts", methods=["GET"], strict_slashes=False)
-@cross_origin()
+# @cross_origin()
 @jwt_required()
 @owner_required
 def stock_alerts():
