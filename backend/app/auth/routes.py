@@ -56,33 +56,25 @@ def register_org():
 def login():
     data = request.get_json()
 
-    user = User.query.filter_by(
-        email=data.get("email"),
-        is_active=True
-    ).first()
-
+    user = User.query.filter_by(email=data.get("email"), is_active=True).first()
     if not user or not user.check_password(data.get("password")):
         return jsonify({"error": "Invalid credentials"}), 401
 
     access_token = create_access_token(
         identity=str(user.id),
-        additional_claims={
-            "organization_id": user.organization_id,
-            "role": user.role
-        }
+        additional_claims={"organization_id": user.organization_id, "role": user.role}
     )
-
     refresh_token = create_refresh_token(identity=str(user.id))
 
-    response = jsonify({
-        "message": "Logged in"
-    })
+    response = jsonify({"message": "Logged in"})
 
-    # ✅ Set both cookies
+    # ✅ Just call without extra kwargs
     set_access_cookies(response, access_token)
     set_refresh_cookies(response, refresh_token)
 
     return response
+
+
 
 
 
@@ -127,20 +119,18 @@ def me():
 @jwt_required(refresh=True)
 def refresh():
     user_id = int(get_jwt_identity())
-
     user = User.query.get(user_id)
 
     access_token = create_access_token(
         identity=str(user.id),
-        additional_claims={
-            "organization_id": user.organization_id,
-            "role": user.role
-        }
+        additional_claims={"organization_id": user.organization_id, "role": user.role}
     )
 
-    return jsonify({
-        "access_token": access_token
-    })
+    response = jsonify({"message": "Token refreshed"})
+    set_access_cookies(response, access_token)
+    return response
+
+
 
 
 
@@ -153,4 +143,5 @@ def logout():
     response = jsonify({"message": "Logged out"})
     unset_jwt_cookies(response)
     return response
+
 
