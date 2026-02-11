@@ -20,10 +20,10 @@ class Config:
     JWT_TOKEN_LOCATION = ["cookies"]
 
     # JWT_COOKIE_SECURE = True      # HTTPS only (Render uses HTTPS) change to True in production
-    JWT_COOKIE_SECURE=False #for local development
+    JWT_COOKIE_SECURE=True # False for local development
     JWT_COOKIE_HTTPONLY = True    # JS cannot read cookies
     JWT_COOKIE_SAMESITE = "Lax"
-    JWT_COOKIE_CSRF_PROTECT = False  # disable CSRF for development, enable in production
+    JWT_COOKIE_CSRF_PROTECT = True  # disable CSRF for development, enable in production
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=7)
 
