@@ -13,8 +13,9 @@ export const loginUser = async (data) => {
 
   if (!res.ok) throw new Error("Login failed");
 
-  return res.json();
+  return res.json(); // contains access_token
 };
+
 
 
 // 🔐 register unchanged except cookies
@@ -46,8 +47,13 @@ export const getMe = async () => {
 
 // 🔐 silent refresh helper (used later automatically)
 export const refreshToken = async () => {
-  await fetch(`${API}/refresh`, {
+  const res = await fetch(`${API}/refresh`, {
     method: "POST",
     credentials: "include",
   });
+
+  if (!res.ok) throw new Error("Refresh failed");
+
+  return res.json();
 };
+

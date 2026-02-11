@@ -1,35 +1,44 @@
-//frontend/src/api/client.js
-
 const API_BASE = import.meta.env.VITE_API_URL;
 
+let accessToken = null;
 
-// central fetch wrapper
+// allow AuthContext to update token
+export const setAccessToken = (token) => {
+  accessToken = token;
+};
+
 export async function apiFetch(url, options = {}) {
   let res = await fetch(`${API_BASE}${url}`, {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
       ...(options.headers || {}),
     },
     ...options,
   });
 
-  // 🔥 if access expired → try silent refresh
+  // 🔥 access expired → refresh silently
   if (res.status === 401) {
-    await fetch(`${API_BASE}/auth/refresh`, {
+    const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
       method: "POST",
       credentials: "include",
     });
 
-    // retry original request
-    res = await fetch(`${API_BASE}${url}`, {
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
-      },
-      ...options,
-    });
+    if (refreshRes.ok) {
+      const data = await refreshRes.json();
+      accessToken = data.access_token;
+
+      res = await fetch(`${API_BASE}${url}`, {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+          ...(options.headers || {}),
+        },
+        ...options,
+      });
+    }
   }
 
   return res;

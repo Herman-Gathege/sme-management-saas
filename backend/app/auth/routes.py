@@ -74,13 +74,17 @@ def login():
 
     refresh_token = create_refresh_token(identity=str(user.id))
 
-    response = jsonify({"message": "Login successful"})
+    response = jsonify({
+        "message": "Logged in"
+    })
 
-    # 🍪 cookies set here (important)
+    # ✅ Set both cookies
     set_access_cookies(response, access_token)
     set_refresh_cookies(response, refresh_token)
 
     return response
+
+
 
 
 
@@ -116,20 +120,29 @@ def me():
     }
 
 
-    # -------------------------
+# -------------------------
 # Refresh Access Token
 # -------------------------
 @auth_bp.route("/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
 
-    access_token = create_access_token(identity=user_id)
+    user = User.query.get(user_id)
 
-    response = jsonify({"message": "Token refreshed"})
-    set_access_cookies(response, access_token)
+    access_token = create_access_token(
+        identity=str(user.id),
+        additional_claims={
+            "organization_id": user.organization_id,
+            "role": user.role
+        }
+    )
 
-    return response
+    return jsonify({
+        "access_token": access_token
+    })
+
+
 
 
 # -------------------------
