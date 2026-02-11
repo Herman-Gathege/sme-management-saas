@@ -48,14 +48,14 @@ def create_app():
     
     CORS(
         app,
-        supports_credentials=True,
-        resources={
-            r"/api/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173", "https://smartduka-blush.vercel.app"]},
-            r"/auth/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173", "https://smartduka-blush.vercel.app"]}
-        },
-        allow_headers=["Content-Type", "Authorization"],
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        origins=[
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "https://smartduka-blush.vercel.app"
+        ],
+        supports_credentials=True
     )
+
 
 
     # Register blueprints
