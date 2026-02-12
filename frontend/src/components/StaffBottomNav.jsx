@@ -7,7 +7,7 @@ import {
 
 export default function StaffBottomNav() {
   const linkClass = ({ isActive }) =>
-    `bottom-nav-link ${isActive ? "active" : ""}`;
+    `bottom-nav-link bottom-nav-item ${isActive ? "active" : ""}`;
 
   return (
     <nav className="bottom-nav show-mobile">
