@@ -1,7 +1,7 @@
 //frontend/src/features/stock/AddStock.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import styles from "../dashboard/layout/DashboardLayout.module.css";
+import { createStock } from "../../api/stock";
 
 export default function AddStock() {
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ export default function AddStock() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const API_BASE = import.meta.env.VITE_API_URL;
+  // const API_BASE = import.meta.env.VITE_API_URL;
 
 
   const handleChange = (e) => {
@@ -30,38 +30,27 @@ export default function AddStock() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    try {
-      const token = localStorage.getItem("token");
+  try {
+    await createStock({
+      ...form,
+      quantity: Number(form.quantity),
+      unit_price: Number(form.unit_price),
+      selling_price: Number(form.selling_price || 0),
+      min_stock_level: Number(form.min_stock_level || 0),
+    });
 
-      const res = await fetch(`${API_BASE}/api/stock`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          ...form,
-          quantity: Number(form.quantity),
-          unit_price: Number(form.unit_price),
-          selling_price: Number(form.selling_price || 0),
-          min_stock_level: Number(form.min_stock_level || 0),
-        }),
-      });
+    navigate("/owner/stock");
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to add stock");
-
-      navigate("/owner/stock");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <section className="card">

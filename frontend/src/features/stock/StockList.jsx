@@ -1,7 +1,7 @@
 // frontend/src/features/stock/StockList.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-// import styles from "../dashboard/layout/DashboardLayout.module.css";
+import { listStock, deleteStock } from "../../api/stock";
 
 import { FiEdit, FiTrash2, FiPlus } from "react-icons/fi";
 
@@ -15,55 +15,39 @@ export default function StockList() {
 
   // Fetch stock items
   useEffect(() => {
-    const fetchStock = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("No auth token found");
+  const fetchStock = async () => {
+    try {
+      const data = await listStock();
+      setStock(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        const res = await fetch(API_URL, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  fetchStock();
+}, []);
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to load stock");
-
-        setStock(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStock();
-  }, [API_URL]);
 
   // Delete stock item
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this item?")) return;
+  if (!window.confirm("Are you sure you want to delete this item?")) return;
 
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to delete stock");
-
-      setStock((prev) => prev.filter((item) => item.id !== id));
-    } catch (err) {
-      if (err.message.includes("linked to existing sales")) {
-        alert(
-          "Cannot delete this stock item because it is linked to existing sales. Consider reducing its quantity or marking it inactive instead.",
-        );
-      } else {
-        alert(`Failed to delete stock: ${err.message}`);
-      }
-      console.error(err);
+  try {
+    await deleteStock(id);
+    setStock((prev) => prev.filter((item) => item.id !== id));
+  } catch (err) {
+    if (err.message.includes("linked to existing sales")) {
+      alert(
+        "Cannot delete this stock item because it is linked to existing sales. Consider reducing its quantity or marking it inactive instead."
+      );
+    } else {
+      alert(`Failed to delete stock: ${err.message}`);
     }
-  };
+  }
+};
+
 
   if (loading) return <p>Loading stock...</p>;
   if (error) return <p className="text-error">{error}</p>;

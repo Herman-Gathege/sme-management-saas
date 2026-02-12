@@ -1,27 +1,27 @@
+//frontend/src/features/dashboard/widgets/TodaysSales.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getOwnerSales } from "../../../api/dashboard";
+
 
 export default function TodaysSales() {
   const [sales, setSales] = useState([]);
-  const API_BASE = import.meta.env.VITE_API_URL;
+  // const API_BASE = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchSales = async () => {
-      const token = localStorage.getItem("token");
-      try {
-        const res = await fetch(`${API_BASE}/api/sales/owner`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (res.ok && Array.isArray(data)) setSales(data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
+  const fetchSales = async () => {
+    try {
+      const data = await getOwnerSales();
+      setSales(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    fetchSales();
-  }, [API_BASE]);
+  fetchSales();
+}, []);
+
 
 const today = new Date().toLocaleDateString("en-CA");
   const totalToday = sales

@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-// import styles from "./Sales.module.css";
+import {
+  listStockForSale,
+  listCustomers,
+  createSale
+} from "../../api/sales";
 import CreateCustomer from "../customers/CreateCustomer";
 import CustomerSelector from "./CustomerSelector";
 import PaymentSelector from "./PaymentSelector";
@@ -22,7 +26,7 @@ export default function CreateSale() {
   const [loading, setLoading] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
 
-  const API_BASE = import.meta.env.VITE_API_URL;
+  // const API_BASE = import.meta.env.VITE_API_URL;
   const PAYMENT_METHODS = ["Cash", "M-Pesa", "Credit"];
   const isConfirmDisabled =
   loading ||
@@ -37,21 +41,18 @@ export default function CreateSale() {
   ======================= */
 
   useEffect(() => {
-    const fetchStock = async () => {
-      const token = localStorage.getItem("token");
-      try {
-        const res = await fetch(`${API_BASE}/api/stock/staff`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to fetch stock");
-        setStockItems(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setMessage(err.message);
-      }
-    };
-    fetchStock();
-  }, [API_BASE]);
+  const fetchStock = async () => {
+    try {
+      const data = await listStockForSale();
+      setStockItems(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setMessage(err.message);
+    }
+  };
+
+  fetchStock();
+}, []);
+
 
  
 
@@ -66,21 +67,14 @@ export default function CreateSale() {
 
 
   const fetchCustomers = async () => {
-    const token = localStorage.getItem("token");
+  try {
+    const data = await listCustomers();
+    setCustomers(Array.isArray(data) ? data : []);
+  } catch (err) {
+    setMessage(err.message);
+  }
+};
 
-    try {
-      const res = await fetch(`${API_BASE}/api/customers`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to fetch customers");
-
-      setCustomers(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setMessage(err.message);
-    }
-  };
 
   /* =======================
      SEARCH
@@ -152,72 +146,59 @@ export default function CreateSale() {
   ======================= */
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    setPaymentError("");
-    setMessage("");
+  setPaymentError("");
+  setMessage("");
 
-    if (loading) return;
+  if (loading) return;
 
+  if (!paymentMethod) {
+    setPaymentError("Please select a payment method to continue.");
+    return;
+  }
 
-    if (!paymentMethod) {
-      setPaymentError("Please select a payment method to continue.");
-      return;
+  if (paymentMethod === "Credit" && !selectedCustomer) {
+    setPaymentError("Please select a customer for credit sales.");
+    return;
+  }
+
+  if (selectedItems.length === 0) {
+    setMessage("Add at least one item");
+    return;
+  }
+
+  setLoading(true);
+  setLowStockAlert([]);
+
+  try {
+    const payload = {
+      items: selectedItems.map((i) => ({
+        stock_id: i.stock_id,
+        quantity: i.quantity,
+        price: i.selling_price,
+      })),
+      paymentMethod,
+      ...(paymentMethod === "Credit" && {
+        customer_id: selectedCustomer,
+      }),
+    };
+
+    const data = await createSale(payload);
+
+    if (Array.isArray(data.low_stock_items)) {
+      setLowStockAlert(data.low_stock_items);
     }
 
-    if (paymentMethod === "Credit" && !selectedCustomer) {
-      setPaymentError("Please select a customer for credit sales.");
-      return;
-    }
-
-    if (selectedItems.length === 0) {
-      setMessage("Add at least one item");
-      return;
-    }
-
-    setLoading(true);
-    setLowStockAlert([]);
-
-    try {
-      const token = localStorage.getItem("token");
-
-      const payload = {
-        items: selectedItems.map((i) => ({
-          stock_id: i.stock_id,
-          quantity: i.quantity,
-          price: i.selling_price, // 🔥 explicit selling price
-        })),
-        paymentMethod,
-        ...(paymentMethod === "Credit" && {
-          customer_id: selectedCustomer,
-        }),
-      };
-
-      const res = await fetch(`${API_BASE}/api/sales`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Sale failed");
-
-      if (Array.isArray(data.low_stock_items)) {
-        setLowStockAlert(data.low_stock_items);
-      }
-
-      setSelectedItems([]);
-      setSelectedCustomer("");
-      setMessage(`Sale completed — Total KES ${data.total_amount}`);
-    } catch (err) {
-      setMessage(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setSelectedItems([]);
+    setSelectedCustomer("");
+    setMessage(`Sale completed — Total KES ${data.total_amount}`);
+  } catch (err) {
+    setMessage(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* =======================
      UI

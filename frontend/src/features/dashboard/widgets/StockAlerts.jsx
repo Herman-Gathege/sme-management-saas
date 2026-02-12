@@ -1,25 +1,28 @@
 //frontend/src/features/dashboard/widgets/StockAlerts.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getStockAlerts } from "../../../api/dashboard";
+
 
 
 export default function StockAlerts() {
   const [alerts, setAlerts] = useState([]);
   const navigate = useNavigate();
-  const API_BASE = import.meta.env.VITE_API_URL;
+  // const API_BASE = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/stock/alerts`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setAlerts(data);
-      })
-      .catch(() => {});
-  }, [API_BASE]);
+  const fetchAlerts = async () => {
+    try {
+      const data = await getStockAlerts();
+      setAlerts(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchAlerts();
+}, []);
+
 
   const outOfStock = alerts.filter((i) => i.quantity === 0).length;
   const lowStock = alerts.filter(

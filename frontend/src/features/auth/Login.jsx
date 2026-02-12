@@ -9,30 +9,53 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setError("");
+
+  //   try {
+  //     const res = await loginUser({ email, password });
+
+  //     if (res.access_token) {
+  //       // Save token only
+  //       localStorage.setItem("token", res.access_token);
+        
+
+  //       // Redirect to generic dashboard
+  //       window.location.href = "/dashboard";
+  //     } else {
+  //       setError(res.error || "Login failed. Please try again.");
+  //     }
+  //   } catch (err) {
+  //     setError("Network error or server unavailable. Please try again later.");
+  //     console.error("Login error:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+  e.preventDefault();
+  setLoading(true);
+  setError("");
 
-    try {
-      const res = await loginUser({ email, password });
+  try {
+    const data = await loginUser({ email, password });
 
-      if (res.access_token) {
-        // Save token only
-        localStorage.setItem("token", res.access_token);
+    // ✅ save both tokens once
+    localStorage.setItem("token", data.access_token);
+    localStorage.setItem("refresh", data.refresh_token);
 
-        // Redirect to generic dashboard
-        window.location.href = "/dashboard";
-      } else {
-        setError(res.error || "Login failed. Please try again.");
-      }
-    } catch (err) {
-      setError("Network error or server unavailable. Please try again later.");
-      console.error("Login error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    window.location.href = "/dashboard";
+  } catch (err) {
+    setError("Invalid email or password");
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // return (
   //   <form className={styles.formContainer} onSubmit={handleSubmit}>

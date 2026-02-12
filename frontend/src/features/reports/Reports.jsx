@@ -1,6 +1,6 @@
 //frontend/src/features/reports/Reports.jsx
 import { useEffect, useState } from "react";
-// import styles from "../dashboard/layout/DashboardLayout.module.css";
+import { getSalesReport } from "../../api/report";
 
 export default function Reports() {
   const [summary, setSummary] = useState(null);
@@ -12,37 +12,29 @@ export default function Reports() {
   const itemsPerPage = 10; // adjust as needed
 
 
-  const API_BASE = import.meta.env.VITE_API_URL;
+  // const API_BASE = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     fetchReports(selectedFilter);
   }, [selectedFilter]);
 
   const fetchReports = async (filter) => {
-    setLoading(true);
-    setError("");
+  setLoading(true);
+  setError("");
 
-    let query = "";
-    if (filter === "today") query = "?range=today";
-    else if (filter === "month") query = "?range=month";
+  try {
+    const data = await getSalesReport(filter);
 
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API_BASE}/api/reports/sales${query}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    setSummary(data.summary);
+    setSales(data.sales);
+    setCurrentPage(1); // nice UX reset page
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to load reports");
-
-      setSummary(data.summary);
-      setSales(data.sales);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const exportCSV = () => {
     if (sales.length === 0) return alert("No sales to export");

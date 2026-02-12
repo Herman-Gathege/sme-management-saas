@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-// import styles from "../sales/Sales.module.css";
+import { createCustomer } from "../../api/customers";
 
 export default function CreateCustomer({ onSuccess, onClose }) {
   const { user } = useAuth();
@@ -19,56 +19,42 @@ export default function CreateCustomer({ onSuccess, onClose }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const API_BASE = import.meta.env.VITE_API_URL;
+  // const API_BASE = import.meta.env.VITE_API_URL;
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
+  e.preventDefault();
+  setLoading(true);
+  setMessage("");
 
-    try {
-      const token = localStorage.getItem("token");
+  try {
+    const data = await createCustomer({
+      ...form,
+      organization_id: user.organization_id,
+    });
 
-      const res = await fetch(`${API_BASE}/api/customers`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          ...form,
-          organization_id: user.organization_id,
-        }),
-      });
+    onSuccess?.(data);
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+    setForm({
+      name: "",
+      business_name: "",
+      phone: "",
+      email: "",
+      role: "debtor",
+      notes: "",
+    });
 
-      // ✅ return created customer
-      onSuccess?.(data);
+    onClose?.();
+  } catch (err) {
+    setMessage(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
-      // reset
-      setForm({
-        name: "",
-        business_name: "",
-        phone: "",
-        email: "",
-        role: "debtor",
-        notes: "",
-      });
-
-      onClose?.();
-
-    } catch (err) {
-      setMessage(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <form onSubmit={handleSubmit} className="card form-stack">

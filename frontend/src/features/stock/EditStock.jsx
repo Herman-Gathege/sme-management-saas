@@ -1,7 +1,7 @@
 //frontend/src/features/stock/EditStock.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-// import styles from "../dashboard/layout/DashboardLayout.module.css";
+import { getStock, updateStock } from "../../api/stock";
 
 export default function EditStock() {
   const { id } = useParams();
@@ -19,75 +19,59 @@ export default function EditStock() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const API_BASE = import.meta.env.VITE_API_URL;
+  // const API_BASE = import.meta.env.VITE_API_URL;
 
 
   useEffect(() => {
-    const fetchStockItem = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const res = await fetch(`${API_BASE}/api/stock/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  const fetchStockItem = async () => {
+    try {
+      const item = await getStock(id);
 
-        if (!res.ok) throw new Error("Failed to load stock");
+      setForm({
+        name: item.name,
+        sku: item.sku || "",
+        category: item.category || "",
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        selling_price: item.selling_price,
+        min_stock_level: item.min_stock_level,
+      });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        const item = await res.json();
+  fetchStockItem();
+}, [id]);
 
-        setForm({
-          name: item.name,
-          sku: item.sku || "",
-          category: item.category || "",
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          selling_price: item.selling_price,
-          min_stock_level: item.min_stock_level,
-        });
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStockItem();
-  }, [id, API_BASE]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    setError("");
+  e.preventDefault();
+  setSaving(true);
+  setError("");
 
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API_BASE}/api/stock/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          ...form,
-          quantity: Number(form.quantity),
-          unit_price: Number(form.unit_price),
-          min_stock_level: Number(form.min_stock_level),
-        }),
-      });
+  try {
+    await updateStock(id, {
+      ...form,
+      quantity: Number(form.quantity),
+      unit_price: Number(form.unit_price),
+      min_stock_level: Number(form.min_stock_level),
+    });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to update stock");
+    navigate("/owner/stock");
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setSaving(false);
+  }
+};
 
-      navigate("/owner/stock");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setSaving(false);
-    }
-  };
 
   if (loading) return <p>Loading stock item...</p>;
   if (error) return <p className="message">{error}</p>;

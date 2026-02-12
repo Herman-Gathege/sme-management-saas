@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
-// import styles from "../dashboard/layout/DashboardLayout.module.css";
+import { listOwnerSales } from "../../api/sales";
 
 export default function AllSales() {
   const [sales, setSales] = useState([]);
@@ -14,41 +14,23 @@ export default function AllSales() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const API_BASE = import.meta.env.VITE_API_URL;
+  // const API_BASE = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    const fetchSales = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("No auth token found");
+  const fetchSales = async () => {
+    try {
+      const data = await listOwnerSales();
+      setSales(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        const res = await fetch(`${API_BASE}/api/sales/owner`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  fetchSales();
+}, []);
 
-        const contentType = res.headers.get("content-type");
-        let data;
-
-        if (contentType && contentType.includes("application/json")) {
-          data = await res.json();
-        } else {
-          const text = await res.text();
-          console.error("Unexpected response:", text);
-          throw new Error("Server returned non-JSON response");
-        }
-
-        if (!res.ok) throw new Error(data.error || "Failed to load sales");
-
-        setSales(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSales();
-  }, [API_BASE]);
 
   const toggleSale = (saleId) => {
     setExpandedSale(expandedSale === saleId ? null : saleId);
@@ -90,7 +72,7 @@ export default function AllSales() {
   const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
 
   if (loading) return <p>Loading sales...</p>;
-  if (error) return <p className={styles.message}>{error}</p>;
+  if (error) return <p className="text-error">{error}</p>;
 
   return (
     <section className="card flex flex-col gap-md">

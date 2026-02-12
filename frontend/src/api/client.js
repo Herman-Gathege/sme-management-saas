@@ -1,36 +1,49 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE = import.meta.env.VITE_API_URL;
 
-async function apiFetch(endpoint, options = {}) {
-  const token = localStorage.getItem("token");
+export async function apiFetch(url, options = {}) {
+  let access = localStorage.getItem("token");
 
-  const headers = {
-    "Content-Type": "application/json",
-    ...(options.headers || {}),
-  };
+  const makeRequest = (token) =>
+    fetch(`${API_BASE}${url}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
+  let res = await makeRequest(access);
 
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
-
-  // Handle 401 globally
+  // 🔥 silent refresh logic
   if (res.status === 401) {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Unauthorized");
+    const refresh = localStorage.getItem("refresh");
+
+    if (!refresh) {
+      localStorage.clear();
+      window.location.href = "/login";
+      return res;
+    }
+
+    const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${refresh}`,
+      },
+    });
+
+    if (!refreshRes.ok) {
+      localStorage.clear();
+      window.location.href = "/login";
+      return res;
+    }
+
+    const data = await refreshRes.json();
+
+    localStorage.setItem("token", data.access_token);
+
+    res = await makeRequest(data.access_token);
   }
 
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data?.error || "Request failed");
-  }
-
-  return data;
+  return res;
 }
-
-export default apiFetch;
