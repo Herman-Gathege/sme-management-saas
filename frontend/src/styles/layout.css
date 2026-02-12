@@ -82,6 +82,7 @@
   border-top: 1px solid #e5e7eb;
   padding: 0.5rem 0;
   z-index: 20;
+  left: 0;
 }
 
 .bottom-nav a { 

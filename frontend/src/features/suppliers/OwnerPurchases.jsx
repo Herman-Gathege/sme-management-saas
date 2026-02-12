@@ -214,134 +214,134 @@ export default function OwnerSupplierPurchases() {
               </div>
 
               {newPurchase.items.length > 0 && (
-              <div className="cart-table-wrapper">
-                <table className="staff-table">
+  <div className="purchase-items-stack">
+    {newPurchase.items.map((item, index) => (
+      <div key={index} className="purchase-item-card">
+        
+        <div className="form-row">
+          <label>Name</label>
+          <input
+            placeholder="name of your item"
+            className="input"
+            type="text"
+            value={item.name}
+            onChange={(e) =>
+              updateItem(index, "name", e.target.value)
+            }
+          />
+        </div>
 
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Qty</th>
-                      <th>Unit Price</th>
-                      <th>SKU</th>
-                      <th>Category</th>
-                      <th>Min Stock</th>
-                      <th>Selling Price</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {newPurchase.items.map((item, index) => (
-                      <tr key={index}>
-                        <td>
-                          <input
-                            className="input"
-                            type="text"
-                            value={item.name}
-                            onChange={(e) =>
-                              updateItem(index, "name", e.target.value)
-                            }
-                          />
-                        </td>
-                        <td>
-                          <input
-                            className="input"
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) =>
-                              updateItem(
-                                index,
-                                "quantity",
-                                Math.max(1, Number(e.target.value)),
-                              )
-                            }
-                          />
-                        </td>
-                        <td>
-                          <input
-                            className="input"
-                            type="number"
-                            value={item.unit_price}
-                            onChange={(e) =>
-                              updateItem(
-                                index,
-                                "unit_price",
-                                Math.max(0, parseFloat(e.target.value) || 0),
-                              )
-                            }
-                          />
-                        </td>
-                        <td>
-                          <input
-                            className="input"
-                            type="text"
-                            value={item.sku}
-                            onChange={(e) =>
-                              updateItem(index, "sku", e.target.value)
-                            }
-                          />
-                        </td>
-                        <td>
-                          <input
-                            className="input"
-                            type="text"
-                            value={item.category}
-                            onChange={(e) =>
-                              updateItem(index, "category", e.target.value)
-                            }
-                          />
-                        </td>
-                        <td>
-                          <input
-                            className="input"
-                            type="number"
-                            value={item.min_stock_level}
-                            onChange={(e) =>
-                              updateItem(
-                                index,
-                                "min_stock_level",
-                                Math.max(0, Number(e.target.value) || 0),
-                              )
-                            }
-                          />
-                        </td>
-                        <td>
-                          <input
-                            className="input"
-                            type="number"
-                            value={item.selling_price}
-                            onChange={(e) =>
-                              updateItem(
-                                index,
-                                "selling_price",
-                                Math.max(0, parseFloat(e.target.value) || 0),
-                              )
-                            }
-                          />
-                        </td>
-                        <td>
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => removeItem(index)}
-                          >
-                            ×
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                </div>
-              )}
+        <div className="form-row two-col">
+          <div>
+            <label>Quantity</label>
+            <input
+              className="input"
+              type="number"
+              value={item.quantity}
+              onChange={(e) =>
+                updateItem(index, "quantity", Math.max(1, Number(e.target.value)))
+              }
+            />
+          </div>
+
+          <div>
+            <label>Unit Price</label>
+            <input
+              className="input"
+              type="number"
+              value={item.unit_price}
+              onChange={(e) =>
+                updateItem(index, "unit_price", Math.max(0, parseFloat(e.target.value) || 0))
+              }
+            />
+          </div>
+        </div>
+
+        <div className="form-row">
+          <label>SKU</label>
+          <input
+            placeholder="(eg) NM1234"
+            className="input"
+            type="text"
+            value={item.sku}
+            onChange={(e) =>
+              updateItem(index, "sku", e.target.value)
+            }
+          />
+        </div>
+
+        <div className="form-row two-col">
+          <div>
+            <label>Category</label>
+            <input
+              placeholder="(eg) Electronics"
+              className="input"
+              type="text"
+              value={item.category}
+              onChange={(e) =>
+                updateItem(index, "category", e.target.value)
+              }
+            />
+          </div>
+
+          <div>
+            <label>Minimum Stock</label>
+            <input
+              className="input"
+              type="number"
+              value={item.min_stock_level}
+              onChange={(e) =>
+                updateItem(index, "min_stock_level", Math.max(0, Number(e.target.value) || 0))
+              }
+            />
+          </div>
+        </div>
+
+        <div className="form-row">
+          <label>Selling Price</label>
+          <input
+            className="input"
+            type="number"
+            value={item.selling_price}
+            onChange={(e) =>
+              updateItem(index, "selling_price", Math.max(0, parseFloat(e.target.value) || 0))
+            }
+          />
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => removeItem(index)}
+          >
+            Remove Item
+          </button>
+
+          
+        </div>
+
+      </div>
+    ))}
+  </div>
+)}
+
 
               <div className="mt-sm">
                 <strong>Total: {purchaseTotal.toFixed(2)}</strong>
               </div>
 
               <button
-                className="btn btn-primary mt-sm"
+                className="btn btn-primary mt-sm mr-md"
                 onClick={handleAddPurchase}
               >
                 Create Purchase
+              </button>
+
+              <button
+                className="btn btn-secondary mt-sm "
+                onClick={() => setShowModal(false)}
+              >
+                Cancel
               </button>
             </div>
           </div>

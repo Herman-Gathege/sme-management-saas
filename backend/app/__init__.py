@@ -48,7 +48,7 @@ def create_app():
     
     CORS(
         app,
-        origins=["https://smartduka-blush.vercel.app"],
+        origins=["https://smartduka-blush.vercel.app", "http://localhost:5173"],
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
         allow_headers=["Content-Type", "Authorization"],
         supports_credentials=True

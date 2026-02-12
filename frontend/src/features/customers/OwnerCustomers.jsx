@@ -68,7 +68,7 @@ export default function OwnerCustomers() {
     try {
       const res = await fetch(
         `${API_BASE}/api/customers/payments/customer/${customerId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       const data = await res.json();
@@ -96,8 +96,7 @@ export default function OwnerCustomers() {
     if (!form.amount || parseFloat(form.amount) <= 0)
       return alert("Amount must be positive");
 
-    if (!form.payment_method)
-      return alert("Select a payment method");
+    if (!form.payment_method) return alert("Select a payment method");
 
     try {
       const res = await fetch(`${API_BASE}/api/customers/payments`, {
@@ -123,8 +122,8 @@ export default function OwnerCustomers() {
         prev.map((c) =>
           c.id === customerId
             ? { ...c, balance: (c.balance || 0) - parseFloat(form.amount) }
-            : c
-        )
+            : c,
+        ),
       );
 
       setPaymentForm((prev) => ({ ...prev, [customerId]: {} }));
@@ -151,7 +150,9 @@ export default function OwnerCustomers() {
 
       <p className="hint flex items-center gap-sm">
         <FiInfo />
-        Any amount with a negative (-) before the number indicates an overpayment during debt settlement.<br/> This amount will be used to settle future debts.
+        Any amount with a negative (-) before the number indicates an
+        overpayment during debt settlement.
+        <br /> This amount will be used to settle future debts.
       </p>
 
       {!loading && customers.length > 0 && (
@@ -162,7 +163,9 @@ export default function OwnerCustomers() {
                 <th></th>
                 <th>Name</th>
                 <th>Company</th>
-                <th>{isDebtors ? "Amount Owed (KES)" : "Amount Payable (KES)"}</th>
+                <th>
+                  {isDebtors ? "Amount Owed (KES)" : "Amount Payable (KES)"}
+                </th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -181,8 +184,8 @@ export default function OwnerCustomers() {
                   balance === 0 && payments.length
                     ? "PAID"
                     : isOwed
-                    ? "OWED"
-                    : "OK";
+                      ? "OWED"
+                      : "OK";
 
                 const [name, company] = c.full_name?.includes("(")
                   ? c.full_name.split(" (")
@@ -190,7 +193,6 @@ export default function OwnerCustomers() {
 
                 return (
                   <React.Fragment key={c.id}>
-
                     {/* MAIN ROW */}
                     <tr key={c.id}>
                       <td>
@@ -198,7 +200,11 @@ export default function OwnerCustomers() {
                           className="icon-btn"
                           onClick={() => toggleRow(c.id)}
                         >
-                          {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                          {expanded ? (
+                            <ChevronUp size={16} />
+                          ) : (
+                            <ChevronDown size={16} />
+                          )}
                         </button>
                       </td>
 
@@ -212,8 +218,8 @@ export default function OwnerCustomers() {
                             status === "OWED"
                               ? "status-owed"
                               : status === "PAID"
-                              ? "status-paid"
-                              : "status-ok"
+                                ? "status-paid"
+                                : "status-ok"
                           }`}
                         >
                           {status}
@@ -252,7 +258,11 @@ export default function OwnerCustomers() {
                                   ) : (
                                     payments.map((p) => (
                                       <tr key={p.id}>
-                                        <td>{new Date(p.created_at).toLocaleString()}</td>
+                                        <td>
+                                          {new Date(
+                                            p.created_at,
+                                          ).toLocaleString()}
+                                        </td>
                                         <td>KES {p.amount.toFixed(2)}</td>
                                         <td>{p.payment_method}</td>
                                         <td>{p.notes || "-"}</td>
@@ -262,23 +272,31 @@ export default function OwnerCustomers() {
                                 </tbody>
                               </table>
 
-                              <div className="paymentForm">
+                              <div className="paymentForm ">
                                 <input
+                                  className="mr-sm"
                                   type="number"
                                   placeholder="Amount"
                                   value={paymentForm[c.id]?.amount || ""}
                                   onChange={(e) =>
-                                    handlePaymentInput(c.id, "amount", e.target.value)
+                                    handlePaymentInput(
+                                      c.id,
+                                      "amount",
+                                      e.target.value,
+                                    )
                                   }
                                 />
 
                                 <select
-                                  value={paymentForm[c.id]?.payment_method || ""}
+                                  className="mr-sm"
+                                  value={
+                                    paymentForm[c.id]?.payment_method || ""
+                                  }
                                   onChange={(e) =>
                                     handlePaymentInput(
                                       c.id,
                                       "payment_method",
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                 >
@@ -289,11 +307,16 @@ export default function OwnerCustomers() {
                                 </select>
 
                                 <input
+                                  className="mr-sm"
                                   type="text"
                                   placeholder="Notes"
                                   value={paymentForm[c.id]?.notes || ""}
                                   onChange={(e) =>
-                                    handlePaymentInput(c.id, "notes", e.target.value)
+                                    handlePaymentInput(
+                                      c.id,
+                                      "notes",
+                                      e.target.value,
+                                    )
                                   }
                                 />
 
@@ -314,7 +337,8 @@ export default function OwnerCustomers() {
         </div>
       )}
 
-      {/* MOBILE CARDS */}<div className="hidden-desktop flex flex-col gap-md">
+      {/* MOBILE CARDS */}
+      <div className="hidden-desktop flex flex-col gap-md">
         {customers.map((c) => {
           const balance = Number(c.balance || 0);
           const isOwed = isDebtors && balance > 0;
@@ -385,6 +409,53 @@ export default function OwnerCustomers() {
                       </div>
                     ))
                   )}
+
+                  {/* ✅ MOBILE PAYMENT FORM */}
+                  <div className="paymentForm form-stack mt-sm">
+                    <input
+                      className="input"
+                      type="number"
+                      placeholder="Amount"
+                      value={paymentForm[c.id]?.amount || ""}
+                      onChange={(e) =>
+                        handlePaymentInput(c.id, "amount", e.target.value)
+                      }
+                    />
+
+                    <select
+                      className="input"
+                      value={paymentForm[c.id]?.payment_method || ""}
+                      onChange={(e) =>
+                        handlePaymentInput(
+                          c.id,
+                          "payment_method",
+                          e.target.value,
+                        )
+                      }
+                    >
+                      <option value="">Select Method</option>
+                      <option value="cash">Cash</option>
+                      <option value="mpesa">MPESA</option>
+                      <option value="bank">Bank</option>
+                    </select>
+
+                    <input
+                      className="input"
+                      type="text"
+                      placeholder="Notes"
+                      value={paymentForm[c.id]?.notes || ""}
+                      onChange={(e) =>
+                        handlePaymentInput(c.id, "notes", e.target.value)
+                      }
+                    />
+
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => submitPayment(c.id)}
+                    >
+                      Add Payment
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
