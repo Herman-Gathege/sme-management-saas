@@ -8,7 +8,6 @@ import {
   FiBox,
   FiUsers,
   FiFileText,
-  
 } from "react-icons/fi";
 
 export default function Sidebar() {
@@ -52,21 +51,21 @@ export default function Sidebar() {
   ];
 
   const isStockRouteActive = stockRoutes.some((path) =>
-    location.pathname.startsWith(path)
+    location.pathname.startsWith(path),
   );
 
   const isCustomerRouteActive = customerRoutes.some((path) =>
-    location.pathname.startsWith(path)
+    location.pathname.startsWith(path),
   );
 
   const isSupplierRouteActive = supplierRoutes.some((path) =>
-    location.pathname.startsWith(path)
+    location.pathname.startsWith(path),
   );
 
   // ---------------------------
   // Open dropdowns if route is active
   // ---------------------------
- useEffect(() => {
+  useEffect(() => {
     if (isStockRouteActive) setStockOpen(true);
     if (isCustomerRouteActive) setCustomerOpen(true);
     if (isSupplierRouteActive) setSupplierOpen(true);
@@ -93,25 +92,22 @@ export default function Sidebar() {
       }`}
     >
       {/* ================= HEADER ================= */}
-<div className="sidebar-header">
-  {!collapsed && (
-    <h2 className="sidebar-logo text-lg font-bold company-blue">
-      {organization?.name || "SmartShop"}
-    </h2>
-  )}
+      <div className="sidebar-header">
+        {!collapsed && (
+          <h2 className="sidebar-logo text-lg font-bold company-blue">
+            {organization?.name || "Azani SmartDuka"}
+          </h2>
+        )}
 
-  {/* Collapse button with < or > */}
-  <button
+        {/* Collapse button with < or > */}
+        <button
           type="button"
           className="sidebar-collapse-btn mr-sm"
           onClick={() => setCollapsed((c) => !c)}
         >
           <FiChevronDown className={collapsed ? "rotated" : ""} />
         </button>
-</div>
-
-
-
+      </div>
 
       {/* ================= NAV ================= */}
       <nav className="flex flex-col gap-sm p-sm">
@@ -140,9 +136,7 @@ export default function Sidebar() {
               {!collapsed && <span>Suppliers</span>}
               {!collapsed && (
                 <FiChevronDown
-                  className={`chevron ${
-                    supplierOpen ? "rotated" : ""
-                  }`}
+                  className={`chevron ${supplierOpen ? "rotated" : ""}`}
                 />
               )}
             </button>
@@ -152,16 +146,10 @@ export default function Sidebar() {
                 <NavLink to="/owner/suppliers" className={linkClass}>
                   Suppliers
                 </NavLink>
-                <NavLink
-                  to="/owner/supplier-purchases"
-                  className={linkClass}
-                >
+                <NavLink to="/owner/supplier-purchases" className={linkClass}>
                   Supplier Purchases
                 </NavLink>
-                <NavLink
-                  to="/owner/suppliers/creditors"
-                  className={linkClass}
-                >
+                <NavLink to="/owner/suppliers/creditors" className={linkClass}>
                   I owe them
                 </NavLink>
               </div>
@@ -170,18 +158,14 @@ export default function Sidebar() {
             {/* -------- STOCK -------- */}
             <button
               type="button"
-              className={`sidebar-link ${
-                isStockRouteActive ? "active" : ""
-              }`}
+              className={`sidebar-link ${isStockRouteActive ? "active" : ""}`}
               onClick={() => setStockOpen((o) => !o)}
             >
               <FiBox />
               {!collapsed && <span>Manage Stock</span>}
               {!collapsed && (
                 <FiChevronDown
-                  className={`chevron ${
-                    stockOpen ? "rotated" : ""
-                  }`}
+                  className={`chevron ${stockOpen ? "rotated" : ""}`}
                 />
               )}
             </button>
@@ -194,10 +178,7 @@ export default function Sidebar() {
                 <NavLink to="/owner/stock/add" className={linkClass}>
                   Add Stock
                 </NavLink>
-                <NavLink
-                  to="/owner/stock/history"
-                  className={linkClass}
-                >
+                <NavLink to="/owner/stock/history" className={linkClass}>
                   Stock History
                 </NavLink>
               </div>
@@ -215,31 +196,20 @@ export default function Sidebar() {
               {!collapsed && <span>Customers</span>}
               {!collapsed && (
                 <FiChevronDown
-                  className={`chevron ${
-                    customerOpen ? "rotated" : ""
-                  }`}
+                  className={`chevron ${customerOpen ? "rotated" : ""}`}
                 />
               )}
             </button>
 
             {customerOpen && !collapsed && (
               <div className="sidebar-submenu">
-                <NavLink
-                  to="/owner/customers/debtors"
-                  className={linkClass}
-                >
+                <NavLink to="/owner/customers/debtors" className={linkClass}>
                   They owe me
                 </NavLink>
-                <NavLink
-                  to="/owner/customers/add"
-                  className={linkClass}
-                >
+                <NavLink to="/owner/customers/add" className={linkClass}>
                   Add Customer
                 </NavLink>
-                <NavLink
-                  to="/owner/all/customers"
-                  className={linkClass}
-                >
+                <NavLink to="/owner/all/customers" className={linkClass}>
                   All Customers
                 </NavLink>
               </div>
