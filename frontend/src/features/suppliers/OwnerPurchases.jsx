@@ -21,12 +21,12 @@ export default function OwnerSupplierPurchases() {
     items: [
       {
         name: "",
-        quantity: 1,
-        unit_price: 0,
+        quantity: "",
+        unit_price: "",
         sku: "",
         category: "",
-        min_stock_level: 0,
-        selling_price: 0,
+        min_stock_level: "",
+        selling_price: "",
       },
     ],
   });
@@ -58,12 +58,12 @@ export default function OwnerSupplierPurchases() {
         ...prev.items,
         {
           name: "",
-          quantity: 1,
-          unit_price: 0,
+          quantity: "",
+          unit_price: "",
           sku: "",
           category: "",
-          min_stock_level: 0,
-          selling_price: 0,
+          min_stock_level: "",
+          selling_price: "",
         },
       ],
     }));
@@ -124,12 +124,12 @@ export default function OwnerSupplierPurchases() {
         items: [
           {
             name: "",
-            quantity: 1,
-            unit_price: 0,
+            quantity: "",
+            unit_price: "",
             sku: "",
             category: "",
-            min_stock_level: 0,
-            selling_price: 0,
+            min_stock_level: "",
+            selling_price: "",
           },
         ],
       });
@@ -170,7 +170,7 @@ export default function OwnerSupplierPurchases() {
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h3>New Purchase</h3>
+            <h3 className="mb-sm">New Purchase</h3>
 
             <div className="purchase-form">
               <div className="flex gap-md flex-wrap mb-md">
@@ -214,116 +214,127 @@ export default function OwnerSupplierPurchases() {
               </div>
 
               {newPurchase.items.length > 0 && (
-  <div className="purchase-items-stack">
-    {newPurchase.items.map((item, index) => (
-      <div key={index} className="purchase-item-card">
-        
-        <div className="form-row">
-          <label>Name</label>
-          <input
-            placeholder="name of your item"
-            className="input"
-            type="text"
-            value={item.name}
-            onChange={(e) =>
-              updateItem(index, "name", e.target.value)
-            }
-          />
-        </div>
+                  <div className="purchase-items-stack">
+                    {newPurchase.items.map((item, index) => (
+                      <div key={index} className="purchase-item-card">
+                        
+                        <div className="form-row">
+                          {/* <label>Name</label> */}
+                          <input
+                            placeholder="name of your item"
+                            name="Name"
+                            className="input"
+                            type="text"
+                            value={item.name}
+                            onChange={(e) =>
+                              updateItem(index, "name", e.target.value)
+                            }
+                          />
+                        </div>
 
-        <div className="form-row two-col">
-          <div>
-            <label>Quantity</label>
-            <input
-              className="input"
-              type="number"
-              value={item.quantity}
-              onChange={(e) =>
-                updateItem(index, "quantity", Math.max(1, Number(e.target.value)))
-              }
-            />
-          </div>
+                        <div className="form-row two-col">
+                          <div>
+                            {/* <label>Quantity</label> */}
+                            <input
+                              name="Quantity"
+                              placeholder="Quantity"
+                              className="input"
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) =>
+                                updateItem(index, "quantity", Math.max(1, Number(e.target.value)))
+                              }
+                            />
+                          </div>
 
-          <div>
-            <label>Unit Price</label>
-            <input
-              className="input"
-              type="number"
-              value={item.unit_price}
-              onChange={(e) =>
-                updateItem(index, "unit_price", Math.max(0, parseFloat(e.target.value) || 0))
-              }
-            />
-          </div>
-        </div>
+                          <div>
+                            {/* <label>Unit Price</label> */}
+                            <input
+                              name="Buying Price"
+                              placeholder="Buying Price per item"
+                              className="input"
+                              type="number"
+                              value={item.unit_price}
+                              onChange={(e) =>
+                                updateItem(index, "unit_price", Math.max(0, parseFloat(e.target.value) || 0))
+                              }
+                            />
+                          </div>
+                        </div>
 
-        <div className="form-row">
-          <label>SKU</label>
-          <input
-            placeholder="(eg) NM1234"
-            className="input"
-            type="text"
-            value={item.sku}
-            onChange={(e) =>
-              updateItem(index, "sku", e.target.value)
-            }
-          />
-        </div>
+                        <div className="form-row">
+                          {/* <label>SKU</label> */}
+                          <input
+                            name="SKU"
+                            placeholder="sku-number(eg) NM1234"
+                            className="input"
+                            type="text"
+                            value={item.sku}
+                            onChange={(e) =>
+                              updateItem(index, "sku", e.target.value)
+                            }
+                          />
+                        </div>
 
-        <div className="form-row two-col">
-          <div>
-            <label>Category</label>
-            <input
-              placeholder="(eg) Electronics"
-              className="input"
-              type="text"
-              value={item.category}
-              onChange={(e) =>
-                updateItem(index, "category", e.target.value)
-              }
-            />
-          </div>
+                        <div className="form-row two-col">
+                          <div>
+                            {/* <label>Category</label> */}
+                            <input
+                              name="Category"
+                              placeholder="Item Category"
+                              className="input"
+                              type="text"
+                              value={item.category}
+                              onChange={(e) =>
+                                updateItem(index, "category", e.target.value)
+                              }
+                            />
+                          </div>
 
-          <div>
-            <label>Minimum Stock</label>
-            <input
-              className="input"
-              type="number"
-              value={item.min_stock_level}
-              onChange={(e) =>
-                updateItem(index, "min_stock_level", Math.max(0, Number(e.target.value) || 0))
-              }
-            />
-          </div>
-        </div>
+                          <div>
+                            {/* <label>Minimum Stock</label> */}
+                            <input
+                              name="Minimum Stock"
+                              placeholder="Minimum Stock Level"
+                              className="input"
+                              type="number"
+                              value={item.min_stock_level}
+                              onChange={(e) =>
+                                updateItem(index, "min_stock_level", Math.max(0, Number(e.target.value) || 0))
+                              }
+                            />
+                          </div>
+                        </div>
 
-        <div className="form-row">
-          <label>Selling Price</label>
-          <input
-            className="input"
-            type="number"
-            value={item.selling_price}
-            onChange={(e) =>
-              updateItem(index, "selling_price", Math.max(0, parseFloat(e.target.value) || 0))
-            }
-          />
-        </div>
+                        <div className="form-row">
+                          {/* <label>Selling Price</label> */}
+                          <input
+                            name="Selling Price"
+                            placeholder="Selling Price per item (optional)"
+                            className="input"
+                            type="number"
+                            value={item.selling_price}
+                            onChange={(e) =>
+                              updateItem(index, "selling_price", Math.max(0, parseFloat(e.target.value) || 0))
+                            }
+                          />
+                        </div>
 
-        <div className="flex justify-end">
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={() => removeItem(index)}
-          >
-            Remove Item
-          </button>
+                        <div className="flex justify-end">
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => removeItem(index)}
+                          >
+                            Remove Item
+                          </button>
 
-          
-        </div>
+                          
+                        </div>
 
-      </div>
-    ))}
-  </div>
-)}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
 
               <div className="mt-sm">

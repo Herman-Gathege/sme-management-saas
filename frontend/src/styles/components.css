@@ -543,3 +543,11 @@
     grid-template-columns: 1fr;
   }
 }
+
+.success-banner {
+  background: #e6f9ed;
+  color: #1b7a3a;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+}

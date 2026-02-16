@@ -49,17 +49,30 @@ def create_supplier():
 
 
 # ---------------- GET ALL SUPPLIERS ----------------
+# @suppliers_bp.route("", methods=["GET"])
+# @jwt_required()
+# @owner_or_staff_required
+# def get_suppliers():
+#     org_id = get_org_id_from_jwt()
+#     suppliers = Supplier.query.filter_by(
+#         organization_id=org_id,
+#         is_active=True
+#     ).all()
+
+#     return jsonify([s.to_dict() for s in suppliers])
+
 @suppliers_bp.route("", methods=["GET"])
 @jwt_required()
 @owner_or_staff_required
 def get_suppliers():
     org_id = get_org_id_from_jwt()
+
     suppliers = Supplier.query.filter_by(
-        organization_id=org_id,
-        is_active=True
-    ).all()
+        organization_id=org_id
+    ).all()   # REMOVE is_active=True filter
 
     return jsonify([s.to_dict() for s in suppliers])
+
 
 
 # ---------------- UPDATE SUPPLIER ----------------

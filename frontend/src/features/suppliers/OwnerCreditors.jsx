@@ -12,6 +12,7 @@ export default function OwnerCreditors() {
   const [expandedSupplierId, setExpandedSupplierId] = useState(null);
   const [expanded, setExpanded] = useState({});
   const [showPaymentFormFor, setShowPaymentFormFor] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -57,35 +58,87 @@ export default function OwnerCreditors() {
   }, []);
 
   // ---------------- Add Payment ----------------
+  // const handleAddPayment = async (supplierId) => {
+  //   const amountNum = parseFloat(newPayment.amount);
+  //   if (!amountNum || amountNum <= 0) {
+  //     alert("Enter a valid amount");
+  //     return;
+  //   }
+
+  //   try {
+  //     await createPayment({
+  //       supplier_id: supplierId,
+  //       amount: amountNum,
+  //       payment_method: newPayment.payment_method,
+  //       notes: newPayment.notes,
+  //     });
+
+  //     setNewPayment({
+  //       supplier_id: "",
+  //       amount: "",
+  //       payment_method: "cash",
+  //       notes: "",
+  //     });
+
+  //     setShowPaymentFormFor(null);
+  //     await fetchPayments();
+  //     await fetchCreditors();
+  //   } catch (err) {
+  //     alert("Failed to add payment");
+  //   }
+  // };
+
   const handleAddPayment = async (supplierId) => {
-    const amountNum = parseFloat(newPayment.amount);
-    if (!amountNum || amountNum <= 0) {
-      alert("Enter a valid amount");
-      return;
-    }
+  const amountNum = parseFloat(newPayment.amount);
 
-    try {
-      await createPayment({
-        supplier_id: supplierId,
-        amount: amountNum,
-        payment_method: newPayment.payment_method,
-        notes: newPayment.notes,
-      });
+  if (!amountNum || amountNum <= 0) {
+    alert("Enter a valid amount");
+    return;
+  }
 
-      setNewPayment({
-        supplier_id: "",
-        amount: "",
-        payment_method: "cash",
-        notes: "",
-      });
+  try {
+    await createPayment({
+      supplier_id: supplierId,
+      amount: amountNum,
+      payment_method: newPayment.payment_method,
+      notes: newPayment.notes,
+    });
 
-      setShowPaymentFormFor(null);
-      await fetchPayments();
+    // Show success feedback
+    setSuccessMessage("Payment saved successfully");
+
+    // Reset form
+    setNewPayment({
+      supplier_id: "",
+      amount: "",
+      payment_method: "cash",
+      notes: "",
+    });
+
+    setShowPaymentFormFor(null);
+
+    // Refresh payments immediately
+    await fetchPayments();
+
+    // Delay creditors refresh so user sees confirmation
+    setTimeout(async () => {
       await fetchCreditors();
-    } catch (err) {
-      alert("Failed to add payment");
-    }
-  };
+
+      // Clear expanded state if supplier no longer exists in creditors
+      setExpandedSupplierId(null);
+
+    }, 800);
+
+    // Clear success message
+    setTimeout(() => {
+      setSuccessMessage("");
+    }, 3000);
+
+  } catch (err) {
+    alert("Failed to add payment");
+  }
+};
+
 
   const toggleExpand = (supplierId) => {
     setExpandedSupplierId(
@@ -104,6 +157,13 @@ export default function OwnerCreditors() {
     <section className="card flex flex-col gap-lg">
       <h2>Suppliers you Owe Money</h2>
 
+      {successMessage && (
+        <div className="success-banner">
+          {successMessage}
+        </div>
+      )}
+
+
       <div className="customers-table-wrapper stock-table-wrapper hidden-on-mobile">
         <table className="customers-table">
 
@@ -114,6 +174,7 @@ export default function OwnerCreditors() {
             <th>Total Credit (KES)</th>
             <th>Total Paid (KES)</th>
             <th>Balance Due (KES)</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
@@ -142,6 +203,13 @@ export default function OwnerCreditors() {
                   <td>{c.total_credit.toFixed(2)}</td>
                   <td>{c.total_paid.toFixed(2)}</td>
                   <td>{c.balance_due.toFixed(2)}</td>
+                  <td>
+                    {c.balance_due > 0
+                      ? "Owing"
+                      : c.balance_due < 0
+                      ? "Overpaid"
+                      : "Settled"}
+                  </td>
                 </tr>
 
                 {expandedSupplierId === c.supplier_id && (
@@ -279,13 +347,21 @@ export default function OwnerCreditors() {
                 <span className="text-muted">Total Credit:</span>{" "}
                 {c.total_credit.toFixed(2)}
               </div>
-                            <div className="text-sm">
+              <div className="text-sm">
                 <span className="text-muted">Total Paid:</span>{" "}
                 {c.total_paid.toFixed(2)}
               </div>
-                              <div className="text-sm">
+              <div className="text-sm">
                 <span className="text-muted">Balance:</span>{" "}
                 <strong>{c.balance_due.toFixed(2)}</strong>
+              </div>
+              <div className="text-sm">
+                <span className="text-muted">Status:</span>{" "}
+                {c.balance_due > 0
+                  ? "Owing"
+                  : c.balance_due < 0
+                  ? "Overpaid"
+                  : "Settled"}
               </div>
 
               {expandedSupplierId === c.supplier_id && (
