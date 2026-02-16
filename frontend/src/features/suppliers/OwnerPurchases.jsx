@@ -10,7 +10,6 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import Modal from "../../components/Modal";
 import Papa from "papaparse";
 
-
 export default function OwnerSupplierPurchases() {
   const [suppliers, setSuppliers] = useState([]);
   const [purchases, setPurchases] = useState([]);
@@ -21,6 +20,8 @@ export default function OwnerSupplierPurchases() {
   const [bulkLoading, setBulkLoading] = useState(false);
   const [bulkError, setBulkError] = useState("");
   const [bulkSuccess, setBulkSuccess] = useState("");
+  const [previewRows, setPreviewRows] = useState([]);
+  const [rowErrors, setRowErrors] = useState([]);
 
   const [newPurchase, setNewPurchase] = useState({
     supplier_id: "",
@@ -163,68 +164,115 @@ export default function OwnerSupplierPurchases() {
     0,
   );
 
-  const handleBulkUpload = async () => {
-  if (!newPurchase.supplier_id)
-    return setBulkError("Please select a supplier");
+  const handleBulkUpload = () => {
+    if (!newPurchase.supplier_id) {
+      setBulkError("Please select a supplier");
+      return;
+    }
 
-  if (!bulkFile)
-    return setBulkError("Please upload a CSV file");
+    if (!bulkFile) {
+      setBulkError("Please upload a CSV file");
+      return;
+    }
 
-  setBulkError("");
-  setBulkSuccess("");
-  setBulkLoading(true);
+    setBulkError("");
+    setBulkSuccess("");
+    setBulkLoading(true);
+    setPreviewRows([]);
+    setRowErrors([]);
 
-  Papa.parse(bulkFile, {
-    header: true,
-    skipEmptyLines: true,
-    complete: async function (results) {
-      try {
-        const items = results.data.map((row, index) => ({
-          name: (row.name || "").trim(),
-          quantity: Number(row.quantity),
-          unit_price: Number(row.unit_price),
-          sku: row.sku?.trim() || null,
-          category: row.category?.trim() || null,
-          min_stock_level: Number(row.min_stock_level) || 0,
-          selling_price: row.selling_price
-            ? Number(row.selling_price)
-            : null,
-        }));
+    Papa.parse(bulkFile, {
+      header: true,
+      skipEmptyLines: true,
+      complete: function (results) {
+        const validRows = [];
+        const errors = [];
 
-        for (const i of items) {
-          if (!i.name || i.quantity <= 0 || i.unit_price <= 0) {
-            throw new Error(
-              `Invalid data for item: ${i.name || "Unknown"}`
-            );
+        results.data.forEach((row, index) => {
+          const item = {
+            name: (row.name || "").trim(),
+            quantity: Number(row.quantity),
+            unit_price: Number(row.unit_price),
+            sku: row.sku?.trim() || null,
+            category: row.category?.trim() || null,
+            min_stock_level: Number(row.min_stock_level) || 0,
+            selling_price: row.selling_price ? Number(row.selling_price) : null,
+          };
+
+          if (!item.name || item.quantity <= 0 || item.unit_price <= 0) {
+            errors.push({
+              row: index + 2, // +2 because header is row 1
+              message: "Invalid name, quantity, or unit price",
+            });
+          } else {
+            validRows.push(item);
           }
-        }
+        });
 
-        const payload = {
-          supplier_id: Number(newPurchase.supplier_id),
-          payment_method: newPurchase.payment_method,
-          notes: "Bulk upload",
-          items,
-        };
-
-        await createPurchase(payload);
-
-        setBulkSuccess("Bulk purchase uploaded successfully");
-        setBulkFile(null);
-        setShowBulkModal(false);
-        fetchData();
-
-      } catch (err) {
-        setBulkError(err.message || "Upload failed");
-      } finally {
+        setPreviewRows(validRows);
+        setRowErrors(errors);
         setBulkLoading(false);
-      }
-    },
-    error: function () {
-      setBulkError("Failed to parse CSV file");
+      },
+      error: function () {
+        setBulkError("Failed to parse CSV file");
+        setBulkLoading(false);
+      },
+    });
+  };
+
+  const confirmBulkUpload = async () => {
+    if (previewRows.length === 0) {
+      setBulkError("No valid rows to upload");
+      return;
+    }
+
+    try {
+      setBulkLoading(true);
+
+      const payload = {
+        supplier_id: Number(newPurchase.supplier_id),
+        payment_method: newPurchase.payment_method,
+        notes: "Bulk upload",
+        items: previewRows,
+      };
+
+      await createPurchase(payload);
+
+      setBulkSuccess("Bulk purchase uploaded successfully");
+      resetBulkState();
+      setShowBulkModal(false);
+      fetchData();
+    } catch (err) {
+      setBulkError(err.message || "Upload failed");
+    } finally {
       setBulkLoading(false);
-    },
-  });
-};
+    }
+  };
+
+  const downloadTemplate = () => {
+    const csvContent = `name,quantity,unit_price,sku,category,min_stock_level,selling_price
+  Sugar 1kg,10,120,SUG123,Groceries,5,150
+  Rice 2kg,20,200,RICE22,Groceries,10,250`;
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "bulk_purchase_template.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const resetBulkState = () => {
+    setBulkFile(null);
+    setBulkError("");
+    setBulkSuccess("");
+    setPreviewRows([]);
+    setRowErrors([]);
+    setBulkLoading(false);
+  };
 
   // ---------------- Render ----------------
   return (
@@ -271,7 +319,7 @@ export default function OwnerSupplierPurchases() {
                 </select>
 
                 <select
-                className="input"
+                  className="input"
                   value={newPurchase.payment_method}
                   onChange={(e) =>
                     setNewPurchase({
@@ -292,128 +340,139 @@ export default function OwnerSupplierPurchases() {
               </div>
 
               {newPurchase.items.length > 0 && (
-                  <div className="purchase-items-stack">
-                    {newPurchase.items.map((item, index) => (
-                      <div key={index} className="purchase-item-card">
-                        
-                        <div className="form-row">
-                          {/* <label>Name</label> */}
+                <div className="purchase-items-stack">
+                  {newPurchase.items.map((item, index) => (
+                    <div key={index} className="purchase-item-card">
+                      <div className="form-row">
+                        {/* <label>Name</label> */}
+                        <input
+                          placeholder="name of your item"
+                          name="Name"
+                          className="input"
+                          type="text"
+                          value={item.name}
+                          onChange={(e) =>
+                            updateItem(index, "name", e.target.value)
+                          }
+                        />
+                      </div>
+
+                      <div className="form-row two-col">
+                        <div>
+                          {/* <label>Quantity</label> */}
                           <input
-                            placeholder="name of your item"
-                            name="Name"
-                            className="input"
-                            type="text"
-                            value={item.name}
-                            onChange={(e) =>
-                              updateItem(index, "name", e.target.value)
-                            }
-                          />
-                        </div>
-
-                        <div className="form-row two-col">
-                          <div>
-                            {/* <label>Quantity</label> */}
-                            <input
-                              name="Quantity"
-                              placeholder="Quantity"
-                              className="input"
-                              type="number"
-                              value={item.quantity}
-                              onChange={(e) =>
-                                updateItem(index, "quantity", Math.max(1, Number(e.target.value)))
-                              }
-                            />
-                          </div>
-
-                          <div>
-                            {/* <label>Unit Price</label> */}
-                            <input
-                              name="Buying Price"
-                              placeholder="Buying Price per item"
-                              className="input"
-                              type="number"
-                              value={item.unit_price}
-                              onChange={(e) =>
-                                updateItem(index, "unit_price", Math.max(0, parseFloat(e.target.value) || 0))
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div className="form-row">
-                          {/* <label>SKU</label> */}
-                          <input
-                            name="SKU"
-                            placeholder="sku-number(eg) NM1234"
-                            className="input"
-                            type="text"
-                            value={item.sku}
-                            onChange={(e) =>
-                              updateItem(index, "sku", e.target.value)
-                            }
-                          />
-                        </div>
-
-                        <div className="form-row two-col">
-                          <div>
-                            {/* <label>Category</label> */}
-                            <input
-                              name="Category"
-                              placeholder="Item Category"
-                              className="input"
-                              type="text"
-                              value={item.category}
-                              onChange={(e) =>
-                                updateItem(index, "category", e.target.value)
-                              }
-                            />
-                          </div>
-
-                          <div>
-                            {/* <label>Minimum Stock</label> */}
-                            <input
-                              name="Minimum Stock"
-                              placeholder="Minimum Stock Level"
-                              className="input"
-                              type="number"
-                              value={item.min_stock_level}
-                              onChange={(e) =>
-                                updateItem(index, "min_stock_level", Math.max(0, Number(e.target.value) || 0))
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div className="form-row">
-                          {/* <label>Selling Price</label> */}
-                          <input
-                            name="Selling Price"
-                            placeholder="Selling Price per item (optional)"
+                            name="Quantity"
+                            placeholder="Quantity"
                             className="input"
                             type="number"
-                            value={item.selling_price}
+                            value={item.quantity}
                             onChange={(e) =>
-                              updateItem(index, "selling_price", Math.max(0, parseFloat(e.target.value) || 0))
+                              updateItem(
+                                index,
+                                "quantity",
+                                Math.max(1, Number(e.target.value)),
+                              )
                             }
                           />
                         </div>
 
-                        <div className="flex justify-end">
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => removeItem(index)}
-                          >
-                            Remove Item
-                          </button>
+                        <div>
+                          {/* <label>Unit Price</label> */}
+                          <input
+                            name="Buying Price"
+                            placeholder="Buying Price per item"
+                            className="input"
+                            type="number"
+                            value={item.unit_price}
+                            onChange={(e) =>
+                              updateItem(
+                                index,
+                                "unit_price",
+                                Math.max(0, parseFloat(e.target.value) || 0),
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
 
-                          
+                      <div className="form-row">
+                        {/* <label>SKU</label> */}
+                        <input
+                          name="SKU"
+                          placeholder="sku-number(eg) NM1234"
+                          className="input"
+                          type="text"
+                          value={item.sku}
+                          onChange={(e) =>
+                            updateItem(index, "sku", e.target.value)
+                          }
+                        />
+                      </div>
+
+                      <div className="form-row two-col">
+                        <div>
+                          {/* <label>Category</label> */}
+                          <input
+                            name="Category"
+                            placeholder="Item Category"
+                            className="input"
+                            type="text"
+                            value={item.category}
+                            onChange={(e) =>
+                              updateItem(index, "category", e.target.value)
+                            }
+                          />
                         </div>
 
+                        <div>
+                          {/* <label>Minimum Stock</label> */}
+                          <input
+                            name="Minimum Stock"
+                            placeholder="Minimum Stock Level"
+                            className="input"
+                            type="number"
+                            value={item.min_stock_level}
+                            onChange={(e) =>
+                              updateItem(
+                                index,
+                                "min_stock_level",
+                                Math.max(0, Number(e.target.value) || 0),
+                              )
+                            }
+                          />
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                )}
 
+                      <div className="form-row">
+                        {/* <label>Selling Price</label> */}
+                        <input
+                          name="Selling Price"
+                          placeholder="Selling Price per item (optional)"
+                          className="input"
+                          type="number"
+                          value={item.selling_price}
+                          onChange={(e) =>
+                            updateItem(
+                              index,
+                              "selling_price",
+                              Math.max(0, parseFloat(e.target.value) || 0),
+                            )
+                          }
+                        />
+                      </div>
+
+                      <div className="flex justify-end">
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => removeItem(index)}
+                        >
+                          Remove Item
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className="mt-sm">
                 <strong>Total: {purchaseTotal.toFixed(2)}</strong>
@@ -438,63 +497,93 @@ export default function OwnerSupplierPurchases() {
       )}
 
       {showBulkModal && (
-          <Modal title="Bulk Upload Purchase" onClose={() => setShowBulkModal(false)}>
-            <div className="flex flex-col gap-md">
+        <Modal
+          title="Bulk Upload Purchase"
+          onClose={() => {
+            resetBulkState();
+            setShowBulkModal(false);
+          }}
+        >
+          <div className="flex flex-col gap-md">
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={downloadTemplate}
+            >
+              Download CSV Template
+            </button>
 
-              <select
-                className="input"
-                value={newPurchase.supplier_id}
-                onChange={(e) =>
-                  setNewPurchase({
-                    ...newPurchase,
-                    supplier_id: e.target.value,
-                  })
-                }
-              >
-                <option value="">Select Supplier</option>
-                {suppliers.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+            <select
+              className="input"
+              value={newPurchase.supplier_id}
+              onChange={(e) =>
+                setNewPurchase({
+                  ...newPurchase,
+                  supplier_id: e.target.value,
+                })
+              }
+            >
+              <option value="">Select Supplier</option>
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
 
-              <select
-                className="input"
-                  value={newPurchase.payment_method}
-                  onChange={(e) =>
-                    setNewPurchase({
-                      ...newPurchase,
-                      payment_method: e.target.value,
-                    })
-                  }
-                >
-                  <option value="credit">Credit</option>
-                  <option value="cash">Cash</option>
-                  <option value="mpesa">Mpesa</option>
-                  <option value="bank">Bank</option>
-                </select>
+            <select
+              className="input"
+              value={newPurchase.payment_method}
+              onChange={(e) =>
+                setNewPurchase({
+                  ...newPurchase,
+                  payment_method: e.target.value,
+                })
+              }
+            >
+              <option value="credit">Credit</option>
+              <option value="cash">Cash</option>
+              <option value="mpesa">Mpesa</option>
+              <option value="bank">Bank</option>
+            </select>
 
-              <input
-                type="file"
-                accept=".csv"
-                onChange={(e) => setBulkFile(e.target.files[0])}
-              />
+            {/* <input
+              type="file"
+              accept=".csv"
+              key={bulkFile ? bulkFile.name : "empty"}
+              onChange={(e) => setBulkFile(e.target.files[0])}
+            /> */}
 
-              {bulkError && <div className="text-danger">{bulkError}</div>}
-              {bulkSuccess && <div className="text-success">{bulkSuccess}</div>}
+            <input
+              type="file"
+              accept=".csv"
+              onChange={(e) => setBulkFile(e.target.files[0])}
+            />
 
+            {bulkError && <div className="text-danger">{bulkError}</div>}
+            {bulkSuccess && <div className="text-success">{bulkSuccess}</div>}
+
+            <button
+              className="btn btn-secondary"
+              onClick={handleBulkUpload}
+              disabled={bulkLoading}
+            >
+              {bulkLoading ? "Processing..." : "Parse File"}
+            </button>
+
+            {previewRows.length > 0 && (
               <button
                 className="btn btn-primary"
+                onClick={confirmBulkUpload}
                 disabled={bulkLoading}
-                onClick={handleBulkUpload}
               >
-                {bulkLoading ? "Uploading..." : "Upload"}
+                {bulkLoading
+                  ? "Uploading..."
+                  : `Confirm Upload (${previewRows.length} items)`}
               </button>
-
-            </div>
-          </Modal>
-        )}
+            )}
+          </div>
+        </Modal>
+      )}
 
       {/* ---------- Purchases List ---------- */}
       <h3 className="mt-md">All Purchases</h3>
@@ -588,72 +677,72 @@ export default function OwnerSupplierPurchases() {
       </div>
 
       {/* Mobile cards with expandable items */}
-<div className="stock-cards hidden-desktop">
-  {purchases.map((p) => {
-    const supplier =
-      suppliers.find((s) => s.id === p.purchase.supplier_id)?.name || "N/A";
+      <div className="stock-cards hidden-desktop">
+        {purchases.map((p) => {
+          const supplier =
+            suppliers.find((s) => s.id === p.purchase.supplier_id)?.name ||
+            "N/A";
 
-    return (
-      <div key={p.purchase.id} className="card flex flex-col gap-sm">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <strong className="text-md">{supplier}</strong>
+          return (
+            <div key={p.purchase.id} className="card flex flex-col gap-sm">
+              {/* Header */}
+              <div className="flex justify-between items-center">
+                <strong className="text-md">{supplier}</strong>
 
-          <button
-            className="icon-btn"
-            onClick={() => toggleExpand(p.purchase.id)}
-          >
-            {expanded[p.purchase.id] ? (
-              <ChevronUp size={18} />
-            ) : (
-              <ChevronDown size={18} />
-            )}
-          </button>
-        </div>
+                <button
+                  className="icon-btn"
+                  onClick={() => toggleExpand(p.purchase.id)}
+                >
+                  {expanded[p.purchase.id] ? (
+                    <ChevronUp size={18} />
+                  ) : (
+                    <ChevronDown size={18} />
+                  )}
+                </button>
+              </div>
 
-        {/* Summary */}
-        <div className="text-sm">
-          <span className="text-muted">Total:</span>{" "}
-          <strong>{p.purchase.total_amount.toFixed(2)}</strong>
-        </div>
+              {/* Summary */}
+              <div className="text-sm">
+                <span className="text-muted">Total:</span>{" "}
+                <strong>{p.purchase.total_amount.toFixed(2)}</strong>
+              </div>
 
-        <div className="text-sm">
-          <span className="text-muted">Payment:</span>{" "}
-          {p.purchase.payment_method}
-        </div>
+              <div className="text-sm">
+                <span className="text-muted">Payment:</span>{" "}
+                {p.purchase.payment_method}
+              </div>
 
-        <div className="text-sm">
-          <span className="text-muted">Items:</span> {p.items.length}
-        </div>
+              <div className="text-sm">
+                <span className="text-muted">Items:</span> {p.items.length}
+              </div>
 
-        <div className="text-sm text-muted">
-          {new Date(p.purchase.created_at).toLocaleString()}
-        </div>
+              <div className="text-sm text-muted">
+                {new Date(p.purchase.created_at).toLocaleString()}
+              </div>
 
-        {/* Expandable items */}
-        {expanded[p.purchase.id] && (
-          <div className="expanded-card mt-sm">
-            <ul className="expanded-list">
-              {p.items.map((i, idx) => (
-                <li key={idx} className="expanded-list-item">
-                  <span className="item-name">{i.name}</span>
-                  <span className="item-qty ">{i.quantity}</span>
-                  <span className="item-price mr-sm">
-                    {i.unit_price.toFixed(2)}
-                  </span>
-                  <span className="item-total">
-                    {(i.quantity * i.unit_price).toFixed(2)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+              {/* Expandable items */}
+              {expanded[p.purchase.id] && (
+                <div className="expanded-card mt-sm">
+                  <ul className="expanded-list">
+                    {p.items.map((i, idx) => (
+                      <li key={idx} className="expanded-list-item">
+                        <span className="item-name">{i.name}</span>
+                        <span className="item-qty ">{i.quantity}</span>
+                        <span className="item-price mr-sm">
+                          {i.unit_price.toFixed(2)}
+                        </span>
+                        <span className="item-total">
+                          {(i.quantity * i.unit_price).toFixed(2)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
-    );
-  })}
-</div>
-
     </section>
   );
 }

@@ -43,7 +43,23 @@ def create_purchase():
         if not supplier_id:
             return jsonify({"error": "supplier_id is required"}), 400
         if not items:
-            return jsonify({"error": "At least one purchase item is required"}), 400        
+            return jsonify({"error": "At least one purchase item is required"}), 400  
+
+        # ---------------- Prevent duplicate SKUs inside same request ----------------
+        skus_in_request = [
+            (item.get("sku") or "").strip()
+            for item in items
+            if (item.get("sku") or "").strip()
+        ]
+
+        duplicate_skus = {sku for sku in skus_in_request if skus_in_request.count(sku) > 1}
+
+        if duplicate_skus:
+            return jsonify({
+                "error": "Duplicate SKUs found in upload",
+                "duplicates": list(duplicate_skus)
+            }), 400
+      
 
         # ---------------- Validate and normalize items ----------------
         for idx, item in enumerate(items):
@@ -117,11 +133,29 @@ def create_purchase():
             if not stock:
                 stock = Stock.query.filter_by(organization_id=org_id, name=i["name"]).first()
 
+            # if stock:
+            #     stock.quantity += i["quantity"]
+            #     stock.unit_price = i["unit_price"]
+            #     if i["category"]:
+            #         stock.category = i["category"]  # update category if provided
+
             if stock:
+                # Prevent SKU collision with different name
+                if i["sku"] and stock.name.strip().lower() != i["name"].strip().lower():
+                    return jsonify({
+                        "error": "SKU already exists with a different product name",
+                        "sku": i["sku"],
+                        "existing_product": stock.name,
+                        "new_product": i["name"]
+                    }), 400
+
+                # Safe to update stock
                 stock.quantity += i["quantity"]
                 stock.unit_price = i["unit_price"]
+
                 if i["category"]:
-                    stock.category = i["category"]  # update category if provided
+                    stock.category = i["category"]
+
             else:
                 stock = Stock(
                     organization_id=org_id,

@@ -48,14 +48,30 @@ export const listPurchases = async () => {
   return res.json();
 };
 
+// export const createPurchase = async (data) => {
+//   const res = await apiFetch(PURCHASES_API, {
+//     method: "POST",
+//     body: JSON.stringify(data),
+//   });
+//   if (!res.ok) throw new Error("Failed to create purchase");
+//   return res.json();
+// };
+
 export const createPurchase = async (data) => {
   const res = await apiFetch(PURCHASES_API, {
     method: "POST",
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to create purchase");
-  return res.json();
+
+  const responseData = await res.json();
+
+  if (!res.ok) {
+    throw new Error(responseData.error || "Failed to create purchase");
+  }
+
+  return responseData;
 };
+
 
 
 // ----------------- Payments -----------------
