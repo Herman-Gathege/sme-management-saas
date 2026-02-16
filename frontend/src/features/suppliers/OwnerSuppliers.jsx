@@ -5,12 +5,14 @@ import {
   createSupplier,
   deactivateSupplier,
 } from "../../api/suppliers";
+
 // import './SupplierModule.css';
 
 export default function OwnerSuppliers() {
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  
 
   const [newSupplier, setNewSupplier] = useState({
     name: "",
@@ -55,13 +57,17 @@ export default function OwnerSuppliers() {
     }
   };
 
+  
+
+
   return (
     <section className="card">
       <div className="flex-between">
         <h2 className="mb-md">Suppliers</h2>
         <button className="btn btn-primary mb-md" onClick={() => setShowModal(true)}>
           + Add Supplier
-        </button>
+        </button>       
+
       </div>
 
       {/* <form className="form-stack">
@@ -187,6 +193,9 @@ export default function OwnerSuppliers() {
           </div>
         </div>
       )}
+
+      
+
 
       {loading ? (
         <p>Loading...</p>

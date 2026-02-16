@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { listPayments, createPayment } from "../../api/suppliers";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { FiInfo } from "react-icons/fi";
 
 // import "./SupplierModule.css";
 
@@ -156,6 +157,13 @@ export default function OwnerCreditors() {
   return (
     <section className="card flex flex-col gap-lg">
       <h2>Suppliers you Owe Money</h2>
+
+      <p className="hint flex items-center gap-sm">
+              <FiInfo />
+              Any amount with a negative (-) before the number indicates an
+              overpayment during debt settlement.
+              <br /> This amount will be used to settle future debts.
+      </p>
 
       {successMessage && (
         <div className="success-banner">

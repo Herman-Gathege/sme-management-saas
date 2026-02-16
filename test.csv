@@ -1,0 +1,4 @@
+name,quantity,unit_price,sku,category,min_stock_level,selling_price
+Sugar 1kg,10,120,SUG123,Groceries,5,150
+Rice 2kg,20,200,RICE22,Groceries,10,250
+Soap,50,50,,Cleaning,5,80

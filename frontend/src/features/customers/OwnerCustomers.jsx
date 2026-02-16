@@ -183,7 +183,7 @@ export default function OwnerCustomers() {
                   balance === 0 && payments.length
                     ? "PAID"
                     : isOwed
-                      ? "OWED"
+                      ? "OWES"
                       : "OK";
 
                 const [name, company] = c.full_name?.includes("(")
@@ -214,7 +214,7 @@ export default function OwnerCustomers() {
                       <td>
                         <span
                           className={`status-pill ${
-                            status === "OWED"
+                            status === "OWES"
                               ? "status-owed"
                               : status === "PAID"
                                 ? "status-paid"
@@ -347,7 +347,7 @@ export default function OwnerCustomers() {
             balance === 0 && paymentsData[c.id]?.length
               ? "PAID"
               : isOwed
-                ? "OWED"
+                ? "OWES"
                 : "OK";
 
           return (
@@ -356,7 +356,7 @@ export default function OwnerCustomers() {
                 <span className="text-bold">{c.full_name}</span>
                 <span
                   className={`status-pill ${
-                    status === "OWED"
+                    status === "OWES"
                       ? "status-owed"
                       : status === "PAID"
                         ? "status-paid"

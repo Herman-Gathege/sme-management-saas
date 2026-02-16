@@ -7,12 +7,20 @@ import {
   createPurchase,
 } from "../../api/suppliers";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import Modal from "../../components/Modal";
+import Papa from "papaparse";
+
 
 export default function OwnerSupplierPurchases() {
   const [suppliers, setSuppliers] = useState([]);
   const [purchases, setPurchases] = useState([]);
   const [expanded, setExpanded] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkFile, setBulkFile] = useState(null);
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [bulkError, setBulkError] = useState("");
+  const [bulkSuccess, setBulkSuccess] = useState("");
 
   const [newPurchase, setNewPurchase] = useState({
     supplier_id: "",
@@ -155,6 +163,69 @@ export default function OwnerSupplierPurchases() {
     0,
   );
 
+  const handleBulkUpload = async () => {
+  if (!newPurchase.supplier_id)
+    return setBulkError("Please select a supplier");
+
+  if (!bulkFile)
+    return setBulkError("Please upload a CSV file");
+
+  setBulkError("");
+  setBulkSuccess("");
+  setBulkLoading(true);
+
+  Papa.parse(bulkFile, {
+    header: true,
+    skipEmptyLines: true,
+    complete: async function (results) {
+      try {
+        const items = results.data.map((row, index) => ({
+          name: (row.name || "").trim(),
+          quantity: Number(row.quantity),
+          unit_price: Number(row.unit_price),
+          sku: row.sku?.trim() || null,
+          category: row.category?.trim() || null,
+          min_stock_level: Number(row.min_stock_level) || 0,
+          selling_price: row.selling_price
+            ? Number(row.selling_price)
+            : null,
+        }));
+
+        for (const i of items) {
+          if (!i.name || i.quantity <= 0 || i.unit_price <= 0) {
+            throw new Error(
+              `Invalid data for item: ${i.name || "Unknown"}`
+            );
+          }
+        }
+
+        const payload = {
+          supplier_id: Number(newPurchase.supplier_id),
+          payment_method: newPurchase.payment_method,
+          notes: "Bulk upload",
+          items,
+        };
+
+        await createPurchase(payload);
+
+        setBulkSuccess("Bulk purchase uploaded successfully");
+        setBulkFile(null);
+        setShowBulkModal(false);
+        fetchData();
+
+      } catch (err) {
+        setBulkError(err.message || "Upload failed");
+      } finally {
+        setBulkLoading(false);
+      }
+    },
+    error: function () {
+      setBulkError("Failed to parse CSV file");
+      setBulkLoading(false);
+    },
+  });
+};
+
   // ---------------- Render ----------------
   return (
     <section className="card flex flex-col gap-lg">
@@ -163,6 +234,13 @@ export default function OwnerSupplierPurchases() {
         <h2>Purchases</h2>
         <button className="btn btn-primary" onClick={() => setShowModal(true)}>
           + Add New Purchase
+        </button>
+
+        <button
+          className="btn btn-secondary"
+          onClick={() => setShowBulkModal(true)}
+        >
+          Bulk Upload
         </button>
       </div>
 
@@ -358,6 +436,65 @@ export default function OwnerSupplierPurchases() {
           </div>
         </div>
       )}
+
+      {showBulkModal && (
+          <Modal title="Bulk Upload Purchase" onClose={() => setShowBulkModal(false)}>
+            <div className="flex flex-col gap-md">
+
+              <select
+                className="input"
+                value={newPurchase.supplier_id}
+                onChange={(e) =>
+                  setNewPurchase({
+                    ...newPurchase,
+                    supplier_id: e.target.value,
+                  })
+                }
+              >
+                <option value="">Select Supplier</option>
+                {suppliers.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                className="input"
+                  value={newPurchase.payment_method}
+                  onChange={(e) =>
+                    setNewPurchase({
+                      ...newPurchase,
+                      payment_method: e.target.value,
+                    })
+                  }
+                >
+                  <option value="credit">Credit</option>
+                  <option value="cash">Cash</option>
+                  <option value="mpesa">Mpesa</option>
+                  <option value="bank">Bank</option>
+                </select>
+
+              <input
+                type="file"
+                accept=".csv"
+                onChange={(e) => setBulkFile(e.target.files[0])}
+              />
+
+              {bulkError && <div className="text-danger">{bulkError}</div>}
+              {bulkSuccess && <div className="text-success">{bulkSuccess}</div>}
+
+              <button
+                className="btn btn-primary"
+                disabled={bulkLoading}
+                onClick={handleBulkUpload}
+              >
+                {bulkLoading ? "Uploading..." : "Upload"}
+              </button>
+
+            </div>
+          </Modal>
+        )}
 
       {/* ---------- Purchases List ---------- */}
       <h3 className="mt-md">All Purchases</h3>

@@ -52,7 +52,7 @@ def get_debtors_summary(org_id):
             "id": customer.id,
             "full_name": f"{customer.name} ({customer.business_name})" if customer.business_name else customer.name,
             "balance": balance,
-            "status": "OWED" if balance > 0 else "PAID"  # mark status
+            "status": "OWES" if balance > 0 else "PAID"  # mark status
         })
 
     return debtors
@@ -89,7 +89,7 @@ def get_creditors_summary(org_id):
             "supplier_id": supplier.id,
             "supplier_name": supplier.name,
             "balance": balance,
-            "status": "OWED" if balance > 0 else "PAID"
+            "status": "OWES" if balance > 0 else "PAID"
         })
 
     return creditors
