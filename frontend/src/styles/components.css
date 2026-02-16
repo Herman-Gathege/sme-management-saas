@@ -203,17 +203,20 @@
   top: 52px;
   right: 0;
 
-  min-width: 160px;
+  display: flex;              /* ADD THIS */
+  flex-direction: column;     /* ADD THIS */
+
+  min-width: 260px;
 
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12);
   overflow: hidden;
-
   z-index: 200;
 }
 
-.dropdown-item {
+
+/* .dropdown-item {
   padding: 12px 16px;
   font-size: 14px;
 
@@ -228,7 +231,113 @@
 
 .dropdown-item:hover {
   background: #f3f4f6;
+} */
+
+/* ================================
+   DROPDOWN LARGE (PRO VERSION)
+================================ */
+
+.dropdown-lg {
+  width: 260px;
+  padding: 8px 0;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+  animation: dropdownFade 0.15s ease;
 }
+
+/* animation */
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================================
+   HEADER
+================================ */
+
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.avatar-sm {
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
+}
+
+.dropdown-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.dropdown-role {
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: capitalize;
+}
+
+/* ================================
+   DIVIDER
+================================ */
+
+.dropdown-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 6px 0;
+}
+
+/* ================================
+   ITEMS
+================================ */
+
+.dropdown-item {
+  padding: 10px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+  margin: 2px 6px;
+  transition: all 0.12s ease;
+}
+
+.dropdown-item:hover {
+  background: #f3f4f6;
+  transform: translateX(2px);
+}
+
+/* ================================
+   LOGOUT
+================================ */
+
+.dropdown-danger {
+  color: var(--danger);
+}
+
+.dropdown-danger:hover {
+  background: #fee2e2;
+}
+
+.chevron {
+  font-size: 18px;
+  color: var(--color-muted);
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
 
 /* =============================
    MODAL

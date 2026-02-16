@@ -17,7 +17,10 @@ export default function Sidebar() {
   // ---------------------------
   // Dropdown state
   // ---------------------------
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    const saved = localStorage.getItem("sidebarCollapsed");
+    return saved === "true"; // default false if null
+  });
   const [stockOpen, setStockOpen] = useState(false);
   const [customerOpen, setCustomerOpen] = useState(false);
   const [supplierOpen, setSupplierOpen] = useState(false);
@@ -79,6 +82,11 @@ export default function Sidebar() {
       setSupplierOpen(false);
     }
   }, [collapsed]);
+
+  useEffect(() => {
+  localStorage.setItem("sidebarCollapsed", collapsed);
+  }, [collapsed]);
+
 
   if (!user) return null;
 
@@ -144,7 +152,7 @@ export default function Sidebar() {
             {supplierOpen && !collapsed && (
               <div className="sidebar-submenu">
                 <NavLink to="/owner/suppliers" className={linkClass}>
-                  Suppliers
+                  Supplier List
                 </NavLink>
                 <NavLink to="/owner/supplier-purchases" className={linkClass}>
                   Supplier Purchases
@@ -210,7 +218,7 @@ export default function Sidebar() {
                   Add Customer
                 </NavLink>
                 <NavLink to="/owner/all/customers" className={linkClass}>
-                  All Customers
+                  Customers List
                 </NavLink>
               </div>
             )}
