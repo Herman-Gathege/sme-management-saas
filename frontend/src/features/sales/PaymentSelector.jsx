@@ -12,7 +12,7 @@ export default function PaymentSelector({
         <button
           key={m}
           type="button"
-          className={value === m ? "active" : ""}
+          className={value === m ? "active " : ""}
           onClick={() => {
             onChange(m);
             clearError?.();
