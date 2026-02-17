@@ -36,6 +36,8 @@ export default function CreateSale() {
 
   // const API_BASE = import.meta.env.VITE_API_URL;
   const PAYMENT_METHODS = ["Cash", "M-Pesa", "Credit"];
+  const VAT_RATE = 0.16; // 16% Kenya VAT
+
   const isConfirmDisabled =
     loading ||
     selectedItems.length === 0 ||
@@ -109,19 +111,7 @@ export default function CreateSale() {
           i.stock_id === stock.id ? { ...i, quantity: i.quantity + 1 } : i,
         );
       }
-
-      // return [
-      //   ...prev,
-      //   {
-      //     stock_id: stock.id,
-      //     sku: stock.sku,
-      //     name: stock.name,
-      //     category: stock.category,
-      //     quantity: 1,
-      //     selling_price: price, // 🔒 always a number
-      //   },
-      // ];
-
+     
       return [
         ...prev,
         {
@@ -212,9 +202,17 @@ export default function CreateSale() {
       }
 
       // 🧾 Save receipt snapshot BEFORE clearing cart
-      setReceiptData({
-        saleId: data.sale_id,
-        items: selectedItems.map((item) => ({
+      const receiptNumber = `RCPT-${new Date()
+        .toISOString()
+        .slice(0, 10)
+        .replace(/-/g, "")}-${data.sale_id
+        .toString()
+        .padStart(5, "0")}`;
+
+        setReceiptData({
+          receiptNumber,
+          saleId: data.sale_id,
+          items: selectedItems.map((item) => ({
           name: item.name,
           quantity: item.quantity,
           original_price: item.original_price,
@@ -326,14 +324,7 @@ export default function CreateSale() {
           <strong>KES {total.toFixed(2)}</strong>
         </div>
 
-        {/* <button
-      type="button"
-      onClick={handleSubmit}
-      disabled={isConfirmDisabled}
-      className="btn primary-btn"
-    >
-      {loading ? "Processing…" : "Confirm Sale"}
-    </button> */}
+        
 
         <button
           type="button"
@@ -639,18 +630,24 @@ export default function CreateSale() {
               {new Date(receiptData.createdAt).toLocaleString()}
             </p>
             <p style={{ textAlign: "center", margin: 0 }}>
-              Sale ID: #{receiptData.saleId}
+              Receipt No: {receiptData.receiptNumber}
             </p>
 
+
             {(() => {
+              const grossTotal = receiptData.total; // already includes VAT
+
+              const vatAmount = grossTotal * (VAT_RATE / (1 + VAT_RATE));
+              const netAmount = grossTotal - vatAmount;
+
               const subtotal = receiptData.items.reduce(
                 (sum, i) => sum + i.original_price * i.quantity,
-                0,
+                0
               );
 
               const totalDiscount = receiptData.items.reduce(
                 (sum, i) => sum + i.discount_amount * i.quantity,
-                0,
+                0
               );
 
               return (
@@ -662,8 +659,12 @@ export default function CreateSale() {
                     <p>Total Discount: -KES {totalDiscount.toFixed(2)}</p>
                   )}
 
+                  <p>Net (Excl. VAT): KES {netAmount.toFixed(2)}</p>
+
+                  <p>VAT (16%): KES {vatAmount.toFixed(2)}</p>
+
                   <p style={{ fontWeight: "bold", fontSize: "14px" }}>
-                    TOTAL: KES {receiptData.total.toFixed(2)}
+                    TOTAL (Incl. VAT): KES {grossTotal.toFixed(2)}
                   </p>
                 </>
               );
