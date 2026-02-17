@@ -25,6 +25,9 @@ export default function CreateSale() {
   const [lowStockAlert, setLowStockAlert] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [discountItemIndex, setDiscountItemIndex] = useState(null);
+  const [discountPriceInput, setDiscountPriceInput] = useState("");
+
 
   // const API_BASE = import.meta.env.VITE_API_URL;
   const PAYMENT_METHODS = ["Cash", "M-Pesa", "Credit"];
@@ -111,6 +114,18 @@ export default function CreateSale() {
         );
       }
 
+      // return [
+      //   ...prev,
+      //   {
+      //     stock_id: stock.id,
+      //     sku: stock.sku,
+      //     name: stock.name,
+      //     category: stock.category,
+      //     quantity: 1,
+      //     selling_price: price, // 🔒 always a number
+      //   },
+      // ];
+
       return [
         ...prev,
         {
@@ -119,7 +134,9 @@ export default function CreateSale() {
           name: stock.name,
           category: stock.category,
           quantity: 1,
-          selling_price: price, // 🔒 always a number
+          original_price: price,
+          selling_price: price,
+          discount_amount: 0,
         },
       ];
     });
@@ -328,6 +345,20 @@ export default function CreateSale() {
                   KES {(i.selling_price * i.quantity).toFixed(2)}
                 </strong>
               </td>
+
+              <td>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => {
+                    setDiscountItemIndex(idx);
+                    setDiscountPriceInput(i.selling_price);
+                  }}
+                >
+                  Discount
+                </button>
+              </td>
+
               <td>
                 <button
                   type="button"
@@ -366,6 +397,76 @@ export default function CreateSale() {
       </div>
     </div>
   )}
+
+  {discountItemIndex !== null && (
+      <div className="modal-backdrop">
+        <div className="modal">
+          <h3 className="text-lg text-bold mb-md">Apply Discount</h3>
+
+          <p className=" text-md mb-md">
+            {selectedItems[discountItemIndex].name}
+          </p>
+
+          <p className=" text-md mb-md">
+            Original Price: KES{" "}
+            {selectedItems[discountItemIndex].original_price.toFixed(2)}
+          </p>
+
+          <input
+            className="input mb-ms"
+            type="number"
+            value={discountPriceInput}
+            onChange={(e) => setDiscountPriceInput(e.target.value)}
+            placeholder="Enter new price"
+          />
+
+          <div className="flex gap-sm mt-sm">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setDiscountItemIndex(null)}
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                const newPrice = Number(discountPriceInput);
+                const item = selectedItems[discountItemIndex];
+
+                if (
+                  newPrice <= 0 ||
+                  newPrice > item.original_price
+                ) {
+                  alert("Invalid discount price");
+                  return;
+                }
+
+                setSelectedItems((prev) =>
+                  prev.map((p, i) =>
+                    i === discountItemIndex
+                      ? {
+                          ...p,
+                          selling_price: newPrice,
+                          discount_amount:
+                            p.original_price - newPrice,
+                        }
+                      : p
+                  )
+                );
+
+                setDiscountItemIndex(null);
+              }}
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
 </section>
 
   );
