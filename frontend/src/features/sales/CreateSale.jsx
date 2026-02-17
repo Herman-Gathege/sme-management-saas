@@ -8,7 +8,7 @@ import CustomerSelector from "./CustomerSelector";
 import PaymentSelector from "./PaymentSelector";
 
 export default function CreateSale() {
-  const { user } = useAuth();
+  const { user, organization } = useAuth();
 
   const [stockItems, setStockItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
@@ -26,6 +26,13 @@ export default function CreateSale() {
   const [showCashModal, setShowCashModal] = useState(false);
   const [cashReceived, setCashReceived] = useState("");
   const [cashError, setCashError] = useState("");
+  const [receiptData, setReceiptData] = useState(null);
+
+  useEffect(() => {
+    if (receiptData) {
+      printReceipt();
+    }
+  }, [receiptData]);
 
   // const API_BASE = import.meta.env.VITE_API_URL;
   const PAYMENT_METHODS = ["Cash", "M-Pesa", "Credit"];
@@ -156,7 +163,6 @@ export default function CreateSale() {
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
 
-
     setPaymentError("");
     setMessage("");
 
@@ -193,11 +199,48 @@ export default function CreateSale() {
         }),
       };
 
+      // const data = await createSale(payload);
+
+      // if (Array.isArray(data.low_stock_items)) {
+      //   setLowStockAlert(data.low_stock_items);
+      // }
+
       const data = await createSale(payload);
 
       if (Array.isArray(data.low_stock_items)) {
         setLowStockAlert(data.low_stock_items);
       }
+
+      // 🧾 Save receipt snapshot BEFORE clearing cart
+      setReceiptData({
+        saleId: data.sale_id,
+        items: selectedItems.map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          original_price: item.original_price,
+          selling_price: item.selling_price,
+          discount_amount: item.discount_amount || 0,
+          line_total: item.quantity * item.selling_price,
+        })),
+        total: Number(data.total_amount),
+        paymentMethod,
+        staff: user?.full_name || "Staff",
+        customer:
+          paymentMethod === "Credit"
+            ? customers.find((c) => c.id == selectedCustomer)?.name ||
+              "Customer"
+            : null,
+        cashReceived: paymentMethod === "Cash" ? Number(cashReceived) : null,
+        balance:
+          paymentMethod === "Cash"
+            ? Number(cashReceived) - Number(data.total_amount)
+            : null,
+        createdAt: data.created_at, // 🔥 use backend timestamp
+      });
+
+      // setTimeout(() => {
+      //   printReceipt();
+      // }, 300);
 
       setSelectedItems([]);
       setSelectedCustomer("");
@@ -211,6 +254,44 @@ export default function CreateSale() {
 
   const totalAmount = total; // already calculated
   const balance = Number(cashReceived || 0) - Number(totalAmount || 0);
+
+  const printReceipt = () => {
+    // const printContents = document.getElementById("receipt-print").innerHTML;
+    const receiptElement = document.getElementById("receipt-print");
+    if (!receiptElement) return;
+
+    const printContents = receiptElement.innerHTML;
+
+    const win = window.open("", "", "width=400,height=600");
+
+    win.document.write(`
+      <html>
+        <head>
+          <title>Receipt</title>
+          <style>
+            body {
+              font-family: monospace;
+              width: 80mm;
+              margin: 0;
+              padding: 10px;
+            }
+            hr {
+              border: none;
+              border-top: 1px dashed #000;
+            }
+          </style>
+        </head>
+        <body>
+          ${printContents}
+        </body>
+      </html>
+    `);
+
+    win.document.close();
+    win.focus();
+    win.print();
+    win.close();
+  };
 
   /* =======================
      UI
@@ -538,6 +619,115 @@ export default function CreateSale() {
                 Confirm Payment
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {receiptData && (
+        <div id="receipt-print" style={{ display: "none" }}>
+          <div className="receipt-inner">
+            <h3 style={{ textAlign: "center", margin: 0 }}>
+              {organization?.name || "Azani SmartDuka"}
+            </h3>
+            <p style={{ textAlign: "center", margin: 0 }}>
+              {organization?.phone || ""}
+            </p>
+            <p style={{ textAlign: "center", margin: 0 }}>
+              {organization?.address || ""}
+            </p>
+            <p style={{ textAlign: "center", margin: 0 }}>
+              {new Date(receiptData.createdAt).toLocaleString()}
+            </p>
+            <p style={{ textAlign: "center", margin: 0 }}>
+              Sale ID: #{receiptData.saleId}
+            </p>
+
+            {(() => {
+              const subtotal = receiptData.items.reduce(
+                (sum, i) => sum + i.original_price * i.quantity,
+                0,
+              );
+
+              const totalDiscount = receiptData.items.reduce(
+                (sum, i) => sum + i.discount_amount * i.quantity,
+                0,
+              );
+
+              return (
+                <>
+                  <hr />
+                  <p>Subtotal: KES {subtotal.toFixed(2)}</p>
+
+                  {totalDiscount > 0 && (
+                    <p>Total Discount: -KES {totalDiscount.toFixed(2)}</p>
+                  )}
+
+                  <p style={{ fontWeight: "bold", fontSize: "14px" }}>
+                    TOTAL: KES {receiptData.total.toFixed(2)}
+                  </p>
+                </>
+              );
+            })()}
+
+            <hr />
+
+            {receiptData.items.map((item, idx) => (
+              <div key={idx} style={{ fontSize: "12px", marginBottom: "4px" }}>
+                <div>{item.name}</div>
+                <div
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <span>
+                    {item.quantity} × {item.selling_price.toFixed(2)}
+                  </span>
+                  <span>{item.line_total.toFixed(2)}</span>
+                </div>
+
+                {item.discount_amount > 0 && (
+                  <div style={{ fontSize: "11px" }}>
+                    Discount: -{item.discount_amount.toFixed(2)} per unit
+                  </div>
+                )}
+              </div>
+            ))}
+
+            <hr />
+
+            {/* <div style={{ fontWeight: "bold", fontSize: "14px" }}>
+              Total: KES {receiptData.total.toFixed(2)}
+            </div> */}
+
+            <hr />
+            <p>
+              <strong>Payment Details</strong>
+            </p>
+            <p>Method: {receiptData.paymentMethod}</p>
+
+            {receiptData.paymentMethod === "Cash" && (
+              <>
+                <p>Cash Received: KES {receiptData.cashReceived.toFixed(2)}</p>
+                <p>Change: KES {receiptData.balance.toFixed(2)}</p>
+              </>
+            )}
+
+            {receiptData.paymentMethod === "Credit" && (
+              <p>Status: CREDIT SALE</p>
+            )}
+
+            {receiptData.paymentMethod === "M-Pesa" && (
+              <p>Status: MPESA PAID</p>
+            )}
+
+            {receiptData.customer && <p>Customer: {receiptData.customer}</p>}
+
+            <p>Served By: {receiptData.staff}</p>
+            <p>Sale ID: #{receiptData.saleId}</p>
+
+            <hr />
+            <p style={{ textAlign: "center" }}>Thank you for shopping!</p>
+            <p style={{ textAlign: "center", fontSize: "11px" }}>
+              Powered by Azani smartDuka
+            </p>
           </div>
         </div>
       )}
