@@ -22,6 +22,8 @@ export default function OwnerSupplierPurchases() {
   const [bulkSuccess, setBulkSuccess] = useState("");
   const [previewRows, setPreviewRows] = useState([]);
   const [rowErrors, setRowErrors] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
 
   const [newPurchase, setNewPurchase] = useState({
     supplier_id: "",
@@ -40,14 +42,25 @@ export default function OwnerSupplierPurchases() {
     ],
   });
 
+  const filteredPurchases = purchases.filter((p) => {
+    const supplier = suppliers.find(
+      (s) => s.id === p.purchase.supplier_id
+    );
+
+    return supplier?.name
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase());
+  });
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10); // change per page count here
 
   // calculate total pages
-  const totalPages = Math.ceil(purchases.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
+
 
   // get current page data
-  const paginatedPurchases = purchases.slice(
+  const paginatedPurchases = filteredPurchases.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
@@ -602,6 +615,27 @@ export default function OwnerSupplierPurchases() {
 
       {/* ---------- Purchases List ---------- */}
       <h3 className="mt-md">All Purchases</h3>
+      <div className="flex flex-mobile-col gap-sm mb-md">
+        <input
+          className="input"
+          placeholder="Search by supplier name..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // reset page when searching
+          }}
+        />
+        <button
+          className="btn btn-secondary btn-sm ml-sm"
+          onClick={() => {
+            setSearchTerm("");
+            setCurrentPage(1);
+          }}
+        >
+          Clear
+        </button>
+      </div>
+
 
       {/* Desktop table */}
       <div className="customers-table-wrapper stock-table-wrapper hidden-on-mobile">

@@ -57,7 +57,8 @@ def get_suppliers():
 
     suppliers = Supplier.query.filter_by(
         organization_id=org_id
-    ).all()   # REMOVE is_active=True filter
+    ).order_by(Supplier.id.desc()).all()
+
 
     return jsonify([s.to_dict() for s in suppliers])
 

@@ -63,6 +63,9 @@ def get_payments():
 
     payments = SupplierPayment.query.filter_by(
         organization_id=organization_id
-    ).all()
+    ).order_by(SupplierPayment.created_at.desc()).all()
+
+    
+
 
     return jsonify([p.to_dict() for p in payments])

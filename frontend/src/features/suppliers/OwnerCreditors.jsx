@@ -16,15 +16,27 @@ export default function OwnerCreditors() {
   const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10); // adjust per page
-  const totalPages = Math.ceil(creditors.length / itemsPerPage);
+  // Filter by supplier name
+  const filteredCreditors = creditors.filter((c) =>
+    c.supplier_name
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
 
-  const paginatedCreditors = creditors.slice(
+  // Recalculate pages based on filtered results
+  const totalPages = Math.ceil(filteredCreditors.length / itemsPerPage);
+
+  // Paginate filtered results
+  const paginatedCreditors = filteredCreditors.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
 
 
   const [newPayment, setNewPayment] = useState({
@@ -138,6 +150,26 @@ export default function OwnerCreditors() {
   return (
     <section className="card flex flex-col gap-lg">
       <h2>Suppliers you Owe Money</h2>
+      <div className="flex flex-mobile-col gap-sm mb-md">
+        <input
+          className="input"
+          placeholder="Search supplier..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // reset page on search
+          }}
+        />
+        <button
+          className="btn btn-secondary btn-sm"
+          onClick={() => {
+            setSearchTerm("");
+            setCurrentPage(1);
+          }}
+        >
+          Clear Search
+        </button>
+      </div>
 
       <p className="hint flex items-center gap-sm">
               <FiInfo />

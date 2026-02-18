@@ -14,6 +14,15 @@ export const listSuppliers = async () => {
   return res.json();
 };
 
+// export const listSuppliers = async (search = "") => {
+//   const query = search ? `?search=${encodeURIComponent(search)}` : "";
+//   const res = await apiFetch(`${SUPPLIERS_API}${query}`);
+
+//   if (!res.ok) throw new Error("Failed to fetch suppliers");
+//   return res.json();
+// };
+
+
 export const createSupplier = async (data) => {
   const res = await apiFetch(SUPPLIERS_API, {
     method: "POST",

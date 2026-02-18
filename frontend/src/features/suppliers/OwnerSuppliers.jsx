@@ -12,6 +12,8 @@ export default function OwnerSuppliers() {
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
   
 
   const [newSupplier, setNewSupplier] = useState({
@@ -22,11 +24,25 @@ export default function OwnerSuppliers() {
     notes: "",
   });
 
+  const filteredSuppliers = suppliers.filter((s) => {
+    const term = searchTerm.toLowerCase();
+
+    return (
+      s.name?.toLowerCase().includes(term) ||
+      s.phone?.toLowerCase().includes(term) ||
+      s.email?.toLowerCase().includes(term) ||
+      s.address?.toLowerCase().includes(term) ||
+      s.notes?.toLowerCase().includes(term)
+    );
+  });
+
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10); // number of suppliers per page
-  const totalPages = Math.ceil(suppliers.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredSuppliers.length / itemsPerPage);
 
-  const paginatedSuppliers = suppliers.slice(
+
+  const paginatedSuppliers = filteredSuppliers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -76,11 +92,29 @@ export default function OwnerSuppliers() {
         <h2 className="mb-md">Suppliers</h2>
         <button className="btn btn-primary mb-md" onClick={() => setShowModal(true)}>
           + Add Supplier
-        </button>       
+        </button>  
+        <div className="flex flex-mobile-col gap-sm mb-md">
+          <input
+            className="input"
+            placeholder="Search by name, phone, email..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1); // reset page when searching
+            }}
+          />
+          <button
+            className="btn btn-secondary ml-sm"
+            onClick={() => {
+              setSearchTerm("");
+              setCurrentPage(1);
+            }}
+          >
+            Clear
+          </button>
+        </div>    
 
-      </div>
-
-      
+      </div>      
 
       {/* ========== MODAL ========== */}
       {showModal && (
