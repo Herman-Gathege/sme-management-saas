@@ -15,8 +15,17 @@ export default function StaffManagement() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [editingStaff, setEditingStaff] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // adjust to your preference
+  const totalPages = Math.ceil(staffList.length / itemsPerPage);
 
-  const token = localStorage.getItem("token");
+  const paginatedStaff = staffList.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+
+  // const token = localStorage.getItem("token");
 
   /* =====================
      DATA FETCHING
@@ -25,7 +34,7 @@ export default function StaffManagement() {
     setLoading(true);
     setMessage("");
     try {
-      const res = await apiListStaff(token);
+      const res = await apiListStaff();
       setStaffList(res.staff || []);
     } catch (err) {
       setMessage(err.message || "Failed to fetch staff");
@@ -43,7 +52,7 @@ export default function StaffManagement() {
   ====================== */
   const handleDeactivate = async (id) => {
     try {
-      await apiDeactivateStaff(id, token);
+      await apiDeactivateStaff(id);
       fetchStaff();
     } catch (err) {
       setMessage(err.message);
@@ -52,7 +61,7 @@ export default function StaffManagement() {
 
   const handleReactivate = async (id) => {
     try {
-      await apiReactivateStaff(id, token);
+      await apiReactivateStaff(id);
       fetchStaff();
     } catch (err) {
       setMessage(err.message);
@@ -61,7 +70,7 @@ export default function StaffManagement() {
 
   const handleResetPassword = async (id) => {
     try {
-      const res = await apiResetPassword(id, token);
+      const res = await apiResetPassword(id);
       alert(`Temporary password: ${res.temporary_password}`);
     } catch (err) {
       setMessage(err.message);
@@ -82,7 +91,7 @@ export default function StaffManagement() {
       {/* Header */}
       <header className="flex justify-between items-start flex-wrap gap-md">
         <div>
-          <h2 className="text-xl text-bold">Staff Management</h2>
+          <h2 className="text-xl text-bold mb-md">Staff Management</h2>
           <p className="hint">
             <FiInfo />
             
@@ -120,7 +129,7 @@ export default function StaffManagement() {
                   </tr>
                 </thead>
                 <tbody>
-                  {staffList.map((s) => (
+                  {paginatedStaff.map((s) => (
                     <tr key={s.id}>
                       <td>{s.full_name}</td>
                       <td>{s.email}</td>
@@ -175,11 +184,39 @@ export default function StaffManagement() {
                   ))}
                 </tbody>
               </table>
+              <div className="pagination flex gap-sm mt-md justify-center">
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  Prev
+                </button>
+
+                {/* {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i}
+                    className={`btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-secondary'}`}
+                    onClick={() => setCurrentPage(i + 1)}
+                  >
+                    {i + 1}
+                  </button>
+                ))} */}
+
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </div>
+
             </div>
 
             {/* MOBILE CARDS */}
             <div className="hidden-desktop flex flex-col gap-md">
-              {staffList.map((s) => (
+              {paginatedStaff.map((s) => (
                 <div key={s.id} className="card">
                   <div className="flex justify-between items-start mb-sm">
                     <div>
@@ -236,6 +273,35 @@ export default function StaffManagement() {
                   </div>
                 </div>
               ))}
+
+              <div className="pagination flex gap-sm mt-md justify-center hidden-desktop">
+                <button
+                  className="btn btn-secondary btn-sm mr-sm"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  Prev
+                </button>
+
+                {/* {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i}
+                    className={`btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-secondary'}`}
+                    onClick={() => setCurrentPage(i + 1)}
+                  >
+                    {i + 1}
+                  </button>
+                ))} */}
+
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </div>
+
             </div>
           </>
         )}

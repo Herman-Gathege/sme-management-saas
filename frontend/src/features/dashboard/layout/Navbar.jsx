@@ -75,23 +75,23 @@ export default function Navbar() {
       </div>
 
      {/* RIGHT */}
-<div className="relative flex items-center gap-xs">
-  
-  {/* Avatar */}
-  <div
-    className="avatar cursor-pointer"
-    onClick={() => setOpen((o) => !o)}
-  >
-    {user.full_name.charAt(0).toUpperCase()}
-  </div>
+      <div className="relative flex items-center gap-xs">
+        
+        {/* Avatar */}
+        <div
+          className="avatar cursor-pointer"
+          onClick={() => setOpen((o) => !o)}
+        >
+          {user.full_name.charAt(0).toUpperCase()}
+        </div>
 
-  {/* Chevron */}
-  <FiChevronDown
-    onClick={() => setOpen((o) => !o)}
-    className={`chevron cursor-pointer transition-transform duration-200 ${
-      open ? "rotate-180" : ""
-    }`}
-  />
+        {/* Chevron */}
+        <FiChevronDown
+          onClick={() => setOpen((o) => !o)}
+          className={`chevron cursor-pointer transition-transform duration-200 ${
+            open ? "rotate-180" : ""
+          }`}
+        />
 
 {/* </div> */}
 
@@ -151,7 +151,7 @@ export default function Navbar() {
               <div className="dropdown-divider" />
 
               {/* LOGOUT */}
-              <button className="dropdown-item dropdown-danger" onClick={logout}>
+              <button className="btn btn-secondary mr-sm ml-sm" onClick={logout}>
                 Logout
               </button>
 

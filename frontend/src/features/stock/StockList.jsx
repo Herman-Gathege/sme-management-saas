@@ -9,9 +9,18 @@ export default function StockList() {
   const [stock, setStock] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // adjust to your preference
+  const totalPages = Math.ceil(stock.length / itemsPerPage);
 
-  const API_BASE = import.meta.env.VITE_API_URL;
-  const API_URL = `${API_BASE}/api/stock`;
+  const paginatedStock = stock.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+
+  // const API_BASE = import.meta.env.VITE_API_URL;
+  // const API_URL = `${API_BASE}/api/stock`;
 
   // Fetch stock items
   useEffect(() => {
@@ -85,7 +94,7 @@ export default function StockList() {
               </thead>
 
               <tbody>
-                {stock.map((item) => {
+                {paginatedStock.map((item) => {
                   const isLow = item.quantity <= item.min_stock_level;
 
                   return (
@@ -136,11 +145,39 @@ export default function StockList() {
                 })}
               </tbody>
             </table>
+            <div className="pagination flex gap-sm mt-md justify-center">
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Prev
+              </button>
+
+              {/* {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  className={`btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setCurrentPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))} */}
+
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+
           </div>
 
           {/* ================= MOBILE CARDS ================= */}
           <div className="stock-cards hidden-on-desktop">
-            {stock.map((item) => {
+            {paginatedStock.map((item) => {
               const isLow = item.quantity <= item.min_stock_level;
 
               return (
@@ -202,6 +239,35 @@ export default function StockList() {
                 </div>
               );
             })}
+
+            <div className="pagination flex gap-sm mt-md justify-center hidden-desktop">
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Prev
+              </button>
+
+              {/* {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  className={`btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setCurrentPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))} */}
+
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+
           </div>
         </>
       )}

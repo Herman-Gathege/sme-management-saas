@@ -22,6 +22,16 @@ export default function OwnerSuppliers() {
     notes: "",
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // number of suppliers per page
+  const totalPages = Math.ceil(suppliers.length / itemsPerPage);
+
+  const paginatedSuppliers = suppliers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+
   const fetchSuppliers = async () => {
     try {
       setLoading(true);
@@ -70,55 +80,7 @@ export default function OwnerSuppliers() {
 
       </div>
 
-      {/* <form className="form-stack">
-        <input
-          className="input"
-          placeholder="Name"
-          value={newSupplier.name}
-          onChange={(e) =>
-            setNewSupplier({ ...newSupplier, name: e.target.value })
-          }
-        />
-        <input
-          className="input"
-          placeholder="Phone"
-          value={newSupplier.phone}
-          onChange={(e) =>
-            setNewSupplier({ ...newSupplier, phone: e.target.value })
-          }
-        />
-        <input
-          className="input"
-          placeholder="Email"
-          value={newSupplier.email}
-          onChange={(e) =>
-            setNewSupplier({ ...newSupplier, email: e.target.value })
-          }
-        />
-        <input
-          className="input"
-          placeholder="Address"
-          value={newSupplier.address}
-          onChange={(e) =>
-            setNewSupplier({ ...newSupplier, address: e.target.value })
-          }
-        />
-        <input
-          className="input"
-          placeholder="Notes"
-          value={newSupplier.notes}
-          onChange={(e) =>
-            setNewSupplier({ ...newSupplier, notes: e.target.value })
-          }
-        />
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={handleCreate}
-        >
-          Add Supplier
-        </button>
-      </form> */}
+      
 
       {/* ========== MODAL ========== */}
       {showModal && (
@@ -217,7 +179,7 @@ export default function OwnerSuppliers() {
                 </tr>
               </thead>
               <tbody>
-                {suppliers.map((s) => (
+                {paginatedSuppliers.map((s) => (
                   <tr key={s.id}>
                     <td>{s.name}</td>
                     <td>{s.phone}</td>
@@ -238,11 +200,39 @@ export default function OwnerSuppliers() {
                 ))}
               </tbody>
             </table>
+            <div className="pagination flex gap-sm mt-md justify-center ">
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  Prev
+                </button>
+
+                {/* {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i}
+                    className={`btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-secondary'}`}
+                    onClick={() => setCurrentPage(i + 1)}
+                  >
+                    {i + 1}
+                  </button>
+                ))} */}
+
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </div>
+
           </div>
 
           {/* ========== MOBILE CARDS ========== */}
           <div className="stock-cards hidden-on-desktop">
-            {suppliers.map((s) => (
+            {paginatedSuppliers.map((s) => (
               <div key={s.id} className="card supplier-card">
                 <div>
                   <strong>{s.name}</strong>
@@ -277,6 +267,34 @@ export default function OwnerSuppliers() {
                 </div>
               </div>
             ))}
+            <div className="pagination flex gap-sm mt-md justify-center hidden-desktop">
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Prev
+              </button>
+
+              {/* {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  className={`btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setCurrentPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))} */}
+
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+
           </div>
         </>
       )}

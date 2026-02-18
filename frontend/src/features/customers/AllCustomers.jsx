@@ -11,6 +11,15 @@ export default function AllCustomers() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // adjust to your preference
+  const totalPages = Math.ceil(customers.length / itemsPerPage);
+
+  const paginatedCustomers = customers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
 
   // const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -56,7 +65,7 @@ export default function AllCustomers() {
                   </tr>
                 </thead>
                 <tbody>
-                  {customers.map((c, idx) => (
+                  {paginatedCustomers.map((c, idx) => (
                     <tr key={c.id}>
                       <td>{idx + 1}</td>
                       <td>{c.name}</td>
@@ -68,11 +77,39 @@ export default function AllCustomers() {
                   ))}
                 </tbody>
               </table>
+              <div className="pagination flex gap-sm mt-md justify-center">
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  Prev
+                </button>
+
+                {/* {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i}
+                    className={`btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-secondary'}`}
+                    onClick={() => setCurrentPage(i + 1)}
+                  >
+                    {i + 1}
+                  </button>
+                ))} */}
+
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </div>
+
             </div>
 
             {/* Mobile cards */}
             <div className="hidden-desktop flex flex-col gap-md">
-              {customers.map((c, idx) => (
+              {paginatedCustomers.map((c, idx) => (
                 <div key={c.id} className="card flex flex-col gap-sm">
                   <div className="flex justify-between items-center">
                     <span className="text-bold">{c.name}</span>
@@ -96,6 +133,35 @@ export default function AllCustomers() {
                   </div>
                 </div>
               ))}
+
+              <div className="pagination flex gap-sm mt-md justify-center hidden-desktop">
+                <button
+                  className="btn btn-secondary btn-sm mr-sm"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  Prev
+                </button>
+
+                {/* {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i}
+                    className={`btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-secondary'}`}
+                    onClick={() => setCurrentPage(i + 1)}
+                  >
+                    {i + 1}
+                  </button>
+                ))} */}
+
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </div>
+
             </div>
           </>
         )}

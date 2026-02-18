@@ -40,6 +40,18 @@ export default function OwnerSupplierPurchases() {
     ],
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // change per page count here
+
+  // calculate total pages
+  const totalPages = Math.ceil(purchases.length / itemsPerPage);
+
+  // get current page data
+  const paginatedPurchases = purchases.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
+
   // ---------------- Fetch Data ----------------
   const fetchData = async () => {
     try {
@@ -280,7 +292,10 @@ export default function OwnerSupplierPurchases() {
       {/* ---------- Header ---------- */}
       <div className="flex justify-between items-center mb-md">
         <h2>Purchases</h2>
-        <button className="btn btn-primary mr-sm ml-sm" onClick={() => setShowModal(true)}>
+        <button
+          className="btn btn-primary mr-sm ml-sm"
+          onClick={() => setShowModal(true)}
+        >
           + Add New Purchase
         </button>
 
@@ -609,7 +624,7 @@ export default function OwnerSupplierPurchases() {
                 </td>
               </tr>
             ) : (
-              purchases.map((p) => {
+              paginatedPurchases.map((p) => {
                 const supplier =
                   suppliers.find((s) => s.id === p.purchase.supplier_id)
                     ?.name || "N/A";
@@ -674,11 +689,40 @@ export default function OwnerSupplierPurchases() {
             )}
           </tbody>
         </table>
+        <div className="pagination flex gap-sm mt-md justify-center">
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </button>
+
+          {/* {[...Array(totalPages)].map((_, i) => (
+    <button
+      key={i}
+      className={`btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-secondary'}`}
+      onClick={() => setCurrentPage(i + 1)}
+    >
+      {i + 1}
+    </button>
+  ))} */}
+
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
       </div>
 
       {/* Mobile cards with expandable items */}
       <div className="stock-cards hidden-desktop">
-        {purchases.map((p) => {
+        {paginatedPurchases.map((p) => {
           const supplier =
             suppliers.find((s) => s.id === p.purchase.supplier_id)?.name ||
             "N/A";
@@ -742,6 +786,35 @@ export default function OwnerSupplierPurchases() {
             </div>
           );
         })}
+      </div>
+      <div className="pagination flex gap-sm mt-md justify-center hidden-desktop">
+        <button
+          className="btn btn-secondary btn-sm"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Prev
+        </button>
+
+        {/* {[...Array(totalPages)].map((_, i) => (
+    <button
+      key={i}
+      className={`btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-secondary'}`}
+      onClick={() => setCurrentPage(i + 1)}
+    >
+      {i + 1}
+    </button>
+  ))} */}
+
+        <button
+          className="btn btn-secondary btn-sm"
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
       </div>
     </section>
   );

@@ -9,12 +9,12 @@ export default function CreateStaff({ onCreated }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [formKey, setFormKey] = useState(0); // force remount
-  const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
 
   const handleSubmit = async (formData) => {
     setMessage("");
     try {
-      const res = await apiCreateStaff(formData, token);
+      const res = await apiCreateStaff(formData);
       setMessage(`Staff created! Temporary password: ${res.temporary_password}`);
       setModalOpen(false);
       if (onCreated) onCreated();

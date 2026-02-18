@@ -8,6 +8,14 @@ export default function StockHistory() {
   const [error, setError] = useState("");
 
   // const API_BASE = import.meta.env.VITE_API_URL;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // adjust as needed
+  const totalPages = Math.ceil(history.length / itemsPerPage);
+
+  const paginatedHistory = history.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
 
   useEffect(() => {
@@ -63,7 +71,7 @@ export default function StockHistory() {
               </tr>
             </thead>
             <tbody>
-              {history.map((h) => (
+              {paginatedHistory.map((h) => (
                 <tr key={h.id}>
                   <td>{new Date(h.created_at).toLocaleString()}</td>
                   <td>{h.stock_name}</td>
@@ -74,11 +82,39 @@ export default function StockHistory() {
               ))}
             </tbody>
           </table>
+          <div className="pagination flex gap-sm mt-md justify-center">
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Prev
+            </button>
+
+            {/* {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                className={`btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setCurrentPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))} */}
+
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+
         </div>
 
         {/* ============== MOBILE CARDS ============== */}
         <div className="stock-cards hidden-on-desktop">
-          {history.map((h) => (
+          {paginatedHistory.map((h) => (
             <div key={h.id} className="card stock-card">
               <div className="stock-card-header">
                 <strong>{h.stock_name}</strong>
@@ -102,6 +138,34 @@ export default function StockHistory() {
               </div>
             </div>
           ))}
+          <div className="pagination flex gap-sm mt-md justify-center hidden-desktop">
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Prev
+            </button>
+
+            {/* {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                className={`btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setCurrentPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))} */}
+
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+
         </div>
       </>
     )}

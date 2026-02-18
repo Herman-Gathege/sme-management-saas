@@ -17,6 +17,16 @@ export default function OwnerCreditors() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // adjust per page
+  const totalPages = Math.ceil(creditors.length / itemsPerPage);
+
+  const paginatedCreditors = creditors.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+
   const [newPayment, setNewPayment] = useState({
     supplier_id: "",
     amount: "",
@@ -58,36 +68,7 @@ export default function OwnerCreditors() {
     );
   }, []);
 
-  // ---------------- Add Payment ----------------
-  // const handleAddPayment = async (supplierId) => {
-  //   const amountNum = parseFloat(newPayment.amount);
-  //   if (!amountNum || amountNum <= 0) {
-  //     alert("Enter a valid amount");
-  //     return;
-  //   }
-
-  //   try {
-  //     await createPayment({
-  //       supplier_id: supplierId,
-  //       amount: amountNum,
-  //       payment_method: newPayment.payment_method,
-  //       notes: newPayment.notes,
-  //     });
-
-  //     setNewPayment({
-  //       supplier_id: "",
-  //       amount: "",
-  //       payment_method: "cash",
-  //       notes: "",
-  //     });
-
-  //     setShowPaymentFormFor(null);
-  //     await fetchPayments();
-  //     await fetchCreditors();
-  //   } catch (err) {
-  //     alert("Failed to add payment");
-  //   }
-  // };
+  
 
   const handleAddPayment = async (supplierId) => {
   const amountNum = parseFloat(newPayment.amount);
@@ -186,7 +167,7 @@ export default function OwnerCreditors() {
           </tr>
         </thead>
         <tbody>
-          {creditors.map((c) => {
+          {paginatedCreditors.map((c) => {
             const supplierPayments = payments.filter(
               (p) => p.supplier_id === c.supplier_id,
             );
@@ -325,12 +306,39 @@ export default function OwnerCreditors() {
           })}
         </tbody>
       </table>
+      <div className="pagination flex gap-sm mt-md justify-center ">
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </button>
+
+          {/* {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i}
+              className={`btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setCurrentPage(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))} */}
+
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+      </div>
       </div>
 
 
       {/* Mobile cards with expandable items */}
       <div className="stock-cards hidden-desktop">
-        {creditors.map((c) => {
+        {paginatedCreditors.map((c) => {
           const supplierPayments = payments.filter(
             (p) => p.supplier_id === c.supplier_id,
           );
@@ -456,7 +464,38 @@ export default function OwnerCreditors() {
             </div>
           );
         })}
+
+        <div className="pagination flex gap-sm mt-md justify-center hidden-desktop">
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </button>
+
+          {/* {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i}
+              className={`btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setCurrentPage(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))} */}
+
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
       </div>
+      </div>
+
+      
+
     </section>
   );
 }
