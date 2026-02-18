@@ -15,14 +15,30 @@ export default function StaffManagement() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [editingStaff, setEditingStaff] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+
+  // Filter staff
+  const filteredStaff = staffList.filter((s) => {
+    const term = searchTerm.toLowerCase();
+
+    return (
+      s.full_name?.toLowerCase().includes(term) ||
+      s.email?.toLowerCase().includes(term) ||
+      s.phone?.toLowerCase().includes(term) ||
+      (s.is_active ? "active" : "inactive").includes(term)
+    );
+  });
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10); // adjust to your preference
-  const totalPages = Math.ceil(staffList.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredStaff.length / itemsPerPage);
 
-  const paginatedStaff = staffList.slice(
+  const paginatedStaff = filteredStaff.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
 
 
   // const token = localStorage.getItem("token");
@@ -105,6 +121,28 @@ export default function StaffManagement() {
 
       {/* Message */}
       {message && <div className="card text-sm text-error">{message}</div>}
+
+      <div className="flex flex-mobile-col gap-sm">
+        <input
+          className="input"
+          placeholder="Search name, email, phone or status..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // reset page when searching
+          }}
+        />
+
+        <button
+          className="btn btn-secondary btn-sm"
+          onClick={() => {
+            setSearchTerm("");
+            setCurrentPage(1);
+          }}
+        >
+          Clear
+        </button>
+      </div>
 
       {/* Staff List */}
       <section className="card">

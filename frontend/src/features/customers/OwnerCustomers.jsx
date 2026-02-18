@@ -15,6 +15,10 @@ import {
 export default function OwnerCustomers() {
   const location = useLocation();
 
+  const isDebtors = location.pathname.includes("debtors");
+  const isAll = location.pathname.includes("all");
+  const roleEndpoint = isAll ? "" : isDebtors ? "debtors" : "creditors";
+  
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -22,23 +26,52 @@ export default function OwnerCustomers() {
   const [expandedRow, setExpandedRow] = useState(null);
   const [paymentsData, setPaymentsData] = useState({});
   const [loadingPayments, setLoadingPayments] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [paymentForm, setPaymentForm] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10); // adjust to your preference
-  const totalPages = Math.ceil(customers.length / itemsPerPage);
+  // Helper to compute status
 
-  const paginatedCustomers = customers.slice(
+  
+
+  const getStatus = (c) => {
+    const balance = Number(c.balance || 0);
+    const isOwed = isDebtors && balance > 0;
+
+    const payments = paymentsData[c.id] || [];
+
+    if (balance === 0 && payments.length) return "paid";
+    if (isOwed) return "owes";
+    return "ok";
+  };
+
+  // Filter customers
+  const filteredCustomers = customers.filter((c) => {
+    const term = searchTerm.toLowerCase();
+    const balance = Number(c.balance || 0);
+
+    return (
+      c.full_name?.toLowerCase().includes(term) ||
+      balance.toString().includes(term) ||
+      getStatus(c).includes(term)
+    );
+  });
+
+  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
+
+  const paginatedCustomers = filteredCustomers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
 
+
+
   // const API_BASE = import.meta.env.VITE_API_URL;
   // const token = localStorage.getItem("token");
 
-  const isDebtors = location.pathname.includes("debtors");
-  const isAll = location.pathname.includes("all");
-  const roleEndpoint = isAll ? "" : isDebtors ? "debtors" : "creditors";
+ 
 
   /* ================= FETCH CUSTOMERS ================= */
   useEffect(() => {
@@ -149,10 +182,33 @@ export default function OwnerCustomers() {
         </h2>
       </div>
 
+       <div className="flex flex-mobile-col gap-sm">
+        <input
+          className="input"
+          placeholder="Search name, balance or status..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+        />
+
+        <button
+          className="btn btn-secondary"
+          onClick={() => {
+            setSearchTerm("");
+            setCurrentPage(1);
+          }}
+        >
+          Clear
+        </button>
+      </div>
+
       {loading && <p>Loading...</p>}
       {error && <p className="text-error">{error}</p>}
 
-      {!loading && customers.length === 0 && (
+      {!loading && filteredCustomers.length === 0 && (
+
         <p>No {isDebtors ? "debtors" : "creditors"} found.</p>
       )}
 
@@ -163,7 +219,9 @@ export default function OwnerCustomers() {
         <br /> This amount will be used to settle future debts.
       </p>
 
-      {!loading && customers.length > 0 && (
+      {/* DESKTOP TABLE */}
+      {!loading && filteredCustomers.length > 0 && (
+
         <div className="customers-table-wrapper hidden-mobile ">
           <table className="customers-table">
             <thead>

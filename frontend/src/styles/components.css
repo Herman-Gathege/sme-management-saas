@@ -93,6 +93,18 @@
   opacity: 0.6;
 }
 
+/* Make active filter buttons more distinct */
+.btn-filter-active {
+  background: var(--primary);
+  color: white;
+  border: none;
+}
+
+.btn-filter-active:hover {
+  background: #1d4ed8; /* slightly darker blue on hover */
+}
+
+
 
 /* =============================
    CARD

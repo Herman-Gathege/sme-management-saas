@@ -15,13 +15,22 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
     const init = async () => {
       try {
         const res = await getMe();
         setUser(res.user);
         setOrganization(res.organization);
       } catch {
-        // not logged in
+        localStorage.clear();
+        setUser(null);
+        setOrganization(null);
       } finally {
         setLoading(false);
       }
@@ -29,6 +38,7 @@ export function AuthProvider({ children }) {
 
     init();
   }, []);
+
 
   return (
     <AuthContext.Provider value={{ user, organization, loading, logout }}>

@@ -18,12 +18,17 @@ export default function StockList() {
   const filteredStock = stock.filter((item) => {
     const term = searchTerm.toLowerCase();
 
+    const computedStatus =
+      item.quantity <= item.min_stock_level ? "low stock" : "ok";
+
     return (
       item.name?.toLowerCase().includes(term) ||
       item.sku?.toLowerCase().includes(term) ||
-      item.category?.toLowerCase().includes(term)
+      item.category?.toLowerCase().includes(term) ||
+      computedStatus.includes(term)
     );
   });
+
 
   // Recalculate pagination using filtered results
   const totalPages = Math.ceil(filteredStock.length / itemsPerPage);

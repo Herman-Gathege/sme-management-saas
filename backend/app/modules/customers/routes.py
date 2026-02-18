@@ -67,7 +67,7 @@ def get_customers():
     customers = Customer.query.filter_by(
         organization_id=org_id,
         is_active=True
-    ).all()
+    ).order_by(Customer.created_at.desc()).all()
 
     return jsonify([c.to_dict() for c in customers])
 

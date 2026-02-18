@@ -11,14 +11,31 @@ export default function AllCustomers() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10); // adjust to your preference
-  const totalPages = Math.ceil(customers.length / itemsPerPage);
+  // Filter customers
+  const filteredCustomers = customers.filter((c) => {
+    const term = searchTerm.toLowerCase();
 
-  const paginatedCustomers = customers.slice(
+    return (
+      c.name?.toLowerCase().includes(term) ||
+      c.business_name?.toLowerCase().includes(term) ||
+      c.email?.toLowerCase().includes(term) ||
+      c.phone?.toLowerCase().includes(term) ||
+      c.role?.toLowerCase().includes(term)
+    );
+  });
+
+  // Pagination based on filtered results
+  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
+
+  const paginatedCustomers = filteredCustomers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
 
 
   // const API_BASE = import.meta.env.VITE_API_URL;
@@ -42,14 +59,36 @@ export default function AllCustomers() {
   return (
     <section className="dashboard-content">
       <div className="card">
-        <div className="customers-header">
+        <div className="customers-header mb-md">
           <h3 className="text-lg text-bold">All Customers</h3>
+          
         </div>
+        <div className="flex flex-mobile-col gap-sm mb-md">
+            <input
+              className="input"
+              placeholder="Search by name, email, phone, business or role..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1); // reset page when searching
+              }}
+            />
+
+            <button
+              className="btn btn-secondary"
+              onClick={() => {
+                setSearchTerm("");
+                setCurrentPage(1);
+              }}
+            >
+              Clear
+            </button>
+          </div>
 
         {loading && <p>Loading customers…</p>}
         {message && <p className="text-error">{message}</p>}
 
-        {!loading && customers.length > 0 && (
+        {!loading && filteredCustomers.length > 0 && (
           <>
             {/* Desktop table */}
             <div className="table-wrapper hidden-mobile">
@@ -164,6 +203,10 @@ export default function AllCustomers() {
 
             </div>
           </>
+        )}
+
+        {!loading && filteredCustomers.length === 0 && (
+          <p>No matching customers found.</p>
         )}
       </div>
     </section>

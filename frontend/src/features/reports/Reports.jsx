@@ -7,6 +7,9 @@ export default function Reports() {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
   const [selectedFilter, setSelectedFilter] = useState("all"); // default filter
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; // adjust as needed
@@ -61,10 +64,29 @@ export default function Reports() {
     window.URL.revokeObjectURL(url);
   };
 
+  // const indexOfLastSale = currentPage * itemsPerPage;
+  // const indexOfFirstSale = indexOfLastSale - itemsPerPage;
+  
+  // Convert dates to timestamps for comparison
+  const filteredSales = sales.filter((s) => {
+    const saleTime = new Date(s.created_at).getTime();
+
+    const startTime = startDate ? new Date(startDate).getTime() : null;
+    const endTime = endDate
+      ? new Date(endDate + "T23:59:59").getTime()
+      : null; // include full end day
+
+    if (startTime && saleTime < startTime) return false;
+    if (endTime && saleTime > endTime) return false;
+
+    return true;
+  });
+
   const indexOfLastSale = currentPage * itemsPerPage;
   const indexOfFirstSale = indexOfLastSale - itemsPerPage;
-  const paginatedSales = sales.slice(indexOfFirstSale, indexOfLastSale);
-  const totalPages = Math.ceil(sales.length / itemsPerPage);
+  const paginatedSales = filteredSales.slice(indexOfFirstSale, indexOfLastSale);
+  const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
+
 
 
   if (loading) return <p>Loading reports…</p>;
@@ -98,35 +120,78 @@ export default function Reports() {
       )}
 
       {/* Filters */}
-      <p>View Sales From:</p>
-      <div className="flex gap-sm wrap">
-        <button
-          className="btn btn-secondary"
-          onClick={() => {
-              console.log("Setting filter to today");
-              setSelectedFilter("today");
-            }}          
-                    disabled={selectedFilter === "today"}
-                  >
-          Today
-        </button>
+        <p>View Sales:</p>
+        <div className="flex flex-wrap gap-sm items-center">
+          <div className="flex gap-xs items-center flex-wrap">
+            <label className="text-sm text-muted" htmlFor="startDate">From</label>
+            <input
+              id="startDate"
+              type="date"
+              className="input"
+              value={startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setCurrentPage(1);
+                setSelectedFilter("");
+              }}
+            />
+          </div>
 
-        <button
-          className="btn btn-secondary"
-          onClick={() => setSelectedFilter("month")}
-          disabled={selectedFilter === "month"}
-        >
-          This Month
-        </button>
+          <div className="flex gap-xs items-center flex-wrap">
+            <label className="text-sm text-muted" htmlFor="endDate">To</label>
+            <input
+              id="endDate"
+              type="date"
+              className="input"
+              value={endDate}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setCurrentPage(1);
+                setSelectedFilter("");
+              }}
+            />
+          </div>
 
-        <button
-          className="btn btn-secondary"
-          onClick={() => setSelectedFilter("all")}
-          disabled={selectedFilter === "all"}
-        >
-          All Time
-        </button>
-      </div>
+          <div className="flex gap-xs flex-wrap">
+            {["today", "month", "all"].map((filter) => (
+              <button
+                key={filter}
+                className={`btn mr-md ${
+                  selectedFilter === filter ? "btn-filter-active" : "btn-secondary"
+                }`}
+                onClick={() => {
+                  setSelectedFilter(filter);
+                  setStartDate("");
+                  setEndDate("");
+                  setCurrentPage(1);
+                }}
+              >
+                {filter === "today"
+                  ? "Today"
+                  : filter === "month"
+                  ? "This Month"
+                  : "All Time"}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap">
+            <button
+              className="btn btn-warning"
+              onClick={() => {
+                setStartDate("");
+                setEndDate("");
+                setSelectedFilter("all");
+                setCurrentPage(1);
+              }}
+            >
+              Clear Filters
+            </button>
+          </div>
+        </div>
+
+
+
 
       {/* Desktop table */}
       <div className="table-wrapper hidden-mobile">
