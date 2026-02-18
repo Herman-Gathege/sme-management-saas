@@ -1,3 +1,4 @@
+//frontend/src/api/client.js
 const API_BASE = import.meta.env.VITE_API_URL;
 
 export async function apiFetch(url, options = {}) {
@@ -16,7 +17,7 @@ export async function apiFetch(url, options = {}) {
   let res = await makeRequest(access);
 
   // 🔥 silent refresh logic
-  if (res.status === 401) {
+  if (res.status === 401 || res.status === 403) {
     const refresh = localStorage.getItem("refresh");
 
     if (!refresh) {

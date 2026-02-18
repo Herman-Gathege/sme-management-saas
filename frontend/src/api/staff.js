@@ -1,3 +1,4 @@
+// frontend/src/api/staff.js
 import { apiFetch } from "./client";
 
 const API = "/api/staff";

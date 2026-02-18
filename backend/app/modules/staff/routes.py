@@ -21,7 +21,7 @@ def create_staff():
     data = request.get_json()
     required = ["full_name", "email", "phone"]
     if not all(data.get(k) for k in required):
-        return jsonify({"error": "Missing fields"}), 400
+        return jsonify({"error": "Missing required fields"}), 400
 
     claims = get_jwt()
     org_id = claims["organization_id"]

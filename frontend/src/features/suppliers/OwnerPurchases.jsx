@@ -280,7 +280,7 @@ export default function OwnerSupplierPurchases() {
       {/* ---------- Header ---------- */}
       <div className="flex justify-between items-center mb-md">
         <h2>Purchases</h2>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+        <button className="btn btn-primary mr-sm ml-sm" onClick={() => setShowModal(true)}>
           + Add New Purchase
         </button>
 

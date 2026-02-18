@@ -10,6 +10,9 @@ from ...models.customer import Customer
 from datetime import timezone
 from zoneinfo import ZoneInfo
 
+from sqlalchemy.orm import joinedload
+
+
 sales_bp = Blueprint("sales", __name__)
 
 
@@ -127,6 +130,50 @@ def create_sale():
 
 
 # ✅ OWNER DASHBOARD SALES
+# @sales_bp.route("/owner", methods=["GET"])
+# @jwt_required()
+# def get_sales_for_owner():
+#     user_id = get_jwt_identity()
+#     user = User.query.get(user_id)
+
+#     if not user or user.role != "owner":
+#         return jsonify({"error": "Owner access required"}), 403
+
+#     sales = (
+#         Sale.query
+#         .filter_by(organization_id=user.organization_id)
+#         .order_by(Sale.created_at.desc())
+#         .all()
+#     )
+
+#     result = []
+#     tz = ZoneInfo("Africa/Nairobi")  # Nairobi timezone
+
+#     for sale in sales:
+#         staff = User.query.get(sale.user_id)
+#         sale_items = [
+#             {
+#                 "stock_id": item.stock_id,
+#                 "name": item.stock.name if item.stock else "Unknown",
+#                 "quantity": item.quantity,
+#                 "unit_price": float(item.unit_price),
+#                 "line_total": float(item.line_total),
+#             }
+#             for item in sale.items
+#         ]
+
+#         result.append({
+#             "sale_id": sale.id,
+#             "staff": staff.full_name if staff else "Unknown",
+#             "total_amount": float(sale.total_amount),
+#             "created_at": sale.created_at.replace(tzinfo=timezone.utc).astimezone(tz).isoformat(),
+#             "items": sale_items,
+#             "payment_method": sale.payment_method
+
+#         })
+
+#     return jsonify(result), 200
+
 @sales_bp.route("/owner", methods=["GET"])
 @jwt_required()
 def get_sales_for_owner():
@@ -136,18 +183,23 @@ def get_sales_for_owner():
     if not user or user.role != "owner":
         return jsonify({"error": "Owner access required"}), 403
 
+    tz = ZoneInfo("Africa/Nairobi")
+
     sales = (
         Sale.query
+        .options(
+            joinedload(Sale.user),                 # staff
+            joinedload(Sale.items).joinedload(SaleItem.stock)  # items + stock
+        )
         .filter_by(organization_id=user.organization_id)
         .order_by(Sale.created_at.desc())
+        .limit(100)  # 🚀 critical for speed
         .all()
     )
 
     result = []
-    tz = ZoneInfo("Africa/Nairobi")  # Nairobi timezone
 
     for sale in sales:
-        staff = User.query.get(sale.user_id)
         sale_items = [
             {
                 "stock_id": item.stock_id,
@@ -161,12 +213,11 @@ def get_sales_for_owner():
 
         result.append({
             "sale_id": sale.id,
-            "staff": staff.full_name if staff else "Unknown",
+            "staff": sale.user.full_name if sale.user else "Unknown",
             "total_amount": float(sale.total_amount),
             "created_at": sale.created_at.replace(tzinfo=timezone.utc).astimezone(tz).isoformat(),
             "items": sale_items,
             "payment_method": sale.payment_method
-
         })
 
     return jsonify(result), 200

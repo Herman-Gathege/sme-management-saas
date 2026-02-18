@@ -189,11 +189,7 @@ export default function CreateSale() {
         }),
       };
 
-      // const data = await createSale(payload);
-
-      // if (Array.isArray(data.low_stock_items)) {
-      //   setLowStockAlert(data.low_stock_items);
-      // }
+      
 
       const data = await createSale(payload);
 

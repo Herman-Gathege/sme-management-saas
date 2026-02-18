@@ -1,3 +1,4 @@
+//frontend/src/features/dashboard/layout/Navbar.jsx
 import { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { FiMaximize, FiMinimize, FiChevronDown } from "react-icons/fi";

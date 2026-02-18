@@ -63,6 +63,8 @@ export default function AllSales() {
     return (staffMatch || itemsMatch) && dateMatch;
   });
 
+  
+
   // -----------------------
   // Pagination logic
   // -----------------------
@@ -104,6 +106,18 @@ export default function AllSales() {
             value={dateRange.to}
             onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
           />
+
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => {
+              setSearchTerm("");
+              setDateRange({ from: "", to: "" });
+            }}
+          >
+            Clear Filters
+          </button>
+
         </div>
       </div>
 

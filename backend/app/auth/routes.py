@@ -1,4 +1,4 @@
-# /home/annewaithaka/personalprojects/sme-management-saas/backend/app/auth/routes.py
+# /backend/app/auth/routes.py
 
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import (
@@ -45,35 +45,7 @@ def register_org():
     return jsonify({"message": "Organization created"}), 201
 
 
-# -------------------------
-# Login
-# -------------------------
-# @auth_bp.route("/login", methods=["POST"])
-# def login():
-#     data = request.get_json()
 
-#     user = User.query.filter_by(
-#         email=data.get("email"),
-#         is_active=True
-#     ).first()
-
-#     if not user or not user.check_password(data.get("password")):
-#         return jsonify({"error": "Invalid credentials"}), 401
-
-#     # 🔥 IDENTITY IS USER ID ONLY
-
-#     # Login
-#     access_token = create_access_token(
-#         identity=str(user.id),   # 👈 MUST be string or int
-#         additional_claims={
-#             "organization_id": user.organization_id,
-#             "role": user.role
-#         }
-#     )
-
-#     return jsonify({
-#         "access_token": access_token
-#     })
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
@@ -85,7 +57,7 @@ def login():
     ).first()
 
     if not user or not user.check_password(data.get("password")):
-        return jsonify({"error": "Invalid credentials"}), 401
+        return jsonify({"error": "Invalid Email or Password Try Again"}), 401
 
     access_token = create_access_token(
         identity=str(user.id),
@@ -104,16 +76,38 @@ def login():
 
 
 
+# @auth_bp.route("/refresh", methods=["POST"])
+# @jwt_required(refresh=True)
+# def refresh():
+#     user_id = get_jwt_identity()
+
+#     access_token = create_access_token(identity=user_id)
+
+#     return jsonify({
+#         "access_token": access_token
+#     })
+
 @auth_bp.route("/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh():
     user_id = get_jwt_identity()
 
-    access_token = create_access_token(identity=user_id)
+    user = User.query.get(int(user_id))
+    if not user or not user.is_active:
+        return jsonify({"error": "User not found"}), 401
+
+    access_token = create_access_token(
+        identity=str(user.id),
+        additional_claims={
+            "organization_id": user.organization_id,
+            "role": user.role
+        }
+    )
 
     return jsonify({
         "access_token": access_token
     })
+
 
 
 

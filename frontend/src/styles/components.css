@@ -26,6 +26,7 @@
 
 .btn {
   height: 52px;
+  min-width: 120px; /* ensures a decent size on small buttons */
   width: auto;
   border-radius: 10px;
   font-size: 14px;
@@ -33,7 +34,39 @@
   border: none;
   cursor: pointer;
   padding: 0 20px;
+  transition: all 0.2s ease; /* smooth hover/resize */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap; /* prevents text wrapping */
 }
+
+/* Small screens (mobile) */
+@media (max-width: 768px) {
+  .btn {
+    height: 44px; /* slightly smaller height */
+    font-size: 13px;
+    padding: 0 15px;
+    min-width: 100px;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .btn {
+    height: 40px;
+    font-size: 12px;
+    padding: 0 12px;
+    min-width: 80px;
+  }
+}
+
+/* Optional hover effect */
+/* .btn:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+} */
+
 
 .btn-primary {
   background: var(--primary);

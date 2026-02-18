@@ -24,17 +24,7 @@ export default function Register() {
     setMessage(res.message || res.error);
   };
 
-  // return (
-  //   <form className={styles.formContainer} onSubmit={handleSubmit}>
-  //     <input placeholder="Business Name" value={name} onChange={(e) => setName(e.target.value)} />
-  //     <input placeholder="Owner Name" value={ownerName} onChange={(e) => setOwnerName(e.target.value)} />
-  //     <input placeholder="Owner Email" value={ownerEmail} onChange={(e) => setOwnerEmail(e.target.value)} />
-  //     <input placeholder="Owner Phone" value={ownerPhone} onChange={(e) => setOwnerPhone(e.target.value)} />
-  //     <input type="password" placeholder="Password" value={ownerPassword} onChange={(e) => setOwnerPassword(e.target.value)} />
-  //     <button type="submit">Register</button>
-  //     {message && <p>{message}</p>}
-  //   </form>
-  // );
+  
 
   return (
   <div className="auth-page">

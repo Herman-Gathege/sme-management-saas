@@ -3,6 +3,8 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from flask_cors import cross_origin
 
+from sqlalchemy.orm import joinedload
+
 from app.extensions import db
 from app.models.stock import Stock
 from app.models.stock_history import StockHistory
@@ -187,9 +189,51 @@ def delete_stock(stock_id):
 
 
 
-# -------------------------
-# STOCK HISTORY
-# -------------------------
+# # -------------------------
+# # STOCK HISTORY
+# # -------------------------
+# @stock_bp.route("/history", methods=["GET"], strict_slashes=False)
+# @cross_origin()
+# @jwt_required()
+# @owner_required
+# def stock_history():
+#     try:
+#         _, organization_id = get_auth_context()
+
+#         # Fetch stock history
+#         histories = (
+#             StockHistory.query
+#             .filter_by(organization_id=organization_id)
+#             .order_by(StockHistory.created_at.desc())
+#             .all()
+#         )
+
+#         from zoneinfo import ZoneInfo
+#         tz = ZoneInfo("Africa/Nairobi")
+
+#         results = []
+#         for h in histories:
+#             stock_item = Stock.query.get(h.stock_id)
+#             user_obj = User.query.get(h.user_id)
+
+#             # Convert created_at from UTC to Nairobi
+#             created_at_nairobi = h.created_at.replace(tzinfo=timezone.utc).astimezone(tz).isoformat()
+
+#             results.append({
+#                 "id": h.id,
+#                 "stock_name": stock_item.name if stock_item else "Deleted",
+#                 "action": h.action,
+#                 "details": json.loads(h.details) if h.details else {},
+#                 "user": user_obj.full_name if user_obj else "Unknown",
+#                 "created_at": created_at_nairobi,
+#             })
+
+#         return jsonify(results), 200
+
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 400
+
+
 @stock_bp.route("/history", methods=["GET"], strict_slashes=False)
 @cross_origin()
 @jwt_required()
@@ -198,24 +242,25 @@ def stock_history():
     try:
         _, organization_id = get_auth_context()
 
-        # Fetch stock history
+        tz = ZoneInfo("Africa/Nairobi")
+
         histories = (
-            StockHistory.query
-            .filter_by(organization_id=organization_id)
+            db.session.query(StockHistory, Stock, User)
+            .outerjoin(Stock, Stock.id == StockHistory.stock_id)
+            .outerjoin(User, User.id == StockHistory.user_id)
+            .filter(StockHistory.organization_id == organization_id)
             .order_by(StockHistory.created_at.desc())
+            .limit(200)  # 🚀 IMPORTANT: prevent huge payloads
             .all()
         )
 
-        from zoneinfo import ZoneInfo
-        tz = ZoneInfo("Africa/Nairobi")
-
         results = []
-        for h in histories:
-            stock_item = Stock.query.get(h.stock_id)
-            user_obj = User.query.get(h.user_id)
-
-            # Convert created_at from UTC to Nairobi
-            created_at_nairobi = h.created_at.replace(tzinfo=timezone.utc).astimezone(tz).isoformat()
+        for h, stock_item, user_obj in histories:
+            created_at_nairobi = (
+                h.created_at.replace(tzinfo=timezone.utc)
+                .astimezone(tz)
+                .isoformat()
+            )
 
             results.append({
                 "id": h.id,
@@ -230,6 +275,7 @@ def stock_history():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
 
 
 # -------------------------

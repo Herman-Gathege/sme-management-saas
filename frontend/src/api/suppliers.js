@@ -1,3 +1,4 @@
+// frontend/src/api/suppliers.js
 import { apiFetch } from "./client";
 
 const SUPPLIERS_API = "/api/suppliers";

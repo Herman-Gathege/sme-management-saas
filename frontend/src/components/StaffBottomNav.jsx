@@ -1,3 +1,4 @@
+// frontend/src/components/StaffBottomNav.jsx
 import { NavLink } from "react-router-dom";
 import {
   FiHome,

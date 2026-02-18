@@ -1,3 +1,4 @@
+//frontend/src/features/dashboard/layout/Sidebar.jsx
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useEffect, useState } from "react";
