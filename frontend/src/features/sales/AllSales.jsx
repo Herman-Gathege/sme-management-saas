@@ -188,7 +188,7 @@ export default function AllSales() {
           </div>
 
           {/* ================= MOBILE CARDS ================= */}
-          <div className="hidden-desktop flex flex-col gap-sm">
+          {/* <div className="hidden-desktop flex flex-col gap-sm">
             {paginatedSales.map((sale, index) => (
               <div key={sale.sale_id} className="card flex flex-col gap-xs">
                 <div className="flex justify-between">
@@ -209,7 +209,78 @@ export default function AllSales() {
                 </div>
               </div>
             ))}
-          </div>
+          </div> */}
+
+          {/* ================= MOBILE CARDS ================= */}
+            <div className="hidden-desktop flex flex-col gap-sm">
+              {paginatedSales.map((sale, index) => (
+                <div key={sale.sale_id} className="card flex flex-col gap-sm">
+
+                  {/* Header Row */}
+                  <div className="flex justify-between items-center">
+                    <span className="text-bold">
+                      #{indexOfFirstSale + index + 1}
+                    </span>
+
+                    <div className="flex items-center gap-sm">
+                      <span className="company-blue text-bold">
+                        KES {sale.total_amount.toFixed(2)}
+                      </span>
+
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => toggleSale(sale.sale_id)}
+                      >
+                        {expandedSale === sale.sale_id ? (
+                          <FiChevronUp />
+                        ) : (
+                          <FiChevronDown />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Sale Info */}
+                  <div className="text-sm">Staff: {sale.staff || "—"}</div>
+                  <div className="text-sm">
+                    Method: {sale.payment_method || "—"}
+                  </div>
+                  <div className="text-xs text-muted">
+                    {new Date(sale.created_at).toLocaleString()}
+                  </div>
+
+                  {/* Expanded Items */}
+                  {expandedSale === sale.sale_id && (
+                    <div className="expanded-card mt-sm">
+                      {Array.isArray(sale.items) && sale.items.length > 0 ? (
+                        <ul className="expanded-list">
+                          {sale.items.map((item, idx) => (
+                            <li key={idx} className="expanded-list-item">
+                              <span className="item-name">
+                                {item.name}
+                              </span>
+                              <span className="item-qty">
+                                × {item.quantity}
+                              </span>
+                              <span className="item-price">
+                                KES {item.unit_price.toFixed(2)}
+                              </span>
+                              <strong className="item-total">
+                                KES {item.line_total.toFixed(2)}
+                              </strong>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <span className="text-muted">No items</span>
+                      )}
+                    </div>
+                  )}
+
+                </div>
+              ))}
+            </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
