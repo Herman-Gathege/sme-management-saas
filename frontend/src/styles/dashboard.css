@@ -123,6 +123,7 @@
   cursor: pointer;
   text-decoration: none;
   transition: background 0.15s ease;
+  min-height: 44px; 
 }
 
 .sidebar-link:hover {
@@ -138,6 +139,9 @@
 /* Icons */
 .sidebar-link svg {
   font-size: 18px;
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
 /* =============================
@@ -160,10 +164,27 @@
    CHEVRONS
 ============================= */
 
+
 .sidebar-link .chevron {
   margin-left: auto;
+
+  display: flex;              /* force flex box */
+  align-items: center;        /* perfect vertical centering */
+  justify-content: center;
+
+  width: 18px;                /* lock dimensions */
+  height: 18px;
+
+  flex-shrink: 0;             /* prevent collapse */
+  line-height: 0;             /* remove SVG baseline spacing */
+
   transition: transform 0.2s ease;
 }
+
+/* .sidebar-link .chevron {
+  margin-left: auto;
+  transition: transform 0.2s ease;
+} */
 
 .rotated {
   transform: rotate(180deg);

@@ -362,10 +362,10 @@
   background: #fee2e2;
 }
 
-.chevron {
+/* .chevron {
   font-size: 18px;
   color: var(--color-muted);
-}
+} */
 
 .rotate-180 {
   transform: rotate(180deg);
