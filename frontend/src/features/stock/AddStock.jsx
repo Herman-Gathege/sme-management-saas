@@ -54,7 +54,7 @@ export default function AddStock() {
 
   return (
     <section className="card">
-      <h3>Add Stock Item</h3>
+      <h3 className="mb-sm ">Add Stock Item</h3>
 
       <form onSubmit={handleSubmit} className="form-stack">
         <input

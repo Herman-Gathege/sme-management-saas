@@ -9,18 +9,29 @@ export default function StockList() {
   const [stock, setStock] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10); // adjust to your preference
-  const totalPages = Math.ceil(stock.length / itemsPerPage);
+  // Filter stock
+  const filteredStock = stock.filter((item) => {
+    const term = searchTerm.toLowerCase();
 
-  const paginatedStock = stock.slice(
+    return (
+      item.name?.toLowerCase().includes(term) ||
+      item.sku?.toLowerCase().includes(term) ||
+      item.category?.toLowerCase().includes(term)
+    );
+  });
+
+  // Recalculate pagination using filtered results
+  const totalPages = Math.ceil(filteredStock.length / itemsPerPage);
+
+  const paginatedStock = filteredStock.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
-  );
-
-
-  // const API_BASE = import.meta.env.VITE_API_URL;
-  // const API_URL = `${API_BASE}/api/stock`;
+  ); 
 
   // Fetch stock items
   useEffect(() => {
@@ -63,8 +74,29 @@ export default function StockList() {
 
   return (
     <section className="card">
+      <h3 className="mb-sm">Stock Inventory</h3>
       <div className="customers-header">
-        <h3>Stock Inventory</h3>
+        
+        <div className="flex flex-mobile-col gap-sm">          
+          <input
+            className="input mb-sm"
+            placeholder="Search by name, SKU or category..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1); // reset page when searching
+            }}
+          />
+          <button
+            className="btn btn-secondary mb-sm"
+            onClick={() => {
+              setSearchTerm("");
+              setCurrentPage(1);
+            }}
+          >
+            Clear
+          </button>
+        </div>
         <Link to="/owner/stock/add" title="Add Stock">
           <button className="btn btn-primary mb-sm">
             <FiPlus /> Add Stock

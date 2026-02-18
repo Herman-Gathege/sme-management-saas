@@ -6,16 +6,33 @@ export default function StockHistory() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
 
   // const API_BASE = import.meta.env.VITE_API_URL;
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10); // adjust as needed
-  const totalPages = Math.ceil(history.length / itemsPerPage);
 
-  const paginatedHistory = history.slice(
+ // Filter history
+  const filteredHistory = history.filter((h) => {
+    const term = searchTerm.toLowerCase();
+
+    return (
+      h.stock_name?.toLowerCase().includes(term) ||
+      h.action?.toLowerCase().includes(term) ||
+      h.user?.toLowerCase().includes(term) ||
+      h.detailsText?.toLowerCase().includes(term)
+    );
+  });
+
+  // Recalculate pagination
+  const totalPages = Math.ceil(filteredHistory.length / itemsPerPage);
+
+  const paginatedHistory = filteredHistory.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
 
 
   useEffect(() => {
@@ -53,7 +70,25 @@ export default function StockHistory() {
 
   return (
     <section className="card">
-      <h3>Stock History</h3>
+      <h3 className="mb-sm">Stock History</h3>
+      <div className="flex flex-mobile-col gap-sm">
+        <input
+        className="input mb-md"
+        placeholder="Search by item, action, user or details..."
+        value={searchTerm}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setCurrentPage(1); // reset page on search
+        }}
+      />
+      <button
+        className="btn btn-secondary btn-sm"
+        onClick={() => setSearchTerm("")}
+      >
+        Clear Search
+      </button>
+      </div>
+
       {history.length === 0 ? (
       <p>No history yet.</p>
     ) : (
