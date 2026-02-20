@@ -122,8 +122,25 @@ export default function Reports() {
       {/* Filters */}
         <p>View Sales:</p>
         <div className="flex flex-wrap gap-sm items-center">
-          <div className="flex gap-xs items-center flex-wrap">
+          {/* <div className="flex gap-xs items-center flex-wrap">
             <label className="text-sm text-muted" htmlFor="startDate">From</label>
+            <input
+              id="startDate"
+              type="date"
+              className="input"
+              value={startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setCurrentPage(1);
+                setSelectedFilter("");
+              }}
+            />
+          </div> */}
+
+          <div className="flex flex-col">
+            <label htmlFor="startDate" className="text-sm text-muted mb-sm">
+              From Date
+            </label>
             <input
               id="startDate"
               type="date"
@@ -137,8 +154,25 @@ export default function Reports() {
             />
           </div>
 
-          <div className="flex gap-xs items-center flex-wrap">
+          {/* <div className="flex gap-xs items-center flex-wrap">
             <label className="text-sm text-muted" htmlFor="endDate">To</label>
+            <input
+              id="endDate"
+              type="date"
+              className="input"
+              value={endDate}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setCurrentPage(1);
+                setSelectedFilter("");
+              }}
+            />
+          </div> */}
+
+          <div className="flex flex-col">
+            <label htmlFor="endDate" className="text-sm text-muted mb-sm">
+              To Date
+            </label>
             <input
               id="endDate"
               type="date"
@@ -156,7 +190,7 @@ export default function Reports() {
             {["today", "month", "all"].map((filter) => (
               <button
                 key={filter}
-                className={`btn mr-md ${
+                className={`btn mr-md mt-lg  ${
                   selectedFilter === filter ? "btn-filter-active" : "btn-secondary"
                 }`}
                 onClick={() => {

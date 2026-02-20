@@ -119,7 +119,7 @@ export default function Sidebar() {
       </div>
 
       {/* ================= NAV ================= */}
-      <nav className="flex flex-col gap-sm p-sm">
+      <nav className="sidebar-nav flex flex-col gap-sm p-sm">
         {/* ================= OWNER ================= */}
         {isOwner && (
           <>

@@ -23,6 +23,8 @@ export default function OwnerSupplierPurchases() {
   const [previewRows, setPreviewRows] = useState([]);
   const [rowErrors, setRowErrors] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  
 
 
   const [newPurchase, setNewPurchase] = useState({
@@ -692,7 +694,13 @@ export default function OwnerSupplierPurchases() {
                     {expanded[p.purchase.id] && (
                       <tr>
                         <td colSpan="6">
-                          <table className="expanded-card">
+                          <table className="nested-table">
+                            <colgroup>
+                              <col style={{ width: "45%" }} />
+                              <col style={{ width: "15%" }} />
+                              <col style={{ width: "20%" }} />
+                              <col style={{ width: "20%" }} />
+                            </colgroup>
                             <thead>
                               <tr>
                                 <th>Name</th>

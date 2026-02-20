@@ -51,6 +51,13 @@
   overflow: hidden;
 }
 
+/* .customers-table,
+.expanded-card {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+} */
+
 
 /* header style = staff-table */
 .customers-table th {
@@ -70,6 +77,19 @@
   border-top: 1px solid #e5e7eb;
   color: #374151;
 }
+
+/* .expanded-card td,
+.expanded-card th {
+  padding: 8px;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.expanded-card td:first-child {
+  white-space: nowrap;
+} */
+
 
 /* hover identical to dashboard */
 @media (hover: hover) {

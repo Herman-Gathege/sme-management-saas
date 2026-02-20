@@ -82,16 +82,16 @@ export default function AllSales() {
       <div className="flex flex-col gap-sm">
         <h3 className="text-lg text-bold">Sales History</h3>
 
-        <div className="flex flex-mobile-col gap-sm">
+        <div className="flex flex-mobile-col gap-sm ">
           <input
-            className="input"
+            className="input mt-lg"
             type="text"
             placeholder="Search by staff or item..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
 
-          <input
+          {/* <input
             className="input"
             type="date"
             value={dateRange.from}
@@ -105,11 +105,43 @@ export default function AllSales() {
             type="date"
             value={dateRange.to}
             onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-          />
+          /> */}
+
+            <div className="flex gap-sm flex-mobile-col">
+
+              <div className="flex flex-col">
+                <label className="text-sm text-muted mb-sm">
+                  From Date
+                </label>
+                <input
+                  className="input"
+                  type="date"
+                  value={dateRange.from}
+                  onChange={(e) =>
+                    setDateRange({ ...dateRange, from: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-sm text-muted mb-sm">
+                  To Date
+                </label>
+                <input
+                  className="input"
+                  type="date"
+                  value={dateRange.to}
+                  onChange={(e) =>
+                    setDateRange({ ...dateRange, to: e.target.value })
+                  }
+                />
+              </div>
+
+            </div>
 
           <button
             type="button"
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary btn-sm mt-lg"
             onClick={() => {
               setSearchTerm("");
               setDateRange({ from: "", to: "" });

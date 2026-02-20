@@ -239,7 +239,7 @@ export default function OwnerCreditors() {
                       <div className="card subtle mt-sm">
                         <h4 className="mb-sm">Payments</h4>
 
-                        <table className="items-table">
+                        <table className="nested-table mb-sm">
                           <thead>
                             <tr>
                               <th>Supplier</th>
