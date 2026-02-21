@@ -306,12 +306,15 @@ export default function OwnerSupplierPurchases() {
     <section className="card flex flex-col gap-lg">
       {/* ---------- Header ---------- */}
       <div className="flex justify-between items-center mb-md">
-        <h2>Purchases</h2>
+        <h2>Purchases</h2>        
+      </div>
+
+      <div>
         <button
           className="btn btn-primary mr-sm ml-sm"
           onClick={() => setShowModal(true)}
         >
-          + Add New Purchase
+          + New Purchase
         </button>
 
         <button
@@ -695,12 +698,12 @@ export default function OwnerSupplierPurchases() {
                       <tr>
                         <td colSpan="6">
                           <table className="nested-table">
-                            <colgroup>
+                            {/* <colgroup>
                               <col style={{ width: "45%" }} />
                               <col style={{ width: "15%" }} />
                               <col style={{ width: "20%" }} />
                               <col style={{ width: "20%" }} />
-                            </colgroup>
+                            </colgroup> */}
                             <thead>
                               <tr>
                                 <th>Name</th>
