@@ -41,6 +41,11 @@
   white-space: nowrap; /* prevents text wrapping */
 }
 
+.primary-btn {
+  background: #1b7a3a;
+  color: white;
+}
+
 /* Small screens (mobile) */
 @media (max-width: 768px) {
   .btn {

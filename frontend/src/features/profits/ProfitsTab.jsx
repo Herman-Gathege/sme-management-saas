@@ -54,21 +54,21 @@ export default function ProfitsTab() {
         </div>
 
         <div className="stat-card-r card-w">
-          <span className="text-sm text-muted">Cost</span>
+          <span className="text-sm text-muted">Items Cost</span>
           <span className="text-lg text-bold company-blue">
             KES {data.totals.cost.toFixed(2)}
           </span>
         </div>
 
         <div className="stat-card-r card-w">
-          <span className="text-sm text-muted">Profit</span>
+          <span className="text-sm text-muted">Your Profit</span>
           <span className="text-lg text-bold company-blue">
             KES {data.totals.profit.toFixed(2)}
           </span>
         </div>
 
         <div className="stat-card-r card-w">
-          <span className="text-sm text-muted">Margin</span>
+          <span className="text-sm text-muted">Profit Margins</span>
           <span className="text-lg text-bold company-blue">
             {data.totals.margin.toFixed(1)}%
           </span>

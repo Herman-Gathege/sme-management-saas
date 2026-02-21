@@ -22,7 +22,10 @@ export default function DashboardContent({ roleLabel }) {
         <TodaysSales />
         <TodaysCreditSales />
       </div>
+      <div className="mt-md">
         <ProfitsGraph />
+      </div>
+        
 
     </div>
   );
