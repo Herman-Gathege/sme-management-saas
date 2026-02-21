@@ -20,6 +20,8 @@ from .models import payment, customer, user
 from app.modules.suppliers.routes import suppliers_bp
 from app.modules.suppliers.purchases.routes import purchases_bp
 from app.modules.suppliers.payments.routes import payments_bp
+from app.modules.profits.routes import profits_bp
+
 
 
 
@@ -59,6 +61,7 @@ def create_app():
 
 
     # Register blueprints
+    app.register_blueprint(profits_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(staff_bp, url_prefix="/api/staff")
     app.register_blueprint(sales_bp, url_prefix="/api/sales")

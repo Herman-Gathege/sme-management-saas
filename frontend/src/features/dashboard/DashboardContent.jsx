@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import TodaysSales from "../dashboard/widgets/TodaysSales";
 import StockAlerts from "../dashboard/widgets/StockAlerts";
 import TodaysCreditSales from "./widgets/TodaysCreditSales";
-
+import ProfitsGraph from "../profits/ProfitsGraph";
 
 
 export default function DashboardContent({ roleLabel }) {
@@ -18,10 +18,12 @@ export default function DashboardContent({ roleLabel }) {
       </div>
 
       <div className="grid grid-cols-1 grid-cols-3 gap-md">
-      <StockAlerts />
-      <TodaysSales />
-      <TodaysCreditSales />
-    </div>
+        <StockAlerts />
+        <TodaysSales />
+        <TodaysCreditSales />
+      </div>
+        <ProfitsGraph />
+
     </div>
   );
 }

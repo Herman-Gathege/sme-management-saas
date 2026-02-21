@@ -75,6 +75,7 @@ def create_sale():
 
             price = float(item["price"])   # 🔥 selling price from POS
             qty = int(item["quantity"])
+            cost = float(stock.unit_price or 0)
 
             subtotal = price * qty
             total_amount += subtotal
@@ -92,10 +93,17 @@ def create_sale():
                 })
 
             sale_items.append(
+                # SaleItem(
+                #     stock_id=stock.id,
+                #     quantity=int(item["quantity"]),
+                #     unit_price=price,
+                #     line_total=subtotal
+                # )
                 SaleItem(
                     stock_id=stock.id,
-                    quantity=int(item["quantity"]),
+                    quantity=qty,
                     unit_price=price,
+                    cost_price=cost,
                     line_total=subtotal
                 )
             )

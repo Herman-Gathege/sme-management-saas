@@ -1,6 +1,7 @@
 //frontend/src/features/reports/Reports.jsx
 import { useEffect, useState } from "react";
 import { getSalesReport } from "../../api/report";
+import ProfitsTab from "../profits/ProfitsTab";
 
 export default function Reports() {
   const [summary, setSummary] = useState(null);
@@ -9,6 +10,7 @@ export default function Reports() {
   const [error, setError] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [activeTab, setActiveTab] = useState("sales");
 
   const [selectedFilter, setSelectedFilter] = useState("all"); // default filter
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,12 +100,35 @@ export default function Reports() {
       <div className="flex justify-between items-center">
         <h3 className="text-lg text-bold ">Sales Reports</h3>
 
-        <button className="btn btn-primary" onClick={exportCSV}>
+        <button className="btn btn-secondary" onClick={exportCSV}>
           Export CSV
         </button>
       </div>
+      <div className="flex gap-sm border-b pb-sm">
+        <button
+          className={`btn ${
+            activeTab === "sales" ? "btn-primary" : "btn-secondary"
+          }`}
+          onClick={() => setActiveTab("sales")}
+        >
+          Sales Reports
+        </button>
 
-      {/* Summary cards */}
+        <button
+          className={`btn ${
+            activeTab === "profits" ? "btn-primary" : "btn-secondary"
+          }`}
+          onClick={() => setActiveTab("profits")}
+        >
+          Profits Reports
+        </button>
+      </div>
+
+      
+
+      {activeTab === "sales" && (
+        <>
+         {/* Summary cards */}
       {summary && (
         <div className="grid-summary">
           {["cash", "mpesa", "credit", "total"].map((key) => (
@@ -224,9 +249,6 @@ export default function Reports() {
           </div>
         </div>
 
-
-
-
       {/* Desktop table */}
       <div className="table-wrapper hidden-mobile">
         <table className="customers-table">
@@ -284,30 +306,34 @@ export default function Reports() {
       </div>
 
       {totalPages > 1 && (
-  <div className="flex gap-sm justify-center mt-md">
-    <button
-      className="btn btn-secondary"
-      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-      disabled={currentPage === 1}
-    >
-      Prev
-    </button>
+        <div className="flex gap-sm justify-center mt-md">
+          <button
+            className="btn btn-secondary"
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </button>
 
-    <span className="text-sm">
-      Page {currentPage} of {totalPages}
-    </span>
+          <span className="text-sm">
+            Page {currentPage} of {totalPages}
+          </span>
 
-    <button
-      className="btn btn-secondary"
-      onClick={() =>
-        setCurrentPage((p) => Math.min(p + 1, totalPages))
-      }
-      disabled={currentPage === totalPages}
-    >
-      Next
-    </button>
-  </div>
-)}
+          <button
+            className="btn btn-secondary"
+            onClick={() =>
+              setCurrentPage((p) => Math.min(p + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
+        </>
+      )}
+
+      {activeTab === "profits" && <ProfitsTab />}
 
     </section>
   );

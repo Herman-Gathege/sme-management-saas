@@ -36,3 +36,8 @@ class SaleItem(db.Model):
     )
 
     stock = db.relationship("Stock", backref="sale_items")
+
+    cost_price = db.Column(
+        db.Numeric(10, 2),
+        nullable=False
+    )
