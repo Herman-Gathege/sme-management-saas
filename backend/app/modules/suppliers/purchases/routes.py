@@ -8,6 +8,7 @@ from app.models.stock import Stock
 from app.models.stock_history import StockHistory
 from app.auth.decorators import owner_required
 from app.utils.decorators import owner_or_staff_required
+from app.utils.time import to_local_iso
 import json
 
 purchases_bp = Blueprint(
@@ -186,9 +187,23 @@ def create_purchase():
 
         db.session.commit()
 
+        # return jsonify({
+        #     "purchase": purchase.to_dict(),
+        #     "items": [item.to_dict() for item in purchase.items]
+        # }), 201
+
         return jsonify({
-            "purchase": purchase.to_dict(),
-            "items": [item.to_dict() for item in purchase.items]
+            "purchase": {
+                **purchase.to_dict(),
+                "created_at": to_local_iso(purchase.created_at)
+            },
+            "items": [
+                {
+                    **item.to_dict(),
+                    "created_at": to_local_iso(item.created_at)
+                }
+                for item in purchase.items
+            ]
         }), 201
 
     except Exception as e:
@@ -211,10 +226,27 @@ def get_purchases():
         organization_id=org_id
     ).order_by(SupplierPurchase.created_at.desc()).all()
 
+    # return jsonify([
+    #     {
+    #         "purchase": p.to_dict(),
+    #         "items": [i.to_dict() for i in p.items]
+    #     }
+    #     for p in purchases
+    # ])
+
     return jsonify([
         {
-            "purchase": p.to_dict(),
-            "items": [i.to_dict() for i in p.items]
+            "purchase": {
+                **p.to_dict(),
+                "created_at": to_local_iso(p.created_at)
+            },
+            "items": [
+                {
+                    **i.to_dict(),
+                    "created_at": to_local_iso(i.created_at)
+                }
+                for i in p.items
+            ]
         }
         for p in purchases
     ])

@@ -4,6 +4,8 @@ from flask_jwt_extended import get_jwt
 from app.extensions import db
 from app.models.supplier_payment import SupplierPayment
 from app.utils.decorators import owner_or_staff_required
+from app.utils.time import to_local_iso
+
 
 payments_bp = Blueprint(
     "supplier_payments",
@@ -15,6 +17,18 @@ payments_bp = Blueprint(
 def get_org_and_user_from_jwt():
     claims = get_jwt()
     return claims.get("organization_id"), claims.get("sub")
+
+
+# def to_dict(self):
+#     return {
+#         "id": self.id,
+#         "supplier_id": self.supplier_id,
+#         "user_id": self.user_id,
+#         "amount": float(self.amount),
+#         "payment_method": self.payment_method,
+#         "notes": self.notes,
+#         "created_at": to_local_iso(self.created_at)
+#     }
 
 
 # ---------------- CREATE PAYMENT ----------------
@@ -47,7 +61,11 @@ def create_payment():
         db.session.add(payment)
         db.session.commit()
 
-        return jsonify(payment.to_dict()), 201
+        # return jsonify(payment.to_dict()), 201
+        response = payment.to_dict()
+        response["created_at"] = to_local_iso(payment.created_at)
+
+        return jsonify(response), 201
 
     except Exception as e:
         db.session.rollback()
@@ -68,4 +86,12 @@ def get_payments():
     
 
 
-    return jsonify([p.to_dict() for p in payments])
+    # return jsonify([p.to_dict() for p in payments])
+    result = []
+
+    for p in payments:
+        data = p.to_dict()
+        data["created_at"] = to_local_iso(p.created_at)
+        result.append(data)
+
+    return jsonify(result)

@@ -6,6 +6,11 @@ from app.models.payment import Payment
 from app.models.customer import Customer
 from app.models.user import User
 
+from datetime import timezone
+from zoneinfo import ZoneInfo
+
+tz = ZoneInfo("Africa/Nairobi")
+
 customer_payments_bp = Blueprint(
     "customer_payments",
     __name__,
@@ -75,9 +80,26 @@ def create_payment():
         db.session.add(payment)
         db.session.commit()
 
+        # return jsonify({
+        #     "message": "Payment recorded successfully",
+        #     "payment": payment.to_dict()
+        # }), 201
+
+        created_at = payment.created_at.replace(
+            tzinfo=timezone.utc
+        ).astimezone(tz).isoformat()
+
         return jsonify({
             "message": "Payment recorded successfully",
-            "payment": payment.to_dict()
+            "payment": {
+                "id": payment.id,
+                "customer_id": payment.customer_id,
+                "user_id": payment.user_id,
+                "amount": float(payment.amount),
+                "payment_method": payment.payment_method,
+                "notes": payment.notes,
+                "created_at": created_at
+            }
         }), 201
 
     except Exception as e:
@@ -98,7 +120,26 @@ def get_payments_for_customer(customer_id):
         organization_id=org_id
     ).order_by(Payment.created_at.desc()).all()
 
-    return jsonify([p.to_dict() for p in payments]), 200
+    # return jsonify([p.to_dict() for p in payments]), 200
+
+    result = []
+
+    for p in payments:
+        created_at = p.created_at.replace(
+            tzinfo=timezone.utc
+        ).astimezone(tz).isoformat()
+
+        result.append({
+            "id": p.id,
+            "customer_id": p.customer_id,
+            "user_id": p.user_id,
+            "amount": float(p.amount),
+            "payment_method": p.payment_method,
+            "notes": p.notes,
+            "created_at": created_at
+        })
+
+    return jsonify(result), 200
 
 
 # -------------------------

@@ -659,7 +659,7 @@ export default function OwnerSupplierPurchases() {
             {purchases.length === 0 ? (
               <tr>
                 <td colSpan="6" style={{ textAlign: "center" }}>
-                  No purchases found
+                  Wait as we load the purchases...
                 </td>
               </tr>
             ) : (
