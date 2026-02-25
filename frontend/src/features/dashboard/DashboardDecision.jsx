@@ -19,6 +19,8 @@ export default function DashboardDecision() {
         navigate("/owner/dashboard", { replace: true });
       } else if (user.role === "staff") {
         navigate("/staff/dashboard", { replace: true });
+      } else if (user.role === "super_admin") {
+      navigate("/super-admin/dashboard", { replace: true });    
       } else {
         // Unknown role fallback
         navigate("/login", { replace: true });

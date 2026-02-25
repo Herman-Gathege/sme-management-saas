@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { FiMaximize, FiMinimize, FiChevronDown } from "react-icons/fi";
 import { NavLink } from "react-router-dom";
-import { ownerNavigation, staffNavigation } from "../../../config/navigation";
+import { ownerNavigation, staffNavigation, superAdminNavigation } from "../../../config/navigation";
 
 
 export default function Navbar() {
@@ -33,7 +33,11 @@ export default function Navbar() {
   if (!user) return <header className="navbar" />;
 
    const navigation =
-    user.role === "owner" ? ownerNavigation : staffNavigation;
+    user.role === "owner"
+      ? ownerNavigation
+      : user.role === "super_admin"
+      ? superAdminNavigation
+      : staffNavigation;
 
   const formattedTime = currentTime.toLocaleTimeString([], {
     hour: "2-digit",

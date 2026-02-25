@@ -1,6 +1,52 @@
 /* =============================
    HOME PAGE
 ============================= */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  .home-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .home-hero-content h1 {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-step-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 768px) {
+  .page-container.flex {
+    flex-direction: column;
+    gap: 12px;
+    height: auto;
+  }
+}
+
 
 .home {
   display: flex;
@@ -160,4 +206,18 @@
   height: 36px;
   width: auto;
   object-fit: contain;
+}
+
+/* ---------- HERO IMAGE ---------- */
+.home-hero-image {
+  width: 100%;
+  max-width: 600px; /* controls how big it can grow */
+}
+
+.home-hero-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  border-radius: 16px;
 }

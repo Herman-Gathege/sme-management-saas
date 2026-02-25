@@ -12,7 +12,7 @@ class User(db.Model):
     phone = db.Column(db.String(50), nullable=True)
     email = db.Column(db.String(100), unique=True, nullable=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(20), nullable=False)  # 'owner' or 'staff'
+    role = db.Column(db.String(20), nullable=False)  # 'owner' or 'staff' or 'super_admin'
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

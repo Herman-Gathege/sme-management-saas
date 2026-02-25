@@ -35,6 +35,9 @@ import StaffManagement from "../features/staff/StaffManagement";
 import AllCustomers from "../features/customers/AllCustomers";
 import Reports from "../features/reports/Reports";
 
+// super admin
+import SuperAdminDashboard from "../features/superadmin/SuperAdminDashboard";
+
 
 
 
@@ -52,6 +55,16 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute>
             <DashboardDecision />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ============ Super Admin Layout ============ */}
+      <Route
+        path="/super-admin/*"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <SuperAdminDashboard />
           </ProtectedRoute>
         }
       />

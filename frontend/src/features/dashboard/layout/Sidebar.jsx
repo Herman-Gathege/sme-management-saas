@@ -30,7 +30,8 @@ export default function Sidebar() {
   // Role flags
   // ---------------------------
   const isOwner = user?.role === "owner";
-  const isStaff = user?.role === "staff";
+  const isStaff = user?.role === "staff";  
+  const isSuperAdmin = user?.role === "super_admin";
 
   // ---------------------------
   // Routes
@@ -252,6 +253,26 @@ export default function Sidebar() {
             <NavLink to="/staff/password" className={linkClass}>
               <FiFileText />
               {!collapsed && <span>Change Password</span>}
+            </NavLink>
+          </>
+        )}
+
+        {/* ================= SUPER ADMIN ================= */}
+        {isSuperAdmin && (
+          <>
+            <NavLink to="/super-admin/dashboard" end className={linkClass}>
+              <FiHome />
+              {!collapsed && <span>Dashboard</span>}
+            </NavLink>
+
+            <NavLink to="/super-admin/organizations" className={linkClass}>
+              <FiUsers />
+              {!collapsed && <span>Organizations</span>}
+            </NavLink>
+
+            <NavLink to="/super-admin/reports" className={linkClass}>
+              <FiFileText />
+              {!collapsed && <span>System Reports</span>}
             </NavLink>
           </>
         )}

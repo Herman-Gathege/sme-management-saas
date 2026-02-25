@@ -54,3 +54,16 @@ def owner_or_staff_required(fn):
             print("JWT validation failed (owner_or_staff_required):", str(e))
             return jsonify({"error": "JWT validation failed"}), 401
     return wrapper
+
+
+def super_admin_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        verify_jwt_in_request()
+        claims = get_jwt()
+
+        if claims.get("role") != "super_admin":
+            return jsonify({"error": "Super Admin access required"}), 403
+
+        return fn(*args, **kwargs)
+    return wrapper

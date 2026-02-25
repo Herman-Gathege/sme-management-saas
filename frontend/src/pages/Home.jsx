@@ -6,14 +6,12 @@ export default function Home() {
   return (
     <div className="home">
       {/* ================= NAVBAR ================= */}
-      <header className="navbar">
-        <div className="page-container flex justify-between items-center h-full">
-          {/* LEFT: LOGO */}
-          <div className="home-nav-logo" onClick={() => navigate("/")}>
+      {/* <header className="navbar">
+        <div className="page-container flex justify-between items-center h-full hidden-on-mobile">
+          <div className="home-nav-logo " onClick={() => navigate("/")}>
             <img src="/assets/azani-logo 1.png" alt="Azani SmartDuka Logo" />
           </div>
 
-          {/* RIGHT: ACTIONS */}
           <div className="flex gap-md">
             <button
               className="btn btn-secondary"
@@ -22,15 +20,10 @@ export default function Home() {
               Sign In
             </button>
 
-            <button
-              className="btn btn-primary"
-              onClick={() => navigate("/register")}
-            >
-              Get Started
-            </button>
+            
           </div>
         </div>
-      </header>
+      </header> */}
 
       {/* ================= HERO ================= */}
       <section className="home-hero">
@@ -48,12 +41,12 @@ export default function Home() {
             </p>
 
             <div className="flex gap-md mt-md">
-              <button
+              {/* <button
                 className="btn btn-primary"
                 onClick={() => navigate("/register")}
               >
                 Get Started Free
-              </button>
+              </button> */}
               <button
                 className="btn btn-secondary"
                 onClick={() => navigate("/login")}
@@ -64,7 +57,7 @@ export default function Home() {
           </div>
 
           {/* RIGHT */}
-          <div className="home-hero-image">
+          <div className="home-hero-image hidden-on-mobile">
             <img src="/assets/hero.jpeg" alt="Dashboard preview" />
           </div>
         </div>

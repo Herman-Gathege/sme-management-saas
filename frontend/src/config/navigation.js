@@ -80,3 +80,11 @@ export const staffNavigation = [
     path: "/staff/password",
   },
 ];
+
+export const superAdminNavigation = [
+  {
+    label: "Dashboard",
+    icon: FiHome,
+    path: "/super-admin/dashboard",
+},
+];
