@@ -68,6 +68,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
 }
 
 /* =============================
@@ -133,7 +134,10 @@
 ============================= */
 
 .cart-table-wrapper {
-  overflow-x: auto;
+  overflow-x: auto;        /* already there */
+  max-width: 100%;         /* prevent table from exceeding parent */
+  -webkit-overflow-scrolling: touch; /* smooth scroll on mobile */
+
 }
 
 .cart-table {
@@ -147,6 +151,13 @@
   padding: 8px;
   border-bottom: 1px solid #e5e7eb;
   text-align: left;
+  white-space: nowrap;
+}
+
+.cart-table td {
+  max-width: 150px;      /* optional: prevent super long cells from stretching */
+  overflow: hidden;
+  text-overflow: ellipsis; /* truncate with "…" */
 }
 
 .qty-control {
@@ -221,6 +232,10 @@
 
   .cart-panel {
     order: 1;
+  }
+
+  .cart-table-wrapper {
+    overflow-x: auto;
   }
 }
 
