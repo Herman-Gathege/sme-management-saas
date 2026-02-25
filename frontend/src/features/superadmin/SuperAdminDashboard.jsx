@@ -10,7 +10,7 @@ export default function SuperAdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(5);
 
   useEffect(() => {
     fetchOrgs();
@@ -69,6 +69,27 @@ export default function SuperAdminDashboard() {
   }
 };
 
+// const deleteOrg = async (id, name) => {
+//   if (!window.confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) {
+//     return;
+//   }
+
+//   try {
+//     const res = await apiFetch(`/api/super-admin/organizations/${id}`, {
+//       method: "DELETE",
+//     });
+
+//     const data = await res.json();
+//     if (!res.ok) throw new Error(data.error || "Failed to delete organization");
+
+//     setSuccessMessage(data.message);
+//     fetchOrgs();
+//     setTimeout(() => setSuccessMessage(""), 3000);
+//   } catch (err) {
+//     setError(err.message || "Failed to delete organization");
+//   }
+// };
+
   // 🔎 Search filter
   const filteredOrgs = orgs.filter((org) =>
     org.name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -123,7 +144,9 @@ export default function SuperAdminDashboard() {
             <tr>
               <th>Name</th>
               <th>Subscription</th>
-              <th>Active</th>
+              <th>Package</th>
+              {/* <th>Active</th> */}
+              <th>Days Remaining</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -137,30 +160,39 @@ export default function SuperAdminDashboard() {
                 <tr key={org.id}>
                   <td>{org.name}</td>
                   <td>{org.subscription_status}</td>
-                  <td>{org.is_active ? "Active" : "Inactive"}</td>
-                  <td className="flex gap-sm">
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={() => upgrade(org.id)}
-                    >
-                      Upgrade
-                    </button>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => deactivate(org.id)}
-                    >
-                      Deactivate
-                    </button>
+                  <td>{org.plan}</td> 
 
-                    {!org.is_active && (
-                      <button
-                        className="btn primary-btn btn-sm"
-                        onClick={() => activate(org.id)}
-                      >
-                        Activate
-                      </button>
-                    )}
-                  </td>
+                  {/* <td>{org.is_active ? "Active" : "Inactive"}</td> */}
+                        <td>{org.days_remaining !== null ? org.days_remaining : "-"}</td> {/* Show days remaining */}
+
+                  <td className="flex gap-sm">
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => upgrade(org.id)}
+                  >
+                    Upgrade
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => deactivate(org.id)}
+                  >
+                    Deactivate
+                  </button>
+                  {!org.is_active && (
+                    <button
+                      className="btn primary-btn btn-sm"
+                      onClick={() => activate(org.id)}
+                    >
+                      Activate
+                    </button>
+                  )}
+                  {/* <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => deleteOrg(org.id, org.name)}
+                  >
+                    Delete
+                  </button> */}
+                </td>
                 </tr>
               ))
             )}
@@ -206,29 +238,36 @@ export default function SuperAdminDashboard() {
             </div>
 
             <div className="flex gap-sm mt-sm">
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => upgrade(org.id)}
-              >
-                Upgrade
-              </button>
+  <button
+    className="btn btn-primary btn-sm"
+    onClick={() => upgrade(org.id)}
+  >
+    Upgrade
+  </button>
 
-              <button
-                className="btn btn-danger btn-sm"
-                onClick={() => deactivate(org.id)}
-              >
-                Deactivate
-              </button>
+  <button
+    className="btn btn-danger btn-sm"
+    onClick={() => deactivate(org.id)}
+  >
+    Deactivate
+  </button>
 
-              {!org.is_active && (
-              <button
-                className="btn btn-success btn-sm"
-                onClick={() => activate(org.id)}
-              >
-                Activate
-              </button>
-            )}
-            </div>
+  {!org.is_active && (
+    <button
+      className="btn btn-success btn-sm"
+      onClick={() => activate(org.id)}
+    >
+      Activate
+    </button>
+  )}
+
+  <button
+    className="btn btn-danger btn-sm"
+    onClick={() => deleteOrg(org.id, org.name)}
+  >
+    Delete
+  </button>
+</div>
           </div>
         ))}
 

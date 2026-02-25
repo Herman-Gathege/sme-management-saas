@@ -20,41 +20,41 @@ auth_bp = Blueprint("auth", __name__)
 # -------------------------
 # Register Organization + Owner
 # -------------------------
-@auth_bp.route("/register", methods=["POST"])
-def register_org():
-    data = request.get_json()
+# @auth_bp.route("/register", methods=["POST"])
+# def register_org():
+#     data = request.get_json()
 
-    required = ["name", "owner_name", "owner_email", "owner_password"]
-    if not all(data.get(k) for k in required):
-        return jsonify({"error": "Missing required fields"}), 400
+#     required = ["name", "owner_name", "owner_email", "owner_password"]
+#     if not all(data.get(k) for k in required):
+#         return jsonify({"error": "Missing required fields"}), 400
 
-    # org = Organization(name=data["name"])
-    # db.session.add(org)
-    # db.session.commit()
+#     # org = Organization(name=data["name"])
+#     # db.session.add(org)
+#     # db.session.commit()
 
-    org = Organization(
-        name=data["name"],
-        subscription_status="trial",
-        trial_ends_at=datetime.utcnow() + timedelta(days=14),
-        is_active=True
-    )
+#     org = Organization(
+#         name=data["name"],
+#         subscription_status="trial",
+#         trial_ends_at=datetime.utcnow() + timedelta(days=14),
+#         is_active=True
+#     )
 
-    db.session.add(org)
-    db.session.commit()
+#     db.session.add(org)
+#     db.session.commit()
 
-    owner = User(
-        organization_id=org.id,
-        full_name=data["owner_name"],
-        email=data["owner_email"],
-        phone=data.get("owner_phone"),
-        role="owner",
-        is_active=True
-    )
-    owner.set_password(data["owner_password"])
-    db.session.add(owner)
-    db.session.commit()
+#     owner = User(
+#         organization_id=org.id,
+#         full_name=data["owner_name"],
+#         email=data["owner_email"],
+#         phone=data.get("owner_phone"),
+#         role="owner",
+#         is_active=True
+#     )
+#     owner.set_password(data["owner_password"])
+#     db.session.add(owner)
+#     db.session.commit()
 
-    return jsonify({"message": "Organization created"}), 201
+#     return jsonify({"message": "Organization created"}), 201
 
 
 

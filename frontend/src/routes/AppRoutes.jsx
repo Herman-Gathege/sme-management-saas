@@ -37,6 +37,8 @@ import Reports from "../features/reports/Reports";
 
 // super admin
 import SuperAdminDashboard from "../features/superadmin/SuperAdminDashboard";
+import Organizations from "../features/superadmin/Organizations";
+
 
 
 
@@ -65,6 +67,14 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["super_admin"]}>
             <SuperAdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/super-admin/organizations"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <Organizations />
           </ProtectedRoute>
         }
       />

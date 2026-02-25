@@ -46,6 +46,11 @@
   color: white;
 }
 
+.btn-danger{
+  background: var(--danger);
+  color: white;
+}
+
 /* Small screens (mobile) */
 @media (max-width: 768px) {
   .btn {
