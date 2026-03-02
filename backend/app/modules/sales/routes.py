@@ -7,6 +7,8 @@ from ...models.sale_item import SaleItem
 from ...models.stock import Stock
 from ...models.user import User
 from ...models.customer import Customer
+from ...models.branch import Branch
+from ...models.device import Device
 from datetime import timezone
 from zoneinfo import ZoneInfo
 
@@ -33,6 +35,38 @@ def create_sale():
         return jsonify({"error": "Invalid token"}), 401
     if user.role not in ["staff", "owner"]:
         return jsonify({"error": "Unauthorized"}), 403
+    
+    # Get organization from user
+    current_org_id = user.organization_id
+    if not current_org_id:
+        return jsonify({"error": "User not assigned to an organization"}), 403
+
+    # Get branch from request
+    branch_id = data.get("branch_id")
+    if not branch_id:
+        return jsonify({"error": "Branch is required"}), 400
+
+    branch = Branch.query.filter_by(
+        id=branch_id,
+        organization_id=current_org_id
+    ).first()
+
+    if not branch:
+        return jsonify({"error": "Invalid branch"}), 404
+
+    # Get device from request
+    device_id = data.get("device_id")
+    if not device_id:
+        return jsonify({"error": "Device is required"}), 400
+
+    device = Device.query.filter_by(
+        id=device_id,
+        branch_id=branch.id,
+        organization_id=current_org_id
+    ).first()
+
+    if not device:
+        return jsonify({"error": "Invalid device for this branch"}), 404
 
     payment_method = data.get("paymentMethod", "").lower()
     if payment_method not in ["cash", "mpesa", "credit"]:
@@ -108,8 +142,19 @@ def create_sale():
                 )
             )
 
+        # sale = Sale(
+        #     organization_id=user.organization_id,
+        #     user_id=user.id,
+        #     customer_id=customer.id if customer else None,
+        #     payment_method=payment_method,
+        #     total_amount=total_amount,
+        #     items=sale_items
+        # )
+
         sale = Sale(
-            organization_id=user.organization_id,
+            organization_id=current_org_id,
+            branch_id=branch.id,
+            device_id=device.id,
             user_id=user.id,
             customer_id=customer.id if customer else None,
             payment_method=payment_method,

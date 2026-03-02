@@ -87,4 +87,9 @@ export const superAdminNavigation = [
     icon: FiHome,
     path: "/super-admin/dashboard",
 },
+{
+  label: "Organizations",
+  icon: FiUsers,
+  path: "/super-admin/organizations",
+},
 ];
