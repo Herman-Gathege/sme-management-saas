@@ -14,7 +14,7 @@ def create_branch():
     org_id = data.get("organization_id")
 
     branch = Branch(
-        organisation_id=org_id,
+        organization_id=org_id,
         name=data["name"],
         location=data.get("location")
     )
@@ -28,7 +28,7 @@ def create_branch():
 @branches_bp.route("", methods=["GET"])
 def list_branches():
     org_id = request.args.get("organization_id")
-    branches = Branch.query.filter_by(organisation_id=org_id).all()
+    branches = Branch.query.filter_by(organization_id=org_id).all()
 
     return jsonify([
         {

@@ -7,3 +7,4 @@ from .stock import Stock
 from .customer import Customer
 from .branch import Branch
 from .device import Device
+from .kra_profile import KRAProfile

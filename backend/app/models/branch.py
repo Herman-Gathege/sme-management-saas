@@ -9,7 +9,7 @@ class Branch(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    organisation_id = db.Column(
+    organization_id = db.Column(
         db.Integer,
         db.ForeignKey("organizations.id", ondelete="CASCADE"),
         nullable=False,
@@ -25,7 +25,7 @@ class Branch(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
-    organisation = db.relationship(
+    organization = db.relationship(
         "Organization",
         back_populates="branches"
     )

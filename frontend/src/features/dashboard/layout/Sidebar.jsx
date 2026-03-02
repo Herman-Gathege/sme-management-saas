@@ -9,6 +9,7 @@ import {
   FiBox,
   FiUsers,
   FiFileText,
+  FiSettings,
 } from "react-icons/fi";
 
 export default function Sidebar() {
@@ -233,6 +234,11 @@ export default function Sidebar() {
             <NavLink to="/owner/reports" className={linkClass}>
               <FiFileText />
               {!collapsed && <span>Reports</span>}
+            </NavLink>
+
+            <NavLink to="/owner/settings" className={linkClass}>
+              <FiSettings />
+              {!collapsed && <span>Settings</span>}
             </NavLink>
           </>
         )}

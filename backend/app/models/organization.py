@@ -33,3 +33,10 @@ class Organization(db.Model):
         back_populates="organization",
         cascade="all, delete-orphan"
     )
+
+    kra_profile = db.relationship(
+        "KRAProfile",
+        back_populates="organization",
+        uselist=False,
+        cascade="all, delete-orphan"
+    )
