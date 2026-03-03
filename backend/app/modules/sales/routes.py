@@ -14,9 +14,11 @@ from zoneinfo import ZoneInfo
 
 from sqlalchemy.orm import joinedload
 
-from app.services.etims.client import EtimsClient
-from app.services.etims.payload_builder import EtimsPayloadBuilder
-from app.services.etims.response_handler import EtimsResponseHandler
+# from app.services.etims.client import EtimsClient
+# from app.services.etims.payload_builder import EtimsPayloadBuilder
+# from app.services.etims.response_handler import EtimsResponseHandler
+
+# from app.tasks.etims_tasks import transmit_sale_task
 
 
 sales_bp = Blueprint("sales", __name__)
@@ -48,9 +50,11 @@ def create_sale():
     # -----------------------
     # Branch Validation
     # -----------------------
-    branch_id = data.get("branch_id")
+    # branch_id = data.get("branch_id")
+
+    branch_id = user.branch_id
     if not branch_id:
-        return jsonify({"error": "Branch is required"}), 400
+        return jsonify({"error": "User is not assigned to a branch"}), 400
 
     branch = Branch.query.filter_by(
         id=branch_id,
@@ -67,14 +71,17 @@ def create_sale():
     if not device_id:
         return jsonify({"error": "Device is required"}), 400
 
-    device = Device.query.filter_by(
-        id=device_id,
-        branch_id=branch.id,
-        organization_id=current_org_id
-    ).first()
+    device = (
+        Device.query
+        .filter(Device.id == device_id)
+        .filter(Device.branch_id == branch.id)
+        .join(Branch)                     # or .join(Device.branch)
+        .filter(Branch.organization_id == current_org_id)
+        .first()
+    )
 
     if not device:
-        return jsonify({"error": "Invalid device for this branch"}), 404
+        return jsonify({"error": "Invalid device for this branch or organization"}), 404
 
     # -----------------------
     # Payment Validation
@@ -174,27 +181,33 @@ def create_sale():
         # -----------------------
         # KRA Transmission
         # -----------------------
+        # try:
+        #     client = EtimsClient(current_org_id)
+        #     payload = EtimsPayloadBuilder.build_invoice_payload(sale)
+        #     response = client.send_invoice(payload)
+        #     result = EtimsResponseHandler.handle(response)
+
+        #     sale.kra_status = result["status"]
+
+        #     if result["status"] == "SENT":
+        #         sale.kra_icn = result["icn"]
+        #         sale.kra_qr_code = result["qr_code"]
+        #         sale.kra_control_number = result["control_number"]
+        #         sale.kra_response_payload = result["raw_response"]
+        #     else:
+        #         sale.kra_response_payload = {"error": result.get("error")}
+
+        # except Exception as e:
+        #     sale.kra_status = "FAILED"
+        #     sale.kra_response_payload = {"error": str(e)}
+
+        # db.session.commit()
+
         try:
-            client = EtimsClient(current_org_id)
-            payload = EtimsPayloadBuilder.build_invoice_payload(sale)
-            response = client.send_invoice(payload)
-            result = EtimsResponseHandler.handle(response)
-
-            sale.kra_status = result["status"]
-
-            if result["status"] == "SENT":
-                sale.kra_icn = result["icn"]
-                sale.kra_qr_code = result["qr_code"]
-                sale.kra_control_number = result["control_number"]
-                sale.kra_response_payload = result["raw_response"]
-            else:
-                sale.kra_response_payload = {"error": result.get("error")}
-
+            from app.tasks.etims_tasks import transmit_sale_task
+            transmit_sale_task.delay(sale.id)
         except Exception as e:
-            sale.kra_status = "FAILED"
-            sale.kra_response_payload = {"error": str(e)}
-
-        db.session.commit()
+            print("Celery not available:", str(e))
 
         # -----------------------
         # Response

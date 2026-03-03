@@ -8,6 +8,7 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     organization_id = db.Column(db.Integer, db.ForeignKey("organizations.id"), nullable=False)
+    branch_id = db.Column(db.Integer, db.ForeignKey("branches.id"), nullable=True)
     full_name = db.Column(db.String(255), nullable=False)
     phone = db.Column(db.String(50), nullable=True)
     email = db.Column(db.String(100), unique=True, nullable=True)
@@ -15,6 +16,9 @@ class User(db.Model):
     role = db.Column(db.String(20), nullable=False)  # 'owner' or 'staff' or 'super_admin'
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    
+    branch = db.relationship("Branch", backref="users")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

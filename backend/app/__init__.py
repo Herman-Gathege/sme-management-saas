@@ -3,6 +3,7 @@ from flask import Flask
 from flask_cors import CORS
 from .config import Config
 from .extensions import db, jwt, migrate
+# from .celery_app import create_celery
 
 from .modules.sales.routes import sales_bp
 from .modules.stock.routes import stock_bp
@@ -84,3 +85,4 @@ def create_app():
     app.register_blueprint(admin_bp)
 
     return app
+

@@ -177,7 +177,21 @@ export default function CreateSale() {
     setLowStockAlert([]);
 
     try {
+      // const payload = {
+      //   items: selectedItems.map((i) => ({
+      //     stock_id: i.stock_id,
+      //     quantity: i.quantity,
+      //     price: i.selling_price,
+      //   })),
+      //   paymentMethod,
+      //   ...(paymentMethod === "Credit" && {
+      //     customer_id: selectedCustomer,
+      //   }),
+      // };
+
       const payload = {
+        branch_id: user?.branch_id,
+        device_id: 1, // temporary until we wire devices properly
         items: selectedItems.map((i) => ({
           stock_id: i.stock_id,
           quantity: i.quantity,
