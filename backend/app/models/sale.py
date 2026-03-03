@@ -72,3 +72,14 @@ class Sale(db.Model):
 
     branch = db.relationship("Branch")
     device = db.relationship("Device")
+
+    kra_status = db.Column(
+        db.String(20),
+        default="PENDING"
+    )
+
+    kra_icn = db.Column(db.String(100), nullable=True)
+    kra_qr_code = db.Column(db.Text, nullable=True)
+    kra_control_number = db.Column(db.String(100), nullable=True)
+
+    kra_response_payload = db.Column(db.JSON, nullable=True)
