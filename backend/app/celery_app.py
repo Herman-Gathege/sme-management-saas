@@ -1,16 +1,14 @@
-#backend/app/celery_app.py
+# backend/app/celery_app.py
 
 from celery import Celery
-from flask import current_app
+
+celery = Celery("sme_management")  # SINGLE GLOBAL INSTANCE
+
 
 def create_celery(app):
-    celery = Celery(
-        app.import_name,
-        broker=app.config["CELERY_BROKER_URL"],
-        backend=app.config["CELERY_RESULT_BACKEND"]
-    )
-
-    celery.conf.update(app.config)
+    celery.conf.broker_url = app.config["CELERY_BROKER_URL"]
+    celery.conf.result_backend = app.config["CELERY_RESULT_BACKEND"]
+    celery.conf.broker_connection_retry_on_startup = True
 
     class ContextTask(celery.Task):
         def __call__(self, *args, **kwargs):
@@ -18,4 +16,5 @@ def create_celery(app):
                 return self.run(*args, **kwargs)
 
     celery.Task = ContextTask
+
     return celery

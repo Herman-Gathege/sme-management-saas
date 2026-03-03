@@ -1,5 +1,5 @@
 #backend/app/modules/sales/routes.py
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.extensions import db
 from ...models.sale import Sale
@@ -202,10 +202,18 @@ def create_sale():
         #     sale.kra_response_payload = {"error": str(e)}
 
         # db.session.commit()
+        from app.celery_app import celery
 
+        print("Broker URL:", celery.conf.broker_url)
+        print("Result Backend:", celery.conf.result_backend)
+        
         try:
+            # from celery import current_app
+            # print("FLASK broker:", current_app.conf.broker_url)
+            
             from app.tasks.etims_tasks import transmit_sale_task
             transmit_sale_task.delay(sale.id)
+
         except Exception as e:
             print("Celery not available:", str(e))
 

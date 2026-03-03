@@ -1,4 +1,6 @@
-from celery import shared_task
+# backend/app/tasks/etims_tasks.py
+
+from app.celery_app import celery
 from app.extensions import db
 from app.models.sale import Sale
 from app.services.etims.client import EtimsClient
@@ -6,9 +8,10 @@ from app.services.etims.payload_builder import EtimsPayloadBuilder
 from app.services.etims.response_handler import EtimsResponseHandler
 
 
-@shared_task()
+@celery.task(name="app.tasks.transmit_sale_task")
 def transmit_sale_task(sale_id):
-
+    print("ETIMS TASK MODULE LOADED")
+    print("🔥 WORKER RECEIVED SALE:", sale_id)
     sale = Sale.query.get(sale_id)
     if not sale:
         return

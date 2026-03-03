@@ -1,3 +1,4 @@
+# backend/app/services/encryption_service.py
 from cryptography.fernet import Fernet
 from flask import current_app
 import base64

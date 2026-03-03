@@ -41,5 +41,9 @@ class Config:
 
     ETIMS_MODE = "mock"  # change to "live" or "sandbox" later
 
+    # CELERY_BROKER_URL = "redis://localhost:6379/0"
+    # CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
+
     CELERY_BROKER_URL = "redis://localhost:6379/0"
     CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
