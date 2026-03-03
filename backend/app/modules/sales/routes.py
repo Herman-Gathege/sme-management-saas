@@ -7,10 +7,16 @@ from ...models.sale_item import SaleItem
 from ...models.stock import Stock
 from ...models.user import User
 from ...models.customer import Customer
+from ...models.branch import Branch
+from ...models.device import Device
 from datetime import timezone
 from zoneinfo import ZoneInfo
 
 from sqlalchemy.orm import joinedload
+
+from app.services.etims.client import EtimsClient
+from app.services.etims.payload_builder import EtimsPayloadBuilder
+from app.services.etims.response_handler import EtimsResponseHandler
 
 
 sales_bp = Blueprint("sales", __name__)
@@ -31,9 +37,48 @@ def create_sale():
 
     if not user:
         return jsonify({"error": "Invalid token"}), 401
+
     if user.role not in ["staff", "owner"]:
         return jsonify({"error": "Unauthorized"}), 403
 
+    current_org_id = user.organization_id
+    if not current_org_id:
+        return jsonify({"error": "User not assigned to an organization"}), 403
+
+    # -----------------------
+    # Branch Validation
+    # -----------------------
+    branch_id = data.get("branch_id")
+    if not branch_id:
+        return jsonify({"error": "Branch is required"}), 400
+
+    branch = Branch.query.filter_by(
+        id=branch_id,
+        organization_id=current_org_id
+    ).first()
+
+    if not branch:
+        return jsonify({"error": "Invalid branch"}), 404
+
+    # -----------------------
+    # Device Validation
+    # -----------------------
+    device_id = data.get("device_id")
+    if not device_id:
+        return jsonify({"error": "Device is required"}), 400
+
+    device = Device.query.filter_by(
+        id=device_id,
+        branch_id=branch.id,
+        organization_id=current_org_id
+    ).first()
+
+    if not device:
+        return jsonify({"error": "Invalid device for this branch"}), 404
+
+    # -----------------------
+    # Payment Validation
+    # -----------------------
     payment_method = data.get("paymentMethod", "").lower()
     if payment_method not in ["cash", "mpesa", "credit"]:
         return jsonify({"error": "Invalid payment method"}), 400
@@ -46,10 +91,11 @@ def create_sale():
 
         customer = Customer.query.filter_by(
             id=customer_id,
-            organization_id=user.organization_id,
+            organization_id=current_org_id,
             role="debtor",
             is_active=True
         ).first()
+
         if not customer:
             return jsonify({"error": "Invalid debtor selected"}), 400
 
@@ -62,30 +108,35 @@ def create_sale():
         sale_items = []
         low_stock_items = []
 
+        # -----------------------
+        # Stock Processing
+        # -----------------------
         for item in items_data:
-            stock = Stock.query.filter_by(
-                id=item["stock_id"],
-                organization_id=user.organization_id
-            ).with_for_update().first()  # lock row for concurrency
+            stock = (
+                Stock.query
+                .filter_by(
+                    id=item["stock_id"],
+                    organization_id=current_org_id
+                )
+                .with_for_update()
+                .first()
+            )
 
             if not stock:
                 return jsonify({"error": f"Stock item {item['stock_id']} not found"}), 404
-            if stock.quantity < item["quantity"]:
+
+            qty = int(item["quantity"])
+            if stock.quantity < qty:
                 return jsonify({"error": f"Insufficient stock for {stock.name}"}), 400
 
-            price = float(item["price"])   # 🔥 selling price from POS
-            qty = int(item["quantity"])
+            price = float(item["price"])
             cost = float(stock.unit_price or 0)
-
             subtotal = price * qty
             total_amount += subtotal
 
-            # Deduct stock
-            stock.quantity -= int(item["quantity"])
-            db.session.add(stock)
+            stock.quantity -= qty
 
-            # Check for low stock
-            if stock.quantity <= stock.min_stock_level:
+            if stock.min_stock_level and stock.quantity <= stock.min_stock_level:
                 low_stock_items.append({
                     "id": stock.id,
                     "name": stock.name,
@@ -93,12 +144,6 @@ def create_sale():
                 })
 
             sale_items.append(
-                # SaleItem(
-                #     stock_id=stock.id,
-                #     quantity=int(item["quantity"]),
-                #     unit_price=price,
-                #     line_total=subtotal
-                # )
                 SaleItem(
                     stock_id=stock.id,
                     quantity=qty,
@@ -108,19 +153,56 @@ def create_sale():
                 )
             )
 
+        # -----------------------
+        # Create Sale (Initial Commit)
+        # -----------------------
         sale = Sale(
-            organization_id=user.organization_id,
+            organization_id=current_org_id,
+            branch_id=branch.id,
+            device_id=device.id,
             user_id=user.id,
             customer_id=customer.id if customer else None,
             payment_method=payment_method,
             total_amount=total_amount,
-            items=sale_items
+            items=sale_items,
+            kra_status="PENDING"
         )
+
         db.session.add(sale)
+        db.session.commit()  # Important: generate sale ID first
+
+        # -----------------------
+        # KRA Transmission
+        # -----------------------
+        try:
+            client = EtimsClient(current_org_id)
+            payload = EtimsPayloadBuilder.build_invoice_payload(sale)
+            response = client.send_invoice(payload)
+            result = EtimsResponseHandler.handle(response)
+
+            sale.kra_status = result["status"]
+
+            if result["status"] == "SENT":
+                sale.kra_icn = result["icn"]
+                sale.kra_qr_code = result["qr_code"]
+                sale.kra_control_number = result["control_number"]
+                sale.kra_response_payload = result["raw_response"]
+            else:
+                sale.kra_response_payload = {"error": result.get("error")}
+
+        except Exception as e:
+            sale.kra_status = "FAILED"
+            sale.kra_response_payload = {"error": str(e)}
+
         db.session.commit()
 
+        # -----------------------
+        # Response
+        # -----------------------
         tz = ZoneInfo("Africa/Nairobi")
-        created_at = sale.created_at.replace(tzinfo=timezone.utc).astimezone(tz).isoformat()
+        created_at = sale.created_at.replace(
+            tzinfo=timezone.utc
+        ).astimezone(tz).isoformat()
 
         return jsonify({
             "message": "Sale created successfully",
@@ -128,8 +210,9 @@ def create_sale():
             "customer": customer.full_name if customer else None,
             "total_amount": float(sale.total_amount),
             "payment_method": sale.payment_method,
+            "kra_status": sale.kra_status,
             "created_at": created_at,
-            "low_stock_items": low_stock_items  # ⚠ low stock alerts
+            "low_stock_items": low_stock_items
         }), 201
 
     except Exception as e:
@@ -138,50 +221,6 @@ def create_sale():
 
 
 # ✅ OWNER DASHBOARD SALES
-# @sales_bp.route("/owner", methods=["GET"])
-# @jwt_required()
-# def get_sales_for_owner():
-#     user_id = get_jwt_identity()
-#     user = User.query.get(user_id)
-
-#     if not user or user.role != "owner":
-#         return jsonify({"error": "Owner access required"}), 403
-
-#     sales = (
-#         Sale.query
-#         .filter_by(organization_id=user.organization_id)
-#         .order_by(Sale.created_at.desc())
-#         .all()
-#     )
-
-#     result = []
-#     tz = ZoneInfo("Africa/Nairobi")  # Nairobi timezone
-
-#     for sale in sales:
-#         staff = User.query.get(sale.user_id)
-#         sale_items = [
-#             {
-#                 "stock_id": item.stock_id,
-#                 "name": item.stock.name if item.stock else "Unknown",
-#                 "quantity": item.quantity,
-#                 "unit_price": float(item.unit_price),
-#                 "line_total": float(item.line_total),
-#             }
-#             for item in sale.items
-#         ]
-
-#         result.append({
-#             "sale_id": sale.id,
-#             "staff": staff.full_name if staff else "Unknown",
-#             "total_amount": float(sale.total_amount),
-#             "created_at": sale.created_at.replace(tzinfo=timezone.utc).astimezone(tz).isoformat(),
-#             "items": sale_items,
-#             "payment_method": sale.payment_method
-
-#         })
-
-#     return jsonify(result), 200
-
 @sales_bp.route("/owner", methods=["GET"])
 @jwt_required()
 def get_sales_for_owner():

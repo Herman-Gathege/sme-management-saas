@@ -17,6 +17,7 @@ import AllSales from "../features/sales/AllSales";
 import OwnerCustomers from "../features/customers/OwnerCustomers";
 import CreateCustomer from "../features/customers/CreateCustomer";
 import OwnerCreditors from "../features/suppliers/OwnerCreditors"; 
+import KRASetup from "../features/kra_compliant/settings/KRASetup";
 
 
 // Suppliers
@@ -112,6 +113,9 @@ export default function AppRoutes() {
         <Route path="suppliers" element={<OwnerSuppliers />} /> {/* All Suppliers */}
         <Route path="supplier-purchases" element={<OwnerPurchases />} />
         <Route path="suppliers/creditors" element={<OwnerCreditors />} />
+
+        {/* KRA eTIMS Setup */}
+        <Route path="settings" element={<KRASetup />} />
       </Route>
 
 

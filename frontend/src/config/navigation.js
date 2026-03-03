@@ -6,6 +6,7 @@ import {
   FiBox,
   FiUsers,
   FiFileText,
+  FiSettings,
 } from "react-icons/fi";
 
 export const ownerNavigation = [
@@ -61,6 +62,11 @@ export const ownerNavigation = [
     icon: FiFileText,
     path: "/owner/reports",
   },
+  {
+    label: "Settings",
+    icon: FiSettings,
+    path: "/owner/settings",
+  }
 ];
 
 export const staffNavigation = [
@@ -86,5 +92,10 @@ export const superAdminNavigation = [
     label: "Dashboard",
     icon: FiHome,
     path: "/super-admin/dashboard",
+},
+{
+  label: "Organizations",
+  icon: FiUsers,
+  path: "/super-admin/organizations",
 },
 ];

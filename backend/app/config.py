@@ -1,5 +1,7 @@
 from datetime import timedelta
 import os
+from cryptography.fernet import Fernet
+
 
 
 class Config:
@@ -31,3 +33,10 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=7)
 
+    KRA_ENCRYPTION_KEY = os.environ.get("KRA_ENCRYPTION_KEY") or Fernet.generate_key()
+
+    ETIMS_SANDBOX_URL = os.environ.get("ETIMS_SANDBOX_URL")
+
+    ETIMS_LIVE_URL = os.environ.get("ETIMS_LIVE_URL")
+
+    ETIMS_MODE = "mock"  # change to "live" or "sandbox" later

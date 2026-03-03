@@ -13,6 +13,10 @@ from .auth.routes import auth_bp
 from app.modules.customers.payments_routes import customer_payments_bp
 from app.modules.suppliers.payments.routes import payments_bp as supplier_payments_bp
 from app.super_admin.routes import super_admin_bp
+from app.modules.kra_compliance.branches.routes import branches_bp
+from app.modules.kra_compliance.devices.routes import devices_bp
+from app.modules.kra_compliance.admin_functions.routes import admin_bp
+
 
 
 
@@ -75,5 +79,8 @@ def create_app():
     app.register_blueprint(customer_payments_bp)
     app.register_blueprint(supplier_payments_bp)
     app.register_blueprint(super_admin_bp)
+    app.register_blueprint(branches_bp)
+    app.register_blueprint(devices_bp)
+    app.register_blueprint(admin_bp)
 
     return app
