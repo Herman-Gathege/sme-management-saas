@@ -401,3 +401,22 @@
   display: flex;
   justify-content: flex-end;
 }
+
+.expanded-headers {
+  font-weight: 600;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #eee;
+}
+
+.expanded-list-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.purchase-item-mobile-card {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fafafa;
+}
