@@ -121,61 +121,93 @@ export default function Organizations() {
         </form>
 
         {/* ======= List Organizations ======= */}
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
-          <>
-            <table className="customers-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Subscription</th>
-                  <th>Active</th>
-                  <th>Days Remaining</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedOrgs.length === 0 ? (
-                  <tr>
-                    <td colSpan="4">No organizations found</td>
-                  </tr>
-                ) : (
-                  paginatedOrgs.map((org) => (
-                    <tr key={org.id}>
-                      <td>{org.name}</td>
-                      <td>{org.subscription_status}</td>
-                      <td>{org.is_active ? "Active" : "Inactive"}</td>
-                      <td>{org.days_remaining ?? "-"}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+{loading ? (
+  <p>Loading...</p>
+) : (
+  <>
+    {/* Desktop Table */}
+    <div className="customers-table-wrapper hidden-mobile">
+      <table className="customers-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Subscription</th>
+            <th>Active</th>
+            <th>Days Remaining</th>
+          </tr>
+        </thead>
+        <tbody>
+          {paginatedOrgs.length === 0 ? (
+            <tr>
+              <td colSpan="4">No organizations found</td>
+            </tr>
+          ) : (
+            paginatedOrgs.map((org) => (
+              <tr key={org.id}>
+                <td>{org.name}</td>
+                <td>{org.subscription_status}</td>
+                <td>{org.is_active ? "Active" : "Inactive"}</td>
+                <td>{org.days_remaining ?? "-"}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
 
-            {/* Pagination controls */}
-            <div className="pagination flex gap-sm mt-md justify-center">
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                disabled={currentPage === 1}
-              >
-                Prev
-              </button>
+    {/* Mobile Cards */}
+    <div className="hidden-desktop flex flex-col gap-sm">
+      {paginatedOrgs.length === 0 && (
+        <p className="text-muted">No organizations found</p>
+      )}
 
-              <span className="text-sm">
-                Page {currentPage} of {totalPages}
-              </span>
+      {paginatedOrgs.map((org) => (
+        <div key={org.id} className="card flex flex-col gap-xs">
+          <div className="text-sm">
+            <strong>{org.name}</strong>
+          </div>
 
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </div>
-          </>
-        )}
+          <div className="text-sm">
+            <strong>Subscription:</strong> {org.subscription_status}
+          </div>
+
+          <div className="text-sm">
+            <strong>Status:</strong>{" "}
+            {org.is_active ? "Active" : "Inactive"}
+          </div>
+
+          <div className="text-sm">
+            <strong>Days Remaining:</strong>{" "}
+            {org.days_remaining ?? "-"}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* Pagination */}
+    <div className="pagination flex gap-sm mt-md justify-center">
+      <button
+        className="btn btn-secondary btn-sm"
+        onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+        disabled={currentPage === 1}
+      >
+        Prev
+      </button>
+
+      <span className="text-sm">
+        Page {currentPage} of {totalPages}
+      </span>
+
+      <button
+        className="btn btn-secondary btn-sm"
+        onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+        disabled={currentPage === totalPages}
+      >
+        Next
+      </button>
+    </div>
+  </>
+)}
       </section>
     </SuperAdminLayout>
   );

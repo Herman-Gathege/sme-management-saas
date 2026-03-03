@@ -23,9 +23,6 @@ export default function OwnerSupplierPurchases() {
   const [previewRows, setPreviewRows] = useState([]);
   const [rowErrors, setRowErrors] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  
-  
-
 
   const [newPurchase, setNewPurchase] = useState({
     supplier_id: "",
@@ -45,13 +42,9 @@ export default function OwnerSupplierPurchases() {
   });
 
   const filteredPurchases = purchases.filter((p) => {
-    const supplier = suppliers.find(
-      (s) => s.id === p.purchase.supplier_id
-    );
+    const supplier = suppliers.find((s) => s.id === p.purchase.supplier_id);
 
-    return supplier?.name
-      ?.toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    return supplier?.name?.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -59,7 +52,6 @@ export default function OwnerSupplierPurchases() {
 
   // calculate total pages
   const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
-
 
   // get current page data
   const paginatedPurchases = filteredPurchases.slice(
@@ -306,7 +298,7 @@ export default function OwnerSupplierPurchases() {
     <section className="card flex flex-col gap-lg">
       {/* ---------- Header ---------- */}
       <div className="flex justify-between items-center mb-md">
-        <h2>Purchases</h2>        
+        <h2>Purchases</h2>
       </div>
 
       <div>
@@ -641,7 +633,6 @@ export default function OwnerSupplierPurchases() {
         </button>
       </div>
 
-
       {/* Desktop table */}
       <div className="customers-table-wrapper stock-table-wrapper hidden-on-mobile">
         <table className="customers-table">
@@ -809,25 +800,31 @@ export default function OwnerSupplierPurchases() {
                 {new Date(p.purchase.created_at).toLocaleString()}
               </div>
 
-              {/* Expandable items */}
-              {expanded[p.purchase.id] && (
-                <div className="expanded-card mt-sm">
-                  <ul className="expanded-list">
-                    {p.items.map((i, idx) => (
-                      <li key={idx} className="expanded-list-item">
-                        <span className="item-name">{i.name}</span>
-                        <span className="item-qty ">{i.quantity}</span>
-                        <span className="item-price mr-sm">
-                          {i.unit_price.toFixed(2)}
-                        </span>
-                        <span className="item-total">
-                          {(i.quantity * i.unit_price).toFixed(2)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {/* Expandable items as mobile cards */}
+{expanded[p.purchase.id] && (
+  <div className="expanded-card mt-sm flex flex-col gap-sm">
+    {p.items.map((i, idx) => (
+      <div key={idx} className="purchase-item-mobile-card">
+        
+        <div className="flex justify-between items-center">
+          <strong className="text-sm">{i.name}</strong>
+          <span className="text-sm text-bold">
+            {(i.quantity * i.unit_price).toFixed(2)}
+          </span>
+        </div>
+
+        <div className="text-xs text-muted">
+          Qty: {i.quantity}
+        </div>
+
+        <div className="text-xs text-muted">
+          Unit Price: {i.unit_price.toFixed(2)}
+        </div>
+
+      </div>
+    ))}
+  </div>
+)}
             </div>
           );
         })}

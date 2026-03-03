@@ -237,7 +237,7 @@ export default function SuperAdminDashboard() {
               {org.is_active ? "Active" : "Inactive"}
             </div>
 
-            <div className="flex gap-sm mt-sm">
+            <div className="flex gap-sm mt-sm flex-wrap">
   <button
     className="btn btn-primary btn-sm"
     onClick={() => upgrade(org.id)}
