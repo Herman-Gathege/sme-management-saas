@@ -6,6 +6,7 @@ import { listStockForSale, listCustomers, createSale } from "../../api/sales";
 import CreateCustomer from "../customers/CreateCustomer";
 import CustomerSelector from "./CustomerSelector";
 import PaymentSelector from "./PaymentSelector";
+import { QRCodeCanvas } from "qrcode.react";
 
 export default function CreateSale() {
   const { user, organization } = useAuth();
@@ -111,7 +112,7 @@ export default function CreateSale() {
           i.stock_id === stock.id ? { ...i, quantity: i.quantity + 1 } : i,
         );
       }
-     
+
       return [
         ...prev,
         {
@@ -177,33 +178,23 @@ export default function CreateSale() {
     setLowStockAlert([]);
 
     try {
-      // const payload = {
-      //   items: selectedItems.map((i) => ({
-      //     stock_id: i.stock_id,
-      //     quantity: i.quantity,
-      //     price: i.selling_price,
-      //   })),
-      //   paymentMethod,
-      //   ...(paymentMethod === "Credit" && {
-      //     customer_id: selectedCustomer,
-      //   }),
-      // };
+      /* =========================
+        CREATE SALE
+      ========================= */
 
       const payload = {
         branch_id: user?.branch_id,
-        device_id: 1, // temporary until we wire devices properly
+        device_id: 1, // temporary until devices wired properly
         items: selectedItems.map((i) => ({
           stock_id: i.stock_id,
           quantity: i.quantity,
           price: i.selling_price,
         })),
-        paymentMethod,
+        payment_method: paymentMethod,
         ...(paymentMethod === "Credit" && {
           customer_id: selectedCustomer,
         }),
       };
-
-      
 
       const data = await createSale(payload);
 
@@ -211,50 +202,53 @@ export default function CreateSale() {
         setLowStockAlert(data.low_stock_items);
       }
 
-      // 🧾 Save receipt snapshot BEFORE clearing cart
+      /* =========================
+        FETCH COMPLIANCE RECEIPT
+      ========================= */
+      const receiptRes = await apiFetch(`/api/sales/${data.sale_id}/receipt`, {
+        method: "GET",
+      });
+
+      if (!receiptRes.ok) {
+        throw new Error("Failed to fetch receipt.");
+      }
+
+      const receipt = await receiptRes.json();
+
+      /* =========================
+        MERGE FRONTEND FIELDS
+      ========================= */
+
       const receiptNumber = `RCPT-${new Date()
         .toISOString()
         .slice(0, 10)
-        .replace(/-/g, "")}-${data.sale_id
-        .toString()
-        .padStart(5, "0")}`;
+        .replace(/-/g, "")}-${data.sale_id.toString().padStart(5, "0")}`;
 
-        setReceiptData({
-          receiptNumber,
-          saleId: data.sale_id,
-          items: selectedItems.map((item) => ({
-          name: item.name,
-          quantity: item.quantity,
-          original_price: item.original_price,
-          selling_price: item.selling_price,
-          discount_amount: item.discount_amount || 0,
-          line_total: item.quantity * item.selling_price,
-        })),
-        total: Number(data.total_amount),
-        paymentMethod,
-        staff: user?.full_name || "Staff",
-        customer:
-          paymentMethod === "Credit"
-            ? customers.find((c) => c.id == selectedCustomer)?.name ||
-              "Customer"
-            : null,
-        cashReceived: paymentMethod === "Cash" ? Number(cashReceived) : null,
+      setReceiptData({
+        ...receipt, // backend compliance data
+
+        receipt_number: receiptNumber,
+
+        // frontend-only values
+        cash_received: paymentMethod === "Cash" ? Number(cashReceived) : null,
+
         balance:
           paymentMethod === "Cash"
-            ? Number(cashReceived) - Number(data.total_amount)
+            ? Number(cashReceived) - Number(receipt.total_amount)
             : null,
-        createdAt: data.created_at, // 🔥 use backend timestamp
       });
 
-      // setTimeout(() => {
-      //   printReceipt();
-      // }, 300);
+      /* =========================
+        RESET STATE
+      ========================= */
 
       setSelectedItems([]);
       setSelectedCustomer("");
+      setCashReceived("");
+
       setMessage(`Sale completed — Total KES ${data.total_amount}`);
     } catch (err) {
-      setMessage(err.message);
+      setMessage(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -282,10 +276,17 @@ export default function CreateSale() {
               width: 80mm;
               margin: 0;
               padding: 10px;
+              font-size: 12px;
             }
+
             hr {
               border: none;
               border-top: 1px dashed #000;
+            }
+
+            canvas {
+              display: block;
+              margin: 10px auto;
             }
           </style>
         </head>
@@ -333,8 +334,6 @@ export default function CreateSale() {
           <span>{selectedItems.length} items</span>
           <strong>KES {total.toFixed(2)}</strong>
         </div>
-
-        
 
         <button
           type="button"
@@ -444,7 +443,7 @@ export default function CreateSale() {
                     </strong>
                   </td>
 
-                  <td>
+                  {/* <td>
                     <button
                       type="button"
                       className="btn btn-secondary btn-sm"
@@ -455,7 +454,7 @@ export default function CreateSale() {
                     >
                       Offer Discount
                     </button>
-                  </td>
+                  </td> */}
 
                   <td>
                     <button
@@ -527,7 +526,7 @@ export default function CreateSale() {
                 Cancel
               </button>
 
-              <button
+              {/* <button
                 type="button"
                 className="btn btn-primary"
                 onClick={() => {
@@ -555,7 +554,7 @@ export default function CreateSale() {
                 }}
               >
                 Apply
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -637,42 +636,22 @@ export default function CreateSale() {
               {organization?.address || ""}
             </p>
             <p style={{ textAlign: "center", margin: 0 }}>
-              {new Date(receiptData.createdAt).toLocaleString()}
+              {new Date(receiptData.created_at).toLocaleString()}
             </p>
             <p style={{ textAlign: "center", margin: 0 }}>
-              Receipt No: {receiptData.receiptNumber}
+              Receipt No: {receiptData.receipt_number}
             </p>
 
-
             {(() => {
-              const grossTotal = receiptData.total; // already includes VAT
-
+              const grossTotal = receiptData.total_amount;
               const vatAmount = grossTotal * (VAT_RATE / (1 + VAT_RATE));
               const netAmount = grossTotal - vatAmount;
-
-              const subtotal = receiptData.items.reduce(
-                (sum, i) => sum + i.original_price * i.quantity,
-                0
-              );
-
-              const totalDiscount = receiptData.items.reduce(
-                (sum, i) => sum + i.discount_amount * i.quantity,
-                0
-              );
 
               return (
                 <>
                   <hr />
-                  <p>Subtotal: KES {subtotal.toFixed(2)}</p>
-
-                  {totalDiscount > 0 && (
-                    <p>Total Discount: -KES {totalDiscount.toFixed(2)}</p>
-                  )}
-
                   <p>Net (Excl. VAT): KES {netAmount.toFixed(2)}</p>
-
                   <p>VAT (16%): KES {vatAmount.toFixed(2)}</p>
-
                   <p style={{ fontWeight: "bold", fontSize: "14px" }}>
                     TOTAL (Incl. VAT): KES {grossTotal.toFixed(2)}
                   </p>
@@ -689,16 +668,16 @@ export default function CreateSale() {
                   style={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <span>
-                    {item.quantity} × {item.selling_price.toFixed(2)}
+                    {item.quantity} × {item.price.toFixed(2)}
                   </span>
                   <span>{item.line_total.toFixed(2)}</span>
                 </div>
 
-                {item.discount_amount > 0 && (
+                {/* {item.discount_amount > 0 && (
                   <div style={{ fontSize: "11px" }}>
                     Discount: -{item.discount_amount.toFixed(2)} per unit
                   </div>
-                )}
+                )} */}
               </div>
             ))}
 
@@ -712,27 +691,55 @@ export default function CreateSale() {
             <p>
               <strong>Payment Details</strong>
             </p>
-            <p>Method: {receiptData.paymentMethod}</p>
+            <p>Method: {receiptData.payment_method}</p>
 
-            {receiptData.paymentMethod === "Cash" && (
+            {receiptData.payment_method === "Cash" && (
               <>
-                <p>Cash Received: KES {receiptData.cashReceived.toFixed(2)}</p>
-                <p>Change: KES {receiptData.balance.toFixed(2)}</p>
+                <p>
+                  Cash Received: KES {receiptData.cash_received?.toFixed(2)}
+                </p>
+                <p>Change: KES {receiptData.balance?.toFixed(2)}</p>
               </>
             )}
 
-            {receiptData.paymentMethod === "Credit" && (
+            {receiptData.payment_method === "Credit" && (
               <p>Status: CREDIT SALE</p>
             )}
 
-            {receiptData.paymentMethod === "M-Pesa" && (
+            {receiptData.payment_method === "M-Pesa" && (
               <p>Status: MPESA PAID</p>
             )}
 
             {receiptData.customer && <p>Customer: {receiptData.customer}</p>}
 
             <p>Served By: {receiptData.staff}</p>
-            <p>Sale ID: #{receiptData.saleId}</p>
+            <p>Sale ID: #{receiptData.sale_id}</p>
+
+            <hr />
+
+            <div style={{ fontSize: "11px" }}>
+              <p>
+                <strong>KRA PIN:</strong> {receiptData.kra_pin}
+              </p>
+              <p>
+                <strong>Branch Code:</strong> {receiptData.branch_code}
+              </p>
+              <p>
+                <strong>Control No:</strong> {receiptData.control_number}
+              </p>
+              <p>
+                <strong>ICN:</strong> {receiptData.icn}
+              </p>
+              <p>
+                <strong>EAT Time:</strong> {receiptData.eat_timestamp}
+              </p>
+            </div>
+
+            {receiptData.qr_code && (
+              <div style={{ textAlign: "center", marginTop: "10px" }}>
+                <QRCodeCanvas value={receiptData.qr_code} size={100} />
+              </div>
+            )}
 
             <hr />
             <p style={{ textAlign: "center" }}>Thank you for shopping!</p>

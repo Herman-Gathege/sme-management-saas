@@ -2,6 +2,7 @@
 from flask import Blueprint, current_app, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.extensions import db
+from app.services.receipt_generator import ReceiptGenerator
 from ...models.sale import Sale
 from ...models.sale_item import SaleItem
 from ...models.stock import Stock
@@ -11,6 +12,7 @@ from ...models.branch import Branch
 from ...models.device import Device
 from datetime import timezone
 from zoneinfo import ZoneInfo
+
 
 from sqlalchemy.orm import joinedload
 
@@ -46,6 +48,11 @@ def create_sale():
     current_org_id = user.organization_id
     if not current_org_id:
         return jsonify({"error": "User not assigned to an organization"}), 403
+
+
+    print("==== SALES PAYLOAD ====")
+    print(request.json)
+    print("========================")
 
     # -----------------------
     # Branch Validation
@@ -86,7 +93,7 @@ def create_sale():
     # -----------------------
     # Payment Validation
     # -----------------------
-    payment_method = data.get("paymentMethod", "").lower()
+    payment_method = data.get("payment_method", "").lower()
     if payment_method not in ["cash", "mpesa", "credit"]:
         return jsonify({"error": "Invalid payment method"}), 400
 
@@ -238,6 +245,8 @@ def create_sale():
 
     except Exception as e:
         db.session.rollback()
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 
@@ -288,4 +297,13 @@ def get_sales_for_owner():
             "payment_method": sale.payment_method
         })
 
+        print("Request JSON:", request.json)
     return jsonify(result), 200
+    
+
+
+# ✅ SALE RECEIPT
+@sales_bp.route("/<int:sale_id>/receipt", methods=["GET"])
+def get_receipt(sale_id):
+    receipt = ReceiptGenerator.generate(sale_id)
+    return receipt, 200

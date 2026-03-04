@@ -83,3 +83,4 @@ class Sale(db.Model):
     kra_control_number = db.Column(db.String(100), nullable=True)
 
     kra_response_payload = db.Column(db.JSON, nullable=True)
+    kra_eat_timestamp = db.Column(db.DateTime, nullable=True)

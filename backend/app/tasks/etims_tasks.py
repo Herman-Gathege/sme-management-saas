@@ -29,6 +29,7 @@ def transmit_sale_task(sale_id):
             sale.kra_qr_code = result["qr_code"]
             sale.kra_control_number = result["control_number"]
             sale.kra_response_payload = result["raw_response"]
+            sale.kra_eat_timestamp = result.get("eat_timestamp")
         else:
             sale.kra_response_payload = {"error": result.get("error")}
 

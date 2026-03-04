@@ -17,5 +17,6 @@ class EtimsResponseHandler:
             "icn": data.get("icn"),
             "qr_code": data.get("qrCode"),
             "control_number": data.get("controlNumber"),
+            "eat_timestamp": data.get("eatDateTime"),  
             "raw_response": data
         }

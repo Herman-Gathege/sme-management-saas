@@ -92,6 +92,10 @@ flask db upgrade
 ```bash
 uv run python run.py
 flask run
+
+redis-cli ping
+redis-server
+celery -A celery_worker.celery worker --loglevel=info
 ```
 
 > Your backend should now be running on [http://127.0.0.1:5000](http://127.0.0.1:5000) with CORS enabled for development.
